@@ -1,0 +1,117 @@
+---
+title: "Portfolio 2: Joyous births"
+format:
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+Today we'll be recreating one of the classic 'joy' plots of age of mother at time of birth through the years.
+
+This is usually done with US data to highlight the baby boom.
+
+Today we'll use Aotearoa/NZ data instead. To reproduce the data source you can go to StatsNZ Infoshare:
+
+https://infoshare.stats.govt.nz
+
+Select Population -> Births VSB -> Live births by age of Mother (Annual-Dec), then select all years and ages from 14 through 47 (we're ignoring the relatively small number of births outside this age range) then select comma delimited .csv file to download the data.
+
+We've done this for you, and the data are read in below:
+
+```{r}
+nz_births <- read_csv("~/Downloads/VSB355804_20260624_114159_2.csv", skip=1)
+```
+
+You should see that there are some warnings reading the data in. We can assess them with `problems()`:
+
+```{r}
+problems(nz_births)
+```
+
+From there you can see that from row 66 onwards (so row 65 excluding the header row) there are fewer columns than expected. This is because of the "metadata" info that is dumped at the bottom of the .csv file:
+
+```{r}
+nz_births |> slice(65:100)
+```
+
+We'll filter those out, name the first column (year) and pivot the data longer so we have year/age/count triples:
+
+```{r}
+nz_births_long <- nz_births |> slice(1:64) |> rename('year' = 1) |>
+  pivot_longer(-year, names_to='age', values_to='count')
+nz_births_long
+```
+
+Now that that's done we'll need to convert the 'age' column to be purely numeric. `tidyr::extract()` could be used here:
+
+```{r}
+nz_births_finalish <- nz_births_long |> extract(age, into='age', regex="([0-9]+)", convert=TRUE)
+nz_births_finalish |> rename(births = count) |> write_csv("births_tidy.csv")
+```
+
+We can check the data is what we expect by counting the `age` and `year` variables: ideally there'd be the same number of observations for each age and each year.
+
+Now we could do a plot:
+
+```{r}
+ggplot(nz_births_finalish |> mutate(year = as.numeric(year))) +
+  aes(x=year, y=age, size=count, col=count) +
+  geom_point(alpha=0.5)
+```
+
+## The joy plot
+
+Recall that a joyplot is just a density plot. We have already summarised data though, so don't need to compute the density as we already have it (well, counts by year which is the same thing as density but on a different scale).
+
+So rather than use `stat_slab()` we'll just go straight to `geom_slab()` and specify the `thickness` aes along with `x`.
+
+```{r}
+library(ggdist)
+
+ggplot(nz_births_finalish) +
+  aes(x = age, thickness = count, y=rev(year), fill=year) +
+  geom_slab(height=3, col='black', linewidth=0.1) +
+  guides(fill = 'none')
+```
+Recall from Workshop 1 that LEGO enthusiasts have noted that sets have increased detail and complexity which results in more parts but potentially similar amounts of plastic.
+
+In this portfolio your goal is to produce a figure to demonstrate whether the amount of plastic in LEGO sets for a given price is changing over time.
+
+We use data on `lego_sets` and `lego_parts` joined together:
+
+```{r}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+
+lego_sets <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+lego_parts <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_parts.csv.gz")
+
+set_weights <- lego_parts |>
+  group_by(set) |>
+  summarise(weight = sum(weight*quantity, na.rm=TRUE))
+
+sets_with_weight <- lego_sets |>
+  left_join(set_weights, by=join_by(set))
+```
+
+## Requirements
+
+You must use the `sets_with_weight` data to produce a chart of price per gram for each lego set for each theme for each year. You should model it on the chart we did in workshop 1 which related `price_per_part` to `year` and `theme`.
+
+ - Ensure you have a facetted plot (facet by theme is recommended).
+ - Show both the data (all sets) and a trend on each facet.
+ - Your chart should have appropriate labels, a title and subtitle.
+ - Use the title to help tell the story of the chart.
+ - Your chart should utilise a different colour in each facet. You don't need a guide for this.
+ - The colours you choose should be different to the defaults. You may utilise a palette or choose your own.
+ - You should submit this .qmd file. You should ensure that it renders correctly before submission.
+ - You will be graded both on the appearance of the figure and your code.
+
+## Your Figure
+
+```{r}
+# replace this comment with your figure code
+```

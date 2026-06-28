@@ -1,0 +1,50 @@
+---
+title: "Portfolio 1: Plastic, plastic, everywhere"
+format:
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+Recall from Workshop 1 that LEGO enthusiasts have noted that sets have increased detail and complexity which results in more parts but potentially similar amounts of plastic.
+
+In this portfolio your goal is to produce a figure to demonstrate whether the amount of plastic in LEGO sets for a given price is changing over time.
+
+We use data on `lego_sets` and `lego_parts` joined together:
+
+```{r}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+
+lego_sets <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+lego_parts <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_parts.csv.gz")
+
+set_weights <- lego_parts |>
+  group_by(set) |>
+  summarise(weight = sum(weight*quantity, na.rm=TRUE))
+
+sets_with_weight <- lego_sets |>
+  left_join(set_weights, by=join_by(set))
+```
+
+## Requirements
+
+You must use the `sets_with_weight` data to produce a chart of price per gram for each lego set for each theme for each year. You should model it on the chart we did in workshop 1 which related `price_per_part` to `year` and `theme`.
+
+ - Ensure you have a facetted plot (facet by theme is recommended).
+ - Show both the data (all sets) and a trend on each facet.
+ - Your chart should have appropriate labels, a title and subtitle.
+ - Use the title to help tell the story of the chart.
+ - Your chart should utilise a different colour in each facet. You don't need a guide for this.
+ - The colours you choose should be different to the defaults. You may utilise a palette or choose your own.
+ - You should submit this .qmd file. You should ensure that it renders correctly before submission.
+ - You will be graded both on the appearance of the figure and your code.
+
+## Your Figure
+
+```{r}
+# replace this comment with your figure code
+```
