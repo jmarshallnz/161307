@@ -1,0 +1,335 @@
+---
+title: "Workshop 3: Tidying up"
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+---
+
+## Introduction
+
+There are two goals of todays workshop:
+
+1. Take a look at obtaining some real data from Statistics NZ, and tidying it up.
+
+2. Tidying up plots by looking at themes, fonts and sizing.
+
+Both of these are really important: data just about never comes in the form you've likely seen to date in your statistics education - it's hardly ever nice and tidy and thus needs a little (or a lot) of janitor work to get it cleaned up and ready for analysis or presentation.
+
+The second is just as important: Charts that are aesthetically pleasing are nicer to look at, but equally need to be readable, so sizing of various elements of the chart are important to ensure labels aren't too large or too small, that font use is consistent where practical, and that multiple charts in a series are consistent in their use of colour, labels, fonts and so on.
+
+### NOTE on the change in the YAML
+
+Recall that the YAML (yet another markup language) at the top of the file specifies the defaults for the rendering engines (knitr and quarto).
+
+In this workshop there's been a change. We've removed the `embed-resources: true` setting that we used in the first two workshops (and will likely use again!) so that we can look under the hood. We've also add a new option to switch the default graphics device to use `ragg` for `png` output.
+
+You will need to install the following packages for this workshop: `ragg`, `systemfonts`, `textshaping`. You would have been prompted about this when you first loaded this file into RStudio.
+
+```{r}
+library(tidyverse)
+library(ragg)        # These are only here so you get a prompt to install them. The `dev: ragg_png` line in the YAML takes care of it otherwise!
+library(systemfonts)
+library(textshaping)
+```
+
+## Getting some real data: Mothers age at birth in Ao/NZ by year
+
+We'll start by obtaining some data on mothers age at birth over time in Aotearoa New Zealand. Statistics NZ contains this (and lots more!) data on the Ao/NZ population. They have a variety of databases and interfaces to those data. The one we'll be using today is Infoshare which is a rather old-school interface. You can get there here:
+
+https://infoshare.stats.govt.nz
+
+We'll be looking at births by mothers age and year. That is under Population -> Births VSB, so click through them to "Live births by age of Mother (Annual-Dec)"
+
+This will bring up the interface for selecting variables (Age of Mother and Time). To keep things simple, we'll ignore the small number of births to mothers aged under 14 or 47 years or over and instead select everything from `14 years` through `46 years`. Then we'll select all years from the `Time` selector.
+
+Once done you can select "Go" to show the table on screen. You'll see a grid of Year by Age of Mother with some table information below.
+
+You can also save this to .csv file by clicking on the "Save table" dropdown at the top. Save it to a folder next to this .qmd file and then read it in by altering this code block:
+
+```{r}
+library(tidyverse)
+stats_births_try1 <- read_csv("VSB355804_20260624_114159_2.csv") # TODO: Change me to the correct path/filename.
+stats_births_try1
+```
+
+As you can see, that's a bit of a mess. The first reason is that all the column names for mother age are on row 2 instead of row 1. We can fix this by skipping the first row (at the expense of losing the first column's name):
+
+```{r}
+stats_births_try2 <- read_csv("VSB355804_20260624_114159_2.csv", skip=1) # TODO: Change me to the correct path/filename.
+stats_births_try2
+```
+
+That looks a bit better, but the warnings indicate we have problems:
+
+```{r}
+problems(stats_births_try2)
+```
+
+By the looks rows 66 (i.e. 65th row after the header) onwards only have one column instead of the expected 34 columns.
+
+### Try yourself
+
+1. Take a look at `stats_births_try2` from row 65 onwards to check what is happening.
+
+2. Create a new dataset which contains only rows 1 through 64. *Hint: you can use `slice` for this*.
+
+3. Rename the first column to "year". *Hint: you can use `rename()` for this*.
+
+4. Finally, save the resulting data frame as `stats_births`.
+
+## Further tidying
+
+The next step is recognising that these data still aren't tidy. We really have 3 variables here: The `year`, the mothers `age` and the number of `births`. But we don't have separate columns for `age` and `births`: instead the `age` is being stored in the column name, while `births` is then the value that all those columns take.
+
+Recall that this is **wide** data: it's useful for humans to read as we have a nice rectangle, so can scan across columns to see how `births` are distributed across `age` within a `year` or can scan down a row to see how `births` change across `year` for a given `age`. But it's no good if what we want to do is chart or summarise births by `year` and `age` simultaneously.
+
+We need to convert the data to **long** form so that it's tidy. Recall we can do this with `tidyr::pivot_longer()`.
+
+### Try yourself
+
+1. Create a longer version of the data called `births_long` using `pivot_longer()`. The new `names_to` column should be `age` and the new `values_to` column should be `births`.
+
+2. The `age` column is now a character variable rather than a number. We know these are age in years but we need to convert it to a number to summarise things nicely. Do this now. *Hint: the `extract()` function might be useful here. Remember you want to convert the type of the variable to numeric afterwards.
+
+3. Save the final dataset as `births`.
+
+4. Check that `births` has the same number of rows for each `age` and each `year` (e.g. using `count()`).
+
+## Working with the tidy data
+
+In case you haven't figured out how to get the data into the tidy form we want, the following codeblock can be run:
+
+```{r}
+# UNCOMMENT AND RUN THIS IF YOU NEED TO DO SO
+# births <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/births_tidy.csv")
+births <- read_csv("births_tidy.csv")
+```
+
+Now that we have things tidy, we can do some summaries!
+
+Firstly, we might want to check the mean age by year. Recall we already have summarised data. To find the mean then we need to do a *weighted mean* of age by births:
+
+```{r}
+mean_birth_age <- births |> group_by(year) |> summarise(mean_age = weighted.mean(age, w=births))
+mean_birth_age
+```
+
+### Try yourself
+
+1. Do a chart of mean birth age over time (year). Compare line and bar charts for this.
+
+2. You could also do a chart of total births over time. Again, consider if a line chart or bar chart is best.
+
+3. Experiment with line charts that include 0 (recall you can do that by utilising `range()` in the `limits` of `scale_y_continuous()` - see Workshop 1).
+
+4. Do you think including zero is useful on this plot? Add some notes about this.
+
+5. Perhaps something more important would be the denominator: we know from 1960 to 2020 the population of NZ increased from around 2.3m to 5.3m. Add some more notes about this.
+
+## Adding distribution
+
+We have more information than just the mean age of mothers through time. We know the distribution thereof. Thus, we could plot distribution information as well by plotting `births` by `year` and `age`.
+
+One way to do this is with a heatmap with `geom_tile()`:
+
+```{r age heatmap}
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile()
+```
+
+The 45 degree 'lines' on the left of the plot are interesting. This corresponds to a single *cohort* (by birth year) of mothers. i.e. the square at 1963, age 21 corresponds to mothers born in 1942. That same cohort is age 22 in 1964 and 23 in 1965. So if a cohort/generation is having more births than a previous one you get the angled striping.
+
+We can re-manipulate the data to show it in terms of cohort rather than the year of the child:
+
+```{r cohort heatmap}
+births |>
+  mutate(cohort = year - age) |> # mothers year of birth
+  ggplot() +
+  aes(x = cohort, y=age, fill=births) +
+  geom_tile() +
+  labs(x = "Mothers born in the year")
+```
+
+Now the angled band we saw are vertical, indicating that mothers born in 1942 through 1945 had fewer babies compared to those born before 1942 or after 1945. The reading of this chart is that those born in later years tend to have babies later in life.
+
+### Try yourself
+
+1. Try a scatter plot of `year` vs `age`, varying point size by `births`. You will likely need to add some transparency.
+
+2. Investigate varying `colour` instead, or `colour` and `size` simultaneously.
+
+3. Tidy up the labels for this chart, and consider different colour palettes.
+
+## Theming
+
+Our charts so far have all used the default theme in `ggplot2` which is `theme_grey()` (or `theme_gray()` if you insist!)
+
+A theme in ggplot specifies:
+
+ - The font family and size.
+ - A header font.
+ - Sizing for rectangles and lines (line widths)
+ - Default colours for the background (`paper`) and foreground (`ink` and `accent`).
+
+Plus pretty much everything else you can see on the plot (whitespace around the chart, grid lines, etc). The default set of base themes are defined as `theme_<something>()`
+
+### Try yourself
+
+1. Switch one of your charts above to try out the various other themes. e.g. try `theme_void()` for example. You can find the rest in the help for any of them.
+
+2. Experiment with the `paper` and `ink` variables in a theme. e.g. specify `paper='pink'` for example in `theme_light()` to see what happens.
+
+3. The `accent` colour is for things like smoothers. e.g. redo the mean mothers age by year and add `geom_smooth()` to see how `accent` works.
+
+4. Investigate the `ggthemes` package. This isn't quite up to date with the new `paper` and `ink` things but offers a good range of additional themes.
+
+## Sizing things
+
+Font size in ggplot2 is measured in points. A point is usually defined as 1/72 of an inch. Or to most of the world, 0.3528mm (!!!) To add to the confusion, other sizes in `ggplot2` (e.g. size of points on a scatterplot) are measured in `mm`. This means that getting sizing right can sometimes cause a bit of a drama.
+
+You can change the font size for all elements in a chart by specifying `base_size` in the `theme_*()` argument. It defaults to 11 normally, so increasing to a larger number increases the font size.
+
+One thing to keep in mind when you do this is to consider how large the figure is! This is a bit tricky, as the rendering of the figure will depend on the system in use. Within a Quarto document, you can specify figure size in inches (the default is 7 by 5) using the `fig-width`, `fig-height` and `fig-asp` (the aspect ratio). These three measures, along with `dpi` define the size in pixels of the resulting image that is produced. The default `dpi` is 96, but note that this is multiplied by `fig.retina` which defaults to 2 in the HTML format, so you end up with 192 pixels per inch. Thus, the default figure size is 7*192 by 5*192 or 1344 by 960 pixels.
+
+However, the size of the image in the rendered document will also be constrained by the output width and height in the document. e.g. usually it's constrained to something like 90% of the page width. This is done by image scaling automatically in the browser: the underlying image might be larger (or smaller!) but it will be scaled so it fits within the output width/height requirements. You can 'right click' on the image in the browser and load it in a separate tab to see how large it really is.
+
+The same behaviour happens within the RStudio editor window when the images are shown inline: a wide window might show the figure unscaled, whereas a narrow window will show it scaled.
+
+### Try yourself
+
+1. Try changing the `base_size` of the mean mothers age by year scatterplot to see how it changes things.
+
+2. Try changing the size of the figure by adding `#| fig-width: 10` as a chunk option to make a wider plot. Note that the font size stays the same in the resulting image, but if the image is scaled down (or up) by the browser, then the font will appear larger or smaller. e.g. try setting `fig-width` to 20 or 2 to see this in action.
+
+3. Explore using `fig-asp` and `fig-height` to specify the figure height (and thus aspect ratio). e.g. to make a square plot you can set `fig-width` and then use `fig-asp: 1` to derive the height.
+
+4. Increase the resolution of the pixel image produced by setting `dpi=300` for a really high resolution chart or `dpi=30` for a low resolution chart. How does this affect font size? (It shouldn't change it, except if the image needs scaling in the browser/viewer).
+
+5. Specify the point size of the `geom_point()` directly to, say 5. What do you notice when you change the `fig-width`? Does the size of points scale with figure size, or are they set to a fixed value?
+
+You should have noticed a few things in your exploration. Firstly, all elements of the display are in *absolute* units. e.g. font size is in points (fractions of an inch) so if you make the figure larger, the same font size is used so you can fit more on to the figure: if the figure is then scaled by the browser the font looks smaller, but really it isn't! This also happens with point size when you specify it (in mm!). BUT: if you *don't* specify the point size and use the defaults, the point size _does_ scale with the output figure size, which is a bit weird (and might be a bug)
+
+The take-home message is that final figure size affects the display quite strongly, so if you're developing a figure and want it a particular size, it pays to define the size *first*, including the resolution (`dpi`) you want and then look at setting font and point sizing afterwards.
+
+## Fonts
+
+What if you want to use a different font? It turns out that fonts are a world of pain!
+
+There are various solutions, but the best one in our view is to use `systemfonts` and `textshaping` along with the `ragg` graphics device. This ensures you have cross-platform (i.e. works on Windows, Mac and Linux) support for any fonts installed on your system.
+
+To see which fonts you have available, you can use:
+
+```{r}
+systemfonts::system_fonts()
+```
+
+You can also grab a font from google fonts or font squirrel. e.g.
+
+```{r barrio}
+systemfonts::require_font("Barrio")
+ggplot(mean_birth_age) + aes(x=year, y=mean_age) + geom_point() + theme_classic(base_family="Barrio")
+```
+
+### Try yourself
+
+1. Go to googlefonts or font squirrel and have a look for a nice font you might like.
+
+2. Use `systemfont::require_font()` to download it automatically.
+
+3. Use `base_family` in a `theme_*()` setup to use it on a chart.
+
+## Font styles
+
+By default, R (and thus ggplot2) only has 4 options for styling fonts: plain, italic, bold and bold-italic. But many fonts have far more variants than that. e.g. in Open Sans we see we have a range of different font weights (bold, extra bold, light etc)
+
+```{r}
+systemfonts::require_font("Open Sans")
+systemfonts::system_fonts() |> filter(family == "Open Sans")
+```
+
+To access these variants (e.g. open sans light) you can use `register_variant()`:
+
+```{r}
+systemfonts::register_variant(
+  name = "Open Sans Thin",
+  family = "Open Sans",
+  weight = "light"
+)
+```
+
+Now you can use `Open Sans Thin` as the font family on a chart:
+
+```{r thin fonts}
+base_chart <- ggplot(mean_birth_age) +
+  aes(x = year, y = mean_age) +
+  geom_point()
+
+base_chart + theme_classic(base_family = "Open Sans")
+base_chart + theme_classic(base_family = "Open Sans Thin")
+```
+
+### Try yourself
+
+1. Explore the use of different fonts and registering different font variants to access different font weights.
+
+## Adapting themes
+
+Up until now we've stuck with the selection of themes available to use (perhaps via `ggthemes`). But you can ofcourse adapt them or create your own.
+
+The `theme()` command is used to change specific theme aspects of a chart. If you look up the help you'll see there are about a hundred odd things that you can mess about with.
+
+The first thing to be aware of is the different parts of the chart:
+
+- The `plot` is the complete area, so mostly deals with things outside the main plotting panel (title, background, margins)
+
+- The `axis.*` arguments control the main axes appearance. This includes the axis labels (title, text), tick marks, line styles.
+
+- The `legend.*` arguments control position of guides (colour scales etc).
+
+- The `panel.*` arguments control the appearance of the panel within a chart. e.g. border, background, spacing between facets, grids etc.
+
+- The `strip.*` arguments control the text on top of panels (e.g. when facetting).
+
+Each of the `theme()` parameters defines an `element` of the chart, and is altered using a corresponding `element_*()` function, of which there are 4 basic types: text, lines, rectangles and blank. Each one then has a bunch of parameters that control aspects of the element.
+
+e.g. to change the background of a plot, we need to use `plot.background` which is an `element_rect()`. We might do:
+
+```{r nice backdrops}
+base_chart +
+  theme_classic() +
+  theme(plot.background = element_rect(fill = 'lightpink', colour='purple', linewidth=3))
+```
+
+Similarly, to change the font and size of the plot title we could use:
+
+```{r bigtitles}
+base_chart + labs(title = "My big title") + theme_classic() +
+  theme(plot.title = element_text(family="Barrio", size=30))
+```
+
+### Try yourself
+
+1. Investigate changing theme elements. You might want to look at changing the grid lines (e.g. `panel.grid.major` and `panel.grid.minor`) or axis text/tick marks etc.
+
+2. Try changing some of the font sizes, e.g. for axis labels. A handy function to use is `rel()` which allows you to specify the `size` relative to the `base_size`: this means when you change the base_size your other adjustments will change with it.
+
+## The render process: Under the hood of Quarto
+
+We altered the YAML in this document so that it doesn't embed the resources (charts, css, javascript etc) needed for the resulting report within the HTML itself: Instead the resources are placed alongside the document and referenced from it.
+
+If you Render this document you'll find you have a `lab03_files` folder that contains a `libs` folder (for javascript and css) as well as a `figure-html` folder that stores your figures.
+
+### Try yourself
+
+1. Render the document. Take a look in the `lab03_files/figure-html` folder for your figures.
+
+2. Check the filenames of those figures and click on them to see what they contain. You should notice that some of them are named appropriately, and some probably aren't (e.g. `unnamed-chunk*.png`). The names come from the chunk label which is the bit after `r` at the top of the chunk.
+
+3. Label some of your unnamed chunks and re-render to check you now have nicely labelled files.
+
+4. Check the size (in pixels) of those images to make sure they make sense! e.g. in particular you might want to check the ones where you changed `fig-width` etc.
+
+5. You might also notice that old files stay around here. You can always delete the folder and they'll all re-generate on the next render.
+
+6. Add the YAML that turns embedding resources back on (see `lab01.qmd` for example). What will happen is these folders will still be generated, but the files therein will then be embedded directly in the HTML file. This is useful for distribution of a single document as it's just one file.

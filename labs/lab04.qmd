@@ -1,0 +1,258 @@
+---
+title: "Workshop 3: Tidying up"
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+---
+
+```{r setup}
+#| message: false
+library(tidyverse)
+library(remotes)   # for nzsf
+```
+
+## Introduction
+
+BLAH BLAH BLAH
+
+There are two goals of todays workshop:
+
+1. Take a look at obtaining some real data from Statistics NZ, and tidying it up.
+
+2. Tidying up plots by looking at themes, fonts and sizing.
+
+Both of these are really important: data just about never comes in the form you've likely seen to date in your statistics education - it's hardly ever nice and tidy and thus needs a little (or a lot) of janitor work to get it cleaned up and ready for analysis or presentation.
+
+The second is just as important: Charts that are aesthetically pleasing are nicer to look at, but equally need to be readable, so sizing of various elements of the chart are important to ensure labels aren't too large or too small, that font use is consistent where practical, and that multiple charts in a series are consistent in their use of colour, labels, fonts and so on.
+
+## Polygons!
+
+We'll start with the easiest way to specify map data: using polygons. The `map_data()` function of `ggplot2` contains some maps (via the `maps` package) that isn't very up to date but is nonetheless available to us nice and easily.
+
+And it contains a map of Aotearoa/NZ! We can grab it using:
+
+```{r}
+library(tidyverse)
+nz <- map_data("nz")
+nz
+```
+
+Notice this is quite simple: we have a data frame with longitude (x), latitude (y), group (as there are multiple islands to draw), order (the order the points should be drawn in) region and subregion.
+
+To draw this, we can treat it like a standard data frame and use the geometries we're used to, such as `geom_point()`:
+
+```{r my first map}
+ggplot(nz) +
+  aes(x=long, y=lat) +
+  geom_point()
+```
+
+TADA! New Zealand! Or perhaps quite a squashed version thereof as the scale for latitude and longitude are different. We can make it look a bit prettier by using `coord_quickmap()` which basically ensures lat and long are what you might expect, given their location on the planet
+
+### Try yourself
+
+1. Add `coord_quickmap()` to the above chart to get the coordinates looking right.
+
+2. Try switching to `geom_polygon()` instead of `geom_point()`. You should get something approximately correct!
+
+3. The extra trick you need is there are multiple islands which are described using separate polygons: `geom_polygon` is currently just rendering them all as one polygon so joining them all up. If you add `group=group` (noting the `group` column in `nz`) then that'll do the trick.
+
+4. Try playing with `fill` and `colour`. e.g. you could set them directly or map them to the `region` column.
+
+The problem with the above is that it's quite basic: each shape or island is described by just one polygon. This is fine in many cases, but often you might want more. e.g. we might want Lake Taupo to be rendered correctly: that's a polygon within a polygon (i.e. the land has a hole in it) so things can get pretty complicated pretty quickly.
+
+The other advantage of simple lat/long data is it's really easy to plot locations on such a map if we assume that longitude and latitude are *planar*: i.e. they're just like typical x and y and can treat it as if the landscape was flat. Ofcourse this isn't true: they actually lie on some sort of slightly squashed sphere. Nonetheless, for many things we'll want to pretend maps are flat (e.g. for printing on paper and putting in an atlas, or for many statistical analyses), even when they're not!
+
+## Simple features
+
+Most map data that is available don't use the simple lat/long data format. Instead maps are usually encoded using "simple features", a standard from the Open Geospatial Consortium. We can work with simple features data using the `sf` package, and `geom_sf()` or `coord_sf()` can be used in ggplot2 to utilise these data.
+
+Continuing with our Aotearoa/NZ theme let's load some simple features data for NZ that's stored in an sqlite database.
+
+We'll download the data and then read it in locally, as GDAL seems to have problems reading from this URL.
+
+```{r}
+download.file("https://www.massey.ac.nz/~jcmarsha/data/nz_map/sa2_boundary.sqlite", dest="sa2_boundary.sqlite")
+
+library(sf)
+nz <- read_sf("sa2_boundary.sqlite")
+nz
+```
+
+Notice we have a data frame object that has a few extras: it has a `GEOMETRY` column that contains a bunch of `sfc_MULTIPOLYGON`'s as well as some additional information about the geometry (bounding box, projected coordinate reference system etc).
+
+We can chart this with `geom_sf()` which automatically uses the projected coordinate reference system (so it plots on a non-planar set of axes):
+
+```{r}
+ggplot(nz) +
+  geom_sf() #+
+#  coord_sf(xlim = c(1500000, 1600000), ylim = c(6000000, 6100000))
+```
+
+Note that this works even when we don't specify any aesthetics. This is because the `geometry` aesthetic is only used by `geom_sf()` and nothing else, so you don't need to specify it (except if your sf has two geometry columns).
+
+### Try yourself
+
+1. Explore changing the chart with `fill`, `colour`, `linewidth` etc.
+
+2. You can 'zoom in' on the chart via `coord_sf()`. Try filtering the data to the Auckland territorial authority and then plot.
+
+```{r}
+nz |> filter(territorial_authority == "Auckland") |>
+  ggplot() + geom_sf()
+```
+
+3. Another way to zoom in is to use a bounding box (xlim/ylim) to `coord_sf()`. To get an appropriate bounding box for Auckland, we can use `nz |> filter(territorial_authority == "Auckland") |> st_bbox()`. We can then apply that bounding box to the entire `nz` map by using `coord_sf()`. Try that!
+
+```{r}
+bb <- nz |> filter(territorial_authority == "Auckland") |> st_bbox()
+ggplot(nz) +
+  geom_sf() +
+  coord_sf(xlim = bb[c(1,3)], ylim=bb[c(2,4)])
+```
+
+## Combining regions
+
+The above map has lots of small regions (statistical area level 2). We might want a higher level, which is available to us in the data as `sa3_name` for example. We can combine the usual `dplyr` grouping tools with spatial tools from `sf` such as `st_union()`.
+
+```{r}
+sa3_nz <- nz |> group_by(sa3, sa3_name, territorial_authority, regional_council) |>
+  summarise(geometry = st_union(GEOMETRY))
+
+ggplot(sa3_nz) +
+  geom_sf()
+```
+
+## Try yourself
+
+1. Combine the sa2 level data by regional council and plot that, coloured by council.
+
+```{r}
+nz |> group_by(regional_council) |> summarise(geometry = st_union(GEOMETRY)) |>
+  ggplot() + aes(fill=regional_council) +
+  geom_sf()
+```
+
+2. Add the appropriate `guides()` line to turn off the guide.
+
+## Labelling maps
+
+It's often useful to add a label to each region on a map. To illustrate this, let's zoom into the middle of Palmerston North:
+
+```{r}
+palmy_bb <- c(1816000, 5523000, 1828000, 5533000) # magic bounding box
+sa3_nz |> filter(territorial_authority == "Palmerston North City") |>
+  ggplot() +
+  geom_sf(mapping=aes(fill = sa3_name)) +
+  coord_sf(xlim = palmy_bb[c(1,3)], ylim=palmy_bb[c(2,4)]) +
+  geom_sf_label(mapping=aes(label=sa3_name), size=3) +
+  guides(fill = 'none')
+```
+
+Like all annotation, it can be tricky to not have overlapping labels.
+
+### Try yourself
+
+1. Investigate the `geom_label_repel()` function using `stat = sf_coordinates` from the `ggrepel` package. You may have to explicitly provide `geometry=geometry` to `aes()`.
+
+```{r}
+library(ggrepel)
+sa3_nz |> filter(territorial_authority == "Palmerston North City") |>
+  ggplot() +
+  aes(geometry=geometry) +
+  geom_sf(mapping = aes(fill=sa3_name)) +
+  coord_sf(xlim = palmy_bb[c(1,3)], ylim=palmy_bb[c(2,4)]) +
+  geom_label_repel(mapping=aes(label=sa3_name), size=3, stat="sf_coordinates") +
+  guides(fill = 'none')
+```
+
+2. Investigate the various aesthetic options for the labels (fill, alpha, colour, linewidth, padding, radius etc).
+
+## Adding other geometries
+
+You can add other geometries onto a map as well: there's nothing particularly special about it. The trick is they have to use the same coordinate system. Our map uses the NZGD2000 map grid which is in northing/easting. As long as our points are in the same x,y northing/easting scale and origin we'll be fine.
+
+e.g. We have some data from schools which has longitude/latitude as well as NZGD2000 coordinates:
+
+```{r}
+schools <- read_csv("~/data/data/nz_map/schools.csv")
+schools
+```
+
+Plotting this is straight-forward with `geom_point()` noting that we specify the `data` parameter:
+
+```{r}
+ggplot(sa3_nz) +
+  geom_sf() +
+  geom_point(data=schools, aes(x=x, y=y), col='purple', alpha=0.3, size=1)
+```
+
+Things are a bit trickier if they're not in the same coordinates though!
+
+## Coordinate reference systems
+
+The planet is not flat. It's not a sphere either. Instead it's some weird ellipisoid thing.
+
+So when we have map data we have alongside it a set of assumptions about the shape of the earth and those
+assumptions vary depending on the data (location, scope etc). This is the *geodetic datum*. It normally defines
+the origin, shape and scope.
+
+In addition, we have the problem of drawing the map onto "paper" (or a plane). This inevitably involves distortion
+or cutting of the map. This is the job of the *map projection*.
+
+The combination of *geodetic datum* and *projection* make up the coordinate reference system or CRS:
+
+```{r}
+st_crs(sa3_nz)
+```
+
+Most of this is a *WKT* (well-known text) string that provides all the information to describe the CRS. It's verbose, but regularly used ones are assigned an *EPSG code* which in this case is 2193.
+
+We can control the CRS using `coord_sf()`. e.g: to use WGS84 like google maps does:
+
+```{r}
+ggplot(sa3_nz) +
+  geom_sf() + coord_sf(crs=st_crs("WGS84"))
+```
+
+## Using longitude/latitude
+
+Often point data for a map comes in longitude/latitude rather than whatever coordinate system the map uses (often an easting/northing pair).
+
+It would be convenient if we could just plot long/lat directly on top of a map without having to deal with coordinate reference transformation.
+
+We can do this in some cases by utilising the `default_crs` option of `coord_crs`. This is the CRS to use for all non-SF data (like points).
+
+### Try yourself
+
+1. Set `default_crs=st_crs("WGS84")` in `coord_sf()` and then use `long` and `lat` for the x, y aesthetics in `geom_point()` for the schools.
+
+2. The above should have worked fine. Try it again, but this time with this dataset which includes the schools in the Chatham/Pitt Islands:
+
+```{r}
+schools_ci <- read_csv("~/data/data/nz_map/schools_ci.csv")
+ggplot(sa3_nz) +
+  geom_sf() +
+  geom_point(data=schools_ci, aes(x=long, y=lat), col='purple', alpha=0.3, size=1) + coord_sf(default_crs=st_crs("WGS84"))
+```
+
+Welcome to NZ where the Chathams are technically in the other hemisphere. Aren't maps fun! :)
+
+One way to deal with this (there are many!) is to convert the schools_ci data into a simple features object and set the geometry and coordinate system for it. e.g. for lat/long data we can use `st_as_sf()` to convert to `sf` then use "WGS84" as the CRS:
+
+```{r}
+schools_sf <- schools_ci |> st_as_sf(coords = c("long", "lat")) |>
+  st_set_crs("WGS84")
+```
+
+### Try yourself
+
+1. Use the `schools_sf` to add the school points with `geom_sf(data=schools_sf)`.
+
+## Working with sf data
+
+TODO: FINISH HIM! Some sort of thing looking at just the islands in the Hauraki Gulf maybe?
+
+
+## Raster data...
+

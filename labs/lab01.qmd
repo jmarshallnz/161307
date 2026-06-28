@@ -1,0 +1,359 @@
+---
+title: "Workshop 1: Remember all the things"
+format:
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+The goal of todays workshop is to remember all the things!
+
+Mostly we'll be covering ground you have very likely encountered before in your statistics, computing or data science journeys so far, including charting and data wrangling.
+
+This workshop will mostly be revision for many of you, but there may well be a few new things, and practice is important! Creating **reproducible** data visualisations requires a familiarity with code (in this case `ggplot2` and the `tidyverse`) akin to learning a new language to a conversational level, and that requires a lot of practice!
+
+The data for today will is on LEGO sets, sourced from https://rebrickable.com (a website where people upload MOCs (My own creations) built out of LEGO).
+
+As always we start by loading packages and reading the data in. Recall that this is a Quarto document, so code chunks look like this:
+
+```{r}
+#| message: false
+
+library(tidyverse)
+
+lego_sets <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+lego_parts <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_parts.csv.gz")
+lego_colours <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_colours.csv")
+```
+
+The `#| message: false` line is a quarto chunk option: in this case we're telling R to suppress startup messages from the tidyverse.
+
+## Looking at the data
+
+Let's start by taking a look at the `lego_sets` dataset:
+
+```{r}
+glimpse(lego_sets)
+```
+
+We see that it has 6 columns, three of which are character types (`<chr>`) and three are numeric (`<dbl>`). We also notice that we have some missing values in the `price` column for example. The `skimr` function from `skim` can be useful here as well:
+
+```{r}
+library(skimr)
+skim(lego_sets)
+```
+
+The `skim` function splits the output up into categorical and numeric variables.
+
+### Try yourself
+
+1. What do the various columns output by the `skim` function mean for the categorical and numeric variables? e.g. what does `min` mean for `set`?
+
+2. Redo the `glimpse` and `skim` for the `lego_parts` and `lego_colours` data and familiarise yourself with those data.
+
+## Missingness
+
+One thing we found in the `lego_sets` data was there was quite a high amount of missingness for the `price` variable. We could take a look at the first few rows that are missing with a `filter` (recall: `dplyr::filter` does what it says on the tin: filters out rows that don't match the given criteria):
+
+```{r}
+lego_sets |> filter(is.na(price))
+```
+
+### Try yourself
+
+1. Why did we use `is.na()` to search for NA values rather than something like `price == NA`? (You could try that one out!)
+
+2. The first row is the reissue of the (very cool) Creator Expert Mini Cooper set 10242-2. Lookup this set on https://rebrickable.com and you'll notice that it's a re-issue of the set 10242-1 (the -1/2 labelling is the way that rebrickable distinguishes different versions of the same set). Notice that the set 10242-1 does have price information in our data:
+
+```{r}
+lego_sets |> filter(str_starts(set, "10242"))
+```
+
+The pricing information comes from another LEGO site https://brickset.com. Lookup the set 10242-1 on brickset and you'll see the RRP listed. Now lookup 10242-2 on brickset: you'll see it doesn't have that set listed!
+
+3. So some of the missingness in price is due to set re-issues. Others might be due to other reasons! e.g. try looking up the set 30404-1 Friendship Flower on brickset.com. What do you notice about pricing? It's always useful to know why some values in the data might be missing!
+
+## Initial charting
+
+Recall that when we chart with the `ggplot2` package, that we're following a standard recipe:
+
+1. We ask for a chart using `ggplot()`
+2. We assign it some data using the `data` argument of ggplot.
+3. We assign some variables (columns) from that data to aesthetics (features of the plot) with `aes()`.
+4. We request one (or more) geometries for the chart with `geom_*()` functions.
+
+So to look at the relationship between price and year for example, we might do:
+
+```{r}
+ggplot(data=lego_sets) +
+  aes(x=year, y=price) +
+  geom_point()
+```
+
+### Try yourself
+
+1. Breakdown the above code by running it line by line: i.e. what does just the `ggplot(data=lego_sets)` line do? What happens when you add on the `aes()` line etc? Write some notes on this process.
+
+2. There's quite a lot of overlapping of the points, so it's hard to see the *point density* to get a feel for where the 'center' of the price is across time. This is due to overplotting as both year and price are essentially discrete rather than continuous (price likely being closer to continuous than the year in this case!). Recall that two ways for dealing with this are jittering the points or adding transparency. Implement both techniques (potentially at once!) and see what you think.
+
+## Aesthetics
+
+We've seen `x` and `y` aesthetics so far in our simple scatterplot. But there's loads of others such as `colour` (inside and outside), `shape`, `size`, `alpha` and so on.
+
+In part 2 above you utilised the `alpha` aesthetic to provide some transparency to all the points uniformly. This differed to the use of `x` and `y` which varied from point to point. The difference between these two is mapping versus setting.
+
+When we **set** an aesthetic to a value (e.g. `alpha = 0.4`) then we're saying we want that aesthetic to take that value uniformly for all data on the chart. All setting of aesthetics happen inside the geometry layers but outside of the `aes()` mapping argument.
+
+When we **map** an aesthetic to a variable (column) from our data, then we're saying we want that aesthetic to be used to distinguish features in our data. All mapped aesthetics are inside the `aes()` function.
+
+e.g. we could **set** the colour of all points to purple using:
+
+```{r}
+ggplot(data = lego_sets) +
+  aes(x=year, y=price) +
+  geom_point(colour = 'purple')
+```
+
+Or, we could **map** the colour of points to the `theme` variable in our data so that we get a different colour for each theme:
+
+```{r}
+ggplot(data = lego_sets) +
+  aes(x=year, y=price, colour=theme) +
+  geom_point()
+```
+
+Notice that when we do so we automatically get a `guide` associated with that mapped aesthetic: indeed, we also got that for `x` and `y` as well (the axes!) In general ggplot will always add a guide for each mapped aesthetic.
+
+### Try yourself
+
+1. Try colouring the above chart with num_parts instead. What do you notice about the guide added compared to the above?
+
+2. Try doing a chart of `year` versus `num_parts` instead, coloured by `theme`.
+
+3. Switch your `year` versus `num_parts` to instead be coloured by price.
+
+4. Try a `num_parts` versus `price` plot. Investigate colouring by `theme` or `year`.
+
+5. Do you have any preliminary conclusion about the relationship(s) between `year`, `price`, `num_parts` and `theme`?
+
+## Colour and scales
+
+You should have noticed in the above that the guide for colour differed depending on whether the colour variable was categorical (`theme`) or numeric (`price`). ggplot2 distinguishes these cases as in the former you want a set of 'discrete' colours, and in the latter you want a continuum.
+
+The colours chosen for each of these guides are governed by the *scales* used. For some aesthetics these are fairly straight-forward: the x and y axes on a scatterplot are continuous numeric scales, so the choices for them are limited mostly to the range (which is typically just the full range of the variable plus a bit of extra at each end) and the number of marks to use across the range.
+
+For other aesthetics such as colour there are a few more choices to make: if we have a set of discrete colours (for a grouping variable) we need to chose which colours to use. If we have a colour gradient for a continuous measure we need to choose the end points of that gradient (and possibly intermediate colours as well).
+
+All scales are controlled using the `scale_<aesthetic>_<type>()` set of functions, where `<aesthetic>` is the corresponding aesthetic (`x`, `y`, `colour`, `fill`, `alpha`, `size` etc) and `<type>` is the type of scale to use which might depend on the type of variable mapped to that aesthetic (continuous, discrete, binned, gradient etc)
+
+For example, lets look in detail at the scale for `x` on our first plot where `year` is on the x axis. We could treat year (and ggplot2 has) as numeric, so will be by default controlled by `scale_x_continuous()`. Looking up the help on that notes that we have the following arguments available to us:
+
+ - `name`
+ - `breaks`
+ - `minor_breaks`
+ - `n.breaks`
+ - `labels`
+ - `limits`
+ - `expand`
+ - `oob`
+ - `na.value`
+ - `transform`
+ - `guide`
+ - `position`
+ - `sec.axis`
+
+Most of these are reasonably self-explanatory as to what they control: `name` is for the axis or legend title, `breaks`, `minor_breaks` or `n.breaks` are about how many divisions are used across the range (marked for breaks, unmarked for minor breaks), `labels` are for how those breaks are labelled, `limits` defines the end points, `expand` defines how those limits are increased to provide a bit of whitespace at either end. `oob` then defines what to do with points that lie outside the limits while `na.value` defines what should be done with `NA` values in the data (e.g. replace with a specific value). `transform` specifies whether the data are transformed prior to charting (e.g. via a log transform), while `guide` specifies the type of guide used (usually most useful for colour and other legend style guides) and `position` specifies where the axis should be (left vs right, top vs bottom). Lastly, `sec.axis` is used to specify a secondary axis (something we normally avoid where possible!)
+
+This gives us an extraordinary amount of control over the guides in our plots. Fortunately the defaults typically work fine anyway, and we need only alter things to fine-tune in most cases for axis scales. Colour scales typically do need to be altered (at least the colour choices) though!
+
+e.g. to change the number of years shown on the x axis we might use:
+
+```{r}
+ggplot(data = lego_sets) +
+  aes(x=year, y=price) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(2012, 2022, by=2))
+```
+
+### Try yourself
+
+1. Try altering the number of breaks for `price` on the y axis.
+
+2. Try altering the range (limits) for `price` on the y axis.
+
+3. Investigate passing a *function* to the `limits` argument instead of fixed values. This is best done with a *anonymous function* (sometimes called a lambda function in compsci!) using `limits = \(x) range(x, 1000)`.
+
+4. Write some notes on number 3 so you understand the magic of the anonymous function!
+
+5. Investigate the `expand` argument. If you read the help for `scale_x_continuous` you'll find the `expansion` helper function might be useful here. Try and change things so that $0 is placed exactly where the x axis is, while there is still some space above the largest point.
+
+To change colours we use the corresponding scale_colour_* functions which are a little more specific for the discrete and continuous cases. For the discrete case `scale_colour_manual()` is used for specifying all colours by hand, while there are some "pre-built" palettes available as well such as `scale_colour_brewer()` or `scale_colour_viridis_d()` etc. e.g. to pick a(n awful!) range of colours for themes we might use:
+
+```{r}
+ggplot(data = lego_sets) +
+  aes(x=year, y=price, colour=theme) +
+  geom_point() +
+  scale_colour_manual(values = c('red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'pink', 'orange', 'grey'))
+```
+
+### Try yourself
+
+1. Try using the `scale_colour_brewer()` function instead. Explore the `palette` option and see which one you like best. Note that some of them might not have 9 colours available!
+
+2. Try the `scale_colour_viridis_d()` option (the d is for discrete). You can change the colours used with the `option` argument.
+
+3. Plot `num_parts` versus `year` coloured by `price`. Investigate the `scale_colour_viridis_c()` option.
+
+4. Try switching to `scale_colour_gradient()` and look at the `low` and `high` parameters for controlling the colour gradient. `scale_colour_gradientn()` can be used to transistion between multiple colours in the middle.
+
+## Using a colour dictionary
+
+For many colours or to keep colours consistent for groupings across charts, the use of a colour dictionary is useful. This is simply a named vector (or tibble that has been deframe'd if you want the names and colours aligned in your code):
+
+```{r}
+theme_colours = tribble(~name, ~colour,
+        'Architecture',      '#ef476f',
+        'Creator',           '#f78c6b',
+        'Friends',           '#ffd166',
+        'Ideas',             '#83d483',
+        'Modular Buildings', '#06d6a0',
+        'Ninjago',           '#0cb0a9',
+        'Star Wars',         '#118ab2',
+        'Technic',           '#0c637f',
+        'Town',              '#073b4c') |>
+  deframe()
+```
+
+```{r}
+ggplot(data = lego_sets) +
+  aes(x=year, y=price, colour=theme) +
+  geom_point(position=position_jitter()) +
+  scale_colour_manual(values = theme_colours)
+```
+
+### Try yourself
+
+1. Grab a set of 9 colours you like (e.g. google for "9 colour palette") and modify the above so it suits your preferences.
+
+## Labelling
+
+An important part of any chart is ensuring it is understandable for the reader, and a big part of that is making sure it is really clear what the elements of the chart are showing which is largely down to labelling axes/guides appropriately.
+
+This is most easily done with the `labs()` command which takes as it's arguments the corresponding aesthetic. e.g. to label the `x` axis we use:
+
+```{r}
+labs(x = "my x axis label")
+```
+
+In addition to the aesthetics, we also have `title`, `subtitle`, `caption` and `tag`.
+
+### Try yourself
+
+1. Improve the axis labels and legends of some of your plots so far.
+
+2. Add a title, subtitle and caption to some plots. You might use the title and subtitle to editorialise a little (e.g. help direct the reader to the key story of the chart) while using the caption to put your name or the data source.
+
+## Label dictionaries
+
+If we go and change a chart around after we've already labelled it (e.g. swapping the role of `y` and `colour` in the `price` vs `year` vs `num_parts` charts) it's a bit of a hassle as we need to change both the `aes()` line as well as the `labs()` line. An alternate is the use of a label dictionary. This is essentially the same as the colour directionary above and can be done via the `dictionary` argument of `labs()`. e.g. we might have:
+
+```{r}
+lego_labels <- tribble(~name, ~label,
+                       'price', "Recommend retail price ($US)",
+                       'num_parts', "Number of parts",
+                       'theme', "Theme",
+                       'year', "Year released") |> deframe()
+lego_labels
+```
+
+### Try yourself
+
+1. Try passing the `lego_labels` dictionary to the `labs` command with `dictionary`.
+
+2. Now swap around some of the aesthetics and notice how the labels move automatically.
+
+## Facetting
+
+Often when you want to tell a story using data it is often across multiple different variables. e.g. we've seen above how there is some hints that the number of parts used in a LEGO set is increasing over time as is the price, and clearly price and number of parts are related. But it's a little less clear whether certain LEGO themes are more or less expensive than others (accounting for parts and year of release). e.g. you might think that the Star Wars LEGO sets might be more expensive as they are licensed from Disney which has a cost but it's a bit hard to see on the charts so far.
+
+Ofcourse, we could just `filter` down to just one theme (Star Wars) and plot that by itself, repeating for different themes:
+
+```{r}
+lego_sets |> filter(theme == "Star Wars") |>
+  ggplot() +
+  aes(x = year, y = price, colour=num_parts) +
+  geom_point()
+```
+
+But it would be nice to be able to compare across themes on one plot. We do this with *small multiples* where we duplicate the same chart on subsets of the data driven by a separate variable:
+
+```{r}
+ggplot(data = lego_sets) +
+  aes(x = year, y = price, colour=num_parts) +
+  geom_point() +
+  facet_wrap(vars(theme))
+```
+
+### Try yourself
+
+1. Do a facetted plot of `price` versus `num_parts` broken down by `theme`. You might want to overlay a smoother via `geom_smooth` on these plots. What is your conclusion regarding price by theme accounting for number of parts?
+
+2. Ensure you label your plot well. To make things prettier you might want to colour by theme and then turn off the colour guide (see `guides()` for how to do this).
+
+## A model for price?
+
+One thing you should notice is that the price is roughly linear with the number of parts. Indeed, LEGO enthusiasts tend to discuss the value of a LEGO set in terms of it's price per part (in cents).
+
+We can compute this by adding a new column with `mutate(price_per_part = price/num_parts*100)` (or, directly doing
+the computation within the `aes()`)
+
+### Try yourself
+
+Our goal here is to assess how the `price_per_part` changes over time by `theme`. We'll do this as follows:
+
+1. Add the `price_per_part` column and then do a facetted chart comparing the price per part over time (`year`) by `theme`.
+
+2. You should notice a couple of extreme outliers. Add a `filter()` step to eliminate any sets that cost more than 500 cents per part.
+
+3. Even with the filter you should see that it's still pretty hard to distinguish any trend (e.g. add a smoother and see if you can see anything). This is partly because price per part tends to 'live' on a log scale: most of them are cheap, but there's a few that are a lot more expensive. Try switching the plot to use a log10 scale for y with `scale_y_log10()`.
+
+4. Finally, tidy up the plot by adding some colour, fixing up labels etc.
+
+## An alternate model: weight?
+
+Some LEGO enthusiasts have noticed that the number of parts have increased markedly over time, not just because sets are getting bigger, but because they are getting more detailed, with many small parts used to create finer details. You can see this for yourself by taking a look at the Speed Champions line in the past few years. e.g. compare the two Porsche 911's:
+
+https://rebrickable.com/sets/75895-1/1974-porsche-911-turbo-30
+https://rebrickable.com/sets/77239-1/porsche-911-gt3-rs-super-car
+
+So potentially a better idea of 'value' might be the amount of plastic which might be proxied by weight.
+
+The `lego_parts` data frame has this information:
+
+```{r}
+glimpse(lego_parts)
+```
+
+We can compute the weight of a set by taking our `lego_parts` data, grouping it by `set` and computing the sum of `weight` times `quantity`:
+
+```{r}
+set_weights <- lego_parts |>
+  group_by(set) |>
+  summarise(weight = sum(weight*quantity, na.rm=TRUE))
+```
+
+We can then join this to our `lego_sets` data to add in the `weight` column:
+
+```{r}
+sets_with_weight <- lego_sets |>
+  left_join(set_weights, by=join_by(set))
+```
+
+### Try yourself
+
+1. Write some notes on the above code to make sure you remember how to summarise by group or join datasets.
+
+2. Do charts of `weight` vs `num_parts` and `price` vs `weight`. Do they make sense?
+
+3. Which variable (`weight` or `num_parts`) is more strongly associated with `price`?
