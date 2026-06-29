@@ -1,5 +1,5 @@
 ---
-title: "Workshop 3: Tidying up"
+title: "Workshop 4: Space"
 knitr:
   opts_chunk:
     dev: "ragg_png"
@@ -16,15 +16,7 @@ library(ggrepel) # labelling
 
 ## Introduction
 
-There are two goals of todays workshop:
-
-1. Take a look at obtaining some real data from Statistics NZ, and tidying it up.
-
-2. Tidying up plots by looking at themes, fonts and sizing.
-
-Both of these are really important: data just about never comes in the form you've likely seen to date in your statistics education - it's hardly ever nice and tidy and thus needs a little (or a lot) of janitor work to get it cleaned up and ready for analysis or presentation.
-
-The second is just as important: Charts that are aesthetically pleasing are nicer to look at, but equally need to be readable, so sizing of various elements of the chart are important to ensure labels aren't too large or too small, that font use is consistent where practical, and that multiple charts in a series are consistent in their use of colour, labels, fonts and so on.
+TODO: BLAH BLAH SPACE!!!
 
 ## Polygons!
 
