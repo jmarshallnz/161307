@@ -8,12 +8,13 @@ knitr:
 ```{r setup}
 #| message: false
 library(tidyverse)
-library(remotes)   # for nzsf
+library(maps)    # maps!
+library(sf)      # maps!
+library(stars)   # rasters!
+library(ggrepel) # labelling
 ```
 
 ## Introduction
-
-BLAH BLAH BLAH
 
 There are two goals of todays workshop:
 
@@ -72,11 +73,12 @@ Continuing with our Aotearoa/NZ theme let's load some simple features data for N
 We'll download the data and then read it in locally, as GDAL seems to have problems reading from this URL.
 
 ```{r}
-download.file("https://www.massey.ac.nz/~jcmarsha/data/nz_map/sa2_boundary.sqlite", dest="sa2_boundary.sqlite")
+# this should just work (tm)
+nz <- read_sf("https://www.massey.ac.nz/~jcmarsha/data/nz_map/sa2_boundary.sqlite")
 
-library(sf)
-nz <- read_sf("sa2_boundary.sqlite")
-nz
+# in case it doesn't, you can download the maps data directly with the below, you can download using:
+# download.file("https://www.massey.ac.nz/~jcmarsha/data/nz_map/sa2_boundary.sqlite", dest="sa2_boundary.sqlite")
+# nz <- read_sf("sa2_boundary.sqlite")
 ```
 
 Notice we have a data frame object that has a few extras: it has a `GEOMETRY` column that contains a bunch of `sfc_MULTIPOLYGON`'s as well as some additional information about the geometry (bounding box, projected coordinate reference system etc).
@@ -85,8 +87,7 @@ We can chart this with `geom_sf()` which automatically uses the projected coordi
 
 ```{r}
 ggplot(nz) +
-  geom_sf() #+
-#  coord_sf(xlim = c(1500000, 1600000), ylim = c(6000000, 6100000))
+  geom_sf()
 ```
 
 Note that this works even when we don't specify any aesthetics. This is because the `geometry` aesthetic is only used by `geom_sf()` and nothing else, so you don't need to specify it (except if your sf has two geometry columns).
@@ -97,19 +98,7 @@ Note that this works even when we don't specify any aesthetics. This is because 
 
 2. You can 'zoom in' on the chart via `coord_sf()`. Try filtering the data to the Auckland territorial authority and then plot.
 
-```{r}
-nz |> filter(territorial_authority == "Auckland") |>
-  ggplot() + geom_sf()
-```
-
 3. Another way to zoom in is to use a bounding box (xlim/ylim) to `coord_sf()`. To get an appropriate bounding box for Auckland, we can use `nz |> filter(territorial_authority == "Auckland") |> st_bbox()`. We can then apply that bounding box to the entire `nz` map by using `coord_sf()`. Try that!
-
-```{r}
-bb <- nz |> filter(territorial_authority == "Auckland") |> st_bbox()
-ggplot(nz) +
-  geom_sf() +
-  coord_sf(xlim = bb[c(1,3)], ylim=bb[c(2,4)])
-```
 
 ## Combining regions
 
@@ -126,12 +115,6 @@ ggplot(sa3_nz) +
 ## Try yourself
 
 1. Combine the sa2 level data by regional council and plot that, coloured by council.
-
-```{r}
-nz |> group_by(regional_council) |> summarise(geometry = st_union(GEOMETRY)) |>
-  ggplot() + aes(fill=regional_council) +
-  geom_sf()
-```
 
 2. Add the appropriate `guides()` line to turn off the guide.
 
@@ -155,17 +138,6 @@ Like all annotation, it can be tricky to not have overlapping labels.
 
 1. Investigate the `geom_label_repel()` function using `stat = sf_coordinates` from the `ggrepel` package. You may have to explicitly provide `geometry=geometry` to `aes()`.
 
-```{r}
-library(ggrepel)
-sa3_nz |> filter(territorial_authority == "Palmerston North City") |>
-  ggplot() +
-  aes(geometry=geometry) +
-  geom_sf(mapping = aes(fill=sa3_name)) +
-  coord_sf(xlim = palmy_bb[c(1,3)], ylim=palmy_bb[c(2,4)]) +
-  geom_label_repel(mapping=aes(label=sa3_name), size=3, stat="sf_coordinates") +
-  guides(fill = 'none')
-```
-
 2. Investigate the various aesthetic options for the labels (fill, alpha, colour, linewidth, padding, radius etc).
 
 ## Adding other geometries
@@ -175,7 +147,7 @@ You can add other geometries onto a map as well: there's nothing particularly sp
 e.g. We have some data from schools which has longitude/latitude as well as NZGD2000 coordinates:
 
 ```{r}
-schools <- read_csv("~/data/data/nz_map/schools.csv")
+schools <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz_map/schools.csv")
 schools
 ```
 
@@ -227,10 +199,10 @@ We can do this in some cases by utilising the `default_crs` option of `coord_crs
 
 1. Set `default_crs=st_crs("WGS84")` in `coord_sf()` and then use `long` and `lat` for the x, y aesthetics in `geom_point()` for the schools.
 
-2. The above should have worked fine. Try it again, but this time with this dataset which includes the schools in the Chatham/Pitt Islands:
+The above should have worked fine. Let's try it again, but this time with this dataset which includes the schools in the Chatham/Pitt Islands:
 
 ```{r}
-schools_ci <- read_csv("~/data/data/nz_map/schools_ci.csv")
+schools_ci <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz_map/schools_ci.csv")
 ggplot(sa3_nz) +
   geom_sf() +
   geom_point(data=schools_ci, aes(x=long, y=lat), col='purple', alpha=0.3, size=1) + coord_sf(default_crs=st_crs("WGS84"))
@@ -251,8 +223,73 @@ schools_sf <- schools_ci |> st_as_sf(coords = c("long", "lat")) |>
 
 ## Working with sf data
 
-TODO: FINISH HIM! Some sort of thing looking at just the islands in the Hauraki Gulf maybe?
+It's important to be able to combine or break down the `geometry` data in an `sf` data frame sometimes.
+
+For example, suppose we wish to produce a map of Rangitoto and Motutapu islands in Auckland.
+
+We find these are in the `Hibiscus and Bays Rural` SA3:
+
+```{r}
+bb_auckland <- c(1745000, 5910000, 1795000, 5940000)
+sa3_nz |> filter(territorial_authority == "Auckland") |>
+  mutate(highlight = sa3_name == "Hibiscus and Bays Rural") |>
+  ggplot() +
+  geom_sf(mapping=aes(fill=highlight)) +
+  coord_sf(xlim=bb_auckland[c(1,3)], ylim=bb_auckland[c(2,4)]) +
+  guides(fill='none')
+```
+
+If we take a look at the geometry for this we see it's a `sfc_MULTIPOLYGON`:
+
+```{r}
+hibiscus <- sa3_nz |> filter(sa3_name == "Hibiscus and Bays Rural")
+hibiscus
+```
+
+We can use `st_cast()` to convert this to it's constituent polygons:
+
+```{r}
+hibiscus |> st_cast(to="POLYGON") |>
+  rowid_to_column('polygon') |>
+  ggplot() +
+  geom_sf() +
+  geom_sf_label(mapping=aes(label=polygon))
+```
+
+We see that Rangitoto is row 1 and Motutapu is row 10, so we can grab and label these accordingly:
+
+```{r}
+rangitoto_motutapu <- hibiscus |> st_cast(to="POLYGON") |>
+  slice(c(1, 10)) |>
+  mutate(label = c("Rangitoto", "Motutapu"))
+
+ggplot(rangitoto_motutapu) + geom_sf() + geom_sf_label(mapping=aes(label=label))
+```
+
+### Try yourself
+
+1. Create a map of Mou Waho, one of the relatively small number of islands that are in lakes on an island that contain a lake (recursive lakes!). Look this up on a map online (e.g. google maps) so you can see where it is relative to the surroundings. Then filter the data down to the appropriate `sa3`, break down the geometry and do a map of only Mou Waho.
+
+## Raster data
+
+The other main type of mapping data are raster data: essentially an area that is tiled with a grid and some variable is represented as a value at each grid location. The data are usually in the form of an **image** with pixels representing the tiles. The grids may be rectangular tiles, but they could also be non-rectangular, or projected onto the globe. A common format is GeoTIFF which is basically a TIFF with additional metadata describing the CRS and extent of the tiled area.
+
+```{r}
+oz_cloud <- read_stars("https://www.massey.ac.nz/~jcmarsha/data/nz_map/aussie_cloud.tif")
+ggplot() + geom_stars(data=oz_cloud) +
+  coord_equal() +
+  scale_fill_gradient(low = "black", high = "white")
+```
+
+```{r}
+nz3 <- sa3_nz |> st_transform(crs = st_crs(oz_cloud))
+ggplot() + 
+  geom_stars(data = oz_cloud, show.legend = FALSE) +
+  geom_sf(data = nz3, fill = NA, color = "white", linewidth=0.01) + 
+  coord_sf() + 
+  theme_void() + 
+  scale_fill_gradient(low = "black", high = "white")
+```
 
 
-## Raster data...
 
