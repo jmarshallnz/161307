@@ -1,0 +1,120 @@
+Plan:
+
+Lab 1: Remember all the things. LEGO data
+Portfolio 1: Maybe figure of weight vs year for LEGO price/gram?
+
+Lab 2: Distributions
+Portfolio 2: maybe a joy chart? Or a barplot with the LEGO data?
+
+Lab 3: Themes, fonts, colours, patchwork etc.
+Portfolio 3: Set of 3 charts combined with patchwork all with a custom theme/ink/highlight
+
+Lab 4: Space!
+Portfolio 4: Hmmm...
+
+1-2 lectures and a 2 hour computing workshop a week.
+
+Lectures:
+
+Week 1a
+
+Intro to ggplot, aesthetics
+Data wrangling
+
+Week 1b
+
+Telling a story
+Coordinate systems/axes
+
+Week 2a
+
+Visualising amounts (barplots, ordering, proportions)
+
+Week 2b
+
+Distributions
+
+Week 3a
+
+Color scales, deficiencies
+
+Week 3b
+
+Figure design
+Compound figures
+
+Week 4a
+
+Maps
+
+Week 4b
+
+More maps?!?
+
+
+
+
+Topics might include:
+
+Colour perception
+Human cognition (lengths vs areas vs curves)
+Accessibility
+Visualising uncertainty
+Dimension reduction techniques (PCA, MDS, clustering)
+Time series principles (autocorrelation, models)
+Network data principles (network summaries)
+Map data principles (spatial autocorrelation)
+
+
+Could get them to have a weekly/bi-weekly discussion group. Assessment item based on participation.
+Teaching staff could drop-in on groups at pre-arranged times and ask questions or note participation.
+
+Topics could be a research paper or a figure (tidy tues as above) or data based news article,
+critique etc?
+
+Data:Ink ratio: https://bsky.app/profile/mjskay.com/post/3lnikalaa2k27
+Data strips: https://rawdatastudies.com/2025/07/05/data-strips-experiment/
+Moon charts: https://media.eagereyes.org/papers/2019/Kosara-EuroVis-2019b.pdf
+Part to whole pies: https://media.eagereyes.org/papers/2019/Kosara-EuroVis-2019a.pdf
+Visible Language (journal archive): https://journals.uc.edu/index.php/vl/issue/archive
+
+### Other data viz courses
+
+Andrew Heiss' class: https://datavizs25.classes.andrewheiss.com/content/
+Data Vis in R: https://wilkelab.org/SDS366/
+ggplot2 uncharted: https://www.ggplot2-uncharted.com/
+Saloni's guide to data viz: https://www.scientificdiscovery.dev/p/salonis-guide-to-data-visualization
+Open visualisation academy: https://openvisualizationacademy.org/
+
+### Books/papers/resources
+
+Using Observarble from Quarto: https://nrennie.rbind.io/blog/observable-r-users/
+Fonts: https://tidyverse.org/blog/2025/05/fonts-in-r/
+ggalign: https://yunuuuu.github.io/ggalign/
+Nicola Rennie: https://nrennie.rbind.io/data-viz-resources/
+Survey data: https://github.com/tidy-survey-r/site
+Quarto image mover: https://github.com/EmilHvitfeldt/quarto-revealjs-imagemover
+Lots of colours in a palette: https://bsky.app/profile/opinionhaver.bsky.social/post/3lwevwsbixk2e
+Truffle: mess up tidy data: https://mmmdata.io/posts/2025/08/creating-messy-datasets-for-teaching-purposes-with-truffle/
+tinytable: https://vincentarelbundock.github.io/tinytable/
+Tidy Tuesday cookbook/Art of data viz: https://nrennie.rbind.io/art-of-viz/
+Data Visualisation: A handbook for data driven design https://visualisingdata.com/book/
+Building Science Graphics: https://www.jenchristiansen.com/building-science-graphics/
+Slidecrafting: https://slidecrafting-book.com/
+Atkinson hyperlegible fonts: https://www.brailleinstitute.org/freefont/
+
+
+### Data sources
+
+Lightning strikes (is Maureen Pugh odd?) https://bsky.app/profile/thoughtfulnz.bsky.social/post/3kpidtss4du2i
+Excess deaths: https://bsky.app/profile/thoughtfulnz.bsky.social/post/3kpfs322xwv2d
+Death rates: https://bsky.app/profile/thoughtfulnz.bsky.social/post/3kpd7u5skcq2e
+NOAA sea temp: https://kieranhealy.org/blog/archives/2024/04/04/make-your-own-noaa-sea-temperature-graph/
+Wellington on a good day: (Broken link, but idea is use weather data to see how often you get a good day (low wind, no rain, good sun?))
+Travel to work: https://public.flourish.studio/visualisation/12453836/
+Road deaths: https://www.transport.govt.nz/statistics-and-insights/safety-road-deaths/sheet/year-to-date-road-deaths
+Netflix creative charting: https://bsky.app/profile/karaman.is/post/3lvirsccqkk2p
+NZ election survey: https://bsky.app/profile/thoughtfulnz.bsky.social/post/3lwuztohnns27 (I have the data)
+Colour continuums https://meodai.github.io/pro-color-harmonies/
+World back indicators data: https://bsky.app/profile/nrennie.bsky.social/post/3m723xcjye22v
+World back indicators interactive: https://nrennie.rbind.io/statistical-performance-indicators/
