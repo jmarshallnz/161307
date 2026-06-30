@@ -1,0 +1,513 @@
+---
+title: "Recall: ggplot2 and dplyr"
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    margin: 0.02
+    smaller: true
+    echo: true
+    message: false
+    fig-width: 7
+    fig-height: 7
+---
+
+```{css}
+div.sourceCode {
+  font-size: 1.4em;
+}
+
+div.cell-output-stdout {
+  font-size: 1.4em;
+}
+```
+
+##
+
+```{r}
+#| setup: true
+
+library(tidyverse)
+theme_set(theme_gray(base_size=16))
+```
+
+![](figures/rnz_sheep_vs_humans)
+
+[https://www.rnz.co.nz/news/country/560252/gap-between-people-and-sheep-rapidly-closing](https://www.rnz.co.nz/news/country/560252/gap-between-people-and-sheep-rapidly-closing)
+
+## Data for today
+
+[Figure.nz](https://figure.nz) has data on agriculture production in Aotearoa NZ from 1935 and population from 1937:
+
+[https://figure.nz/table/NteyKZu48ZHuqab1](https://figure.nz/table/NteyKZu48ZHuqab1)
+[https://figure.nz/table/83PJnWFeJehqJYaS](https://figure.nz/table/83PJnWFeJehqJYaS)
+
+::: aside
+These URLs may not be stable over time.
+:::
+
+## Data for today
+
+```{r}
+library(tidyverse)
+
+ag_production <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/ag_production.csv")
+ag_production
+```
+
+## Data for today
+
+```{r}
+#| message: false
+
+population <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/nz_population.csv")
+population
+```
+
+## The ggplot2 recipe
+
+1. Create a chart with `ggplot2()`
+2. Assign some data to the chart with `data=foo`, i.e. `ggplot2(data=foo)`
+3. Define the mapping from features of the chart to variables/columns in the data with `aes()`
+4. Choose which type of geometry to use with `geom_*()`.
+
+## The ggplot2 recipe
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg1}
+#| eval: false
+ggplot()
+```
+
+`ggplot()` creates a new chart
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg1"
+```
+:::
+
+::::
+
+
+## The ggplot2 recipe
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg2}
+#| eval: false
+ggplot(data=ag_production)
+```
+
+`ggplot()` creates a new chart
+
+`data=ag_production` assigns the data to the chart
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg2"
+```
+:::
+
+::::
+
+## The ggplot2 recipe
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg3}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value)
+```
+
+`ggplot()` creates a new chart
+
+`data=ag_production` assigns the data to the chart
+
+`aes(x=year, y=value)` maps features of chart to columns of data
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg3"
+```
+:::
+
+::::
+
+## The ggplot2 recipe
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg4}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value) +
+  geom_point()
+```
+
+`ggplot()` creates a new chart
+
+`data=ag_production` assigns the data to the chart
+
+`aes(x=year, y=value)` maps features of chart to columns of data
+
+`geom_point()` chooses the point geometry
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg4"
+```
+:::
+
+::::
+
+## Adding another aesthetic
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg5}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, colour=animal) +
+  geom_point()
+```
+
+`colour=animal` maps the colour aesthetic to the `animal` column.
+
+Note it automatically supplies a *scale*, in this case a legend or **guide**.
+
+`x` and `y` also have scales!
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg5"
+```
+:::
+
+::::
+
+## A different geometry
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg6}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, colour=animal) +
+  geom_line()
+```
+
+The line geometry draws lines between observations within 'groups'.
+
+The grouping is automatic when you have assigned `colour` or `fill`.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg6"
+```
+:::
+
+::::
+
+## Groups are important
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg7}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value) +
+  geom_line()
+```
+
+If there are no groups, all lines will be joined up.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg7"
+```
+:::
+
+::::
+
+
+::::
+
+## Groups are important
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg8}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, group=animal) +
+  geom_line()
+```
+
+The `group` aesthetic can be useful in this case.
+
+But it has no scale or guide.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg8"
+```
+:::
+
+::::
+
+## Labelling
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg9}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, colour=animal) +
+  geom_line() +
+  labs(x = "Year",
+       y = "Number of animals",
+       colour = "Animal")
+```
+
+The `labs()` command allows you to override the default labels.
+
+The parameters it takes are the same as aesthetics.
+
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg9"
+```
+:::
+
+::::
+
+## Label dictionary
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg10}
+#| eval: false
+
+labels = c(year = "Year",
+           animal = "Animal",
+           value = "Number of Animals")
+
+ggplot(data=ag_production) +
+  aes(x=year, y=value, colour=animal) +
+  geom_line() +
+  labs(dictionary = labels)
+```
+
+A label dictionary is a named vector mapping the columns
+in your data to the label you want to use.
+
+This can be useful for consistency across multiple plots.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg10"
+```
+:::
+
+::::
+
+::: aside
+Recall the `c()` function combines multiple entries into a single vector.
+:::
+
+## The grammar of graphics
+
+ggplot2 is based on the Grammar of Graphics defined by Leland Wilkinson in 1999.
+
+In the same way that a grammar defines the structures and composition of a language, the grammar of graphics defines the structures and composition of statistical graphics.
+
+Most widely used graphics packages for charting have been informed by this idea.
+
+The grammar in ggplot2 breaks down a chart into:
+
+- Data
+- Aesthetics
+- Geometries
+- Facets
+- Statistics
+- Coordinates
+- Themes
+
+## Data
+
+The data 'layer' in `ggplot2` needs to be **tidy**. That is, you need to ensure that each observation is in its own row and each variable is in its own column.
+
+The `ag_production` data are tidy in **long form**: each row represents a single observation the count (`value`) of `animal` in a particular `year`.
+
+However, we could also present these data in **wide form** where each animal has its own column instead:
+
+```{r}
+ag_wide <- ag_production |> pivot_wider(names_from=animal, values_from=value) |>
+  filter(year > 1970)
+```
+
+It's the same data, just formatted the other way around. For charting though, it probably doesn't make sense to plot the `Sheep` column against the `Goats` column directly: both are changing through time, and having time be on the `x` axis is likely sensible!
+
+## Aesthetics
+
+Aesthetics are features of the plot that allow us to distinguish one observation from another.
+
+We've already seen position aesthetics (`x` and `y`) as well as the `colour` and `group` aesthetics. Others are `shape`, `size`, `alpha` (transparency) `linewidth` and `linetype`.
+
+## Aesthetics
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg11}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, shape=animal) +
+  geom_point()
+```
+
+`shape` can be useful when we have a relatively small number of groups.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg11"
+```
+:::
+
+::::
+
+
+## Aesthetics
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg12}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, size=animal) +
+  geom_point()
+```
+
+`size` is typically a continuous measure rather than a discrete one.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg12"
+```
+:::
+
+::::
+
+
+## Aesthetics
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg13}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, colour=animal, shape=animal) +
+  geom_point()
+```
+
+You can combine aesthetics and the guides will try and combine as well.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg13"
+```
+:::
+
+::::
+
+
+## Aesthetics
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg14}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, linewidth=animal) +
+  geom_line()
+```
+
+Line geometries can be distinguished using width and line type.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg14"
+```
+:::
+
+::::
+
+
+## Aesthetics
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r gg15}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value, linetype=animal) +
+  geom_line()
+```
+
+Line geometries can be distinguished using width and line type.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "gg15"
+```
+:::
+
+::::
