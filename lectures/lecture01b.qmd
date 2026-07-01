@@ -4,7 +4,7 @@ format:
   revealjs:
     width: 1280
     height: 720
-    margin: 0.02
+    margin: 0.1
     echo: true
     message: false
     fig-width: 7
@@ -15,11 +15,11 @@ format:
 /*| echo: false */
 
 div.sourceCode {
-  font-size: 1.4em;
+  font-size: 1em;
 }
 
 div.cell-output-stdout {
-  font-size: 1.4em;
+  font-size: 1em;
 }
 ```
 
@@ -110,8 +110,8 @@ Action
 Resolution
 :::
 
-:::{.fragment .smaller}
-Challenge and resolution are the most important parts.
+:::{.fragment}
+<small>Challenge and resolution are the most important parts.</small>
 :::
 
 ## Wood working as a story
@@ -198,14 +198,67 @@ Development
 :::
 
 :::{.fragment}
-But soon I realised that building with recycled native timber didn't just meet a need: it was also a new hobby with lots to learn, lots of toys to play with and lots of pleasure both during building and enjoyment afterwards.
-:::{.fragment}
+But I soon realised that building with recycled native timber didn't just meet a need: it was also a new hobby with lots to learn, lots of toys to play with and lots of pleasure both during building and enjoyment afterwards.
+:::
 
 # Telling a story with figures
 
-## Example: preprints in biology
+## Example: Preprints in biology
 
-# TODO: finish him!
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+arxiv <- read_csv(here::here("data/arxiv_submissions.csv"))
+labels <- arxiv |> slice_max(date) |>
+  filter(archive != "bioRxiv")
+arxiv |>
+  filter(archive != "bioRxiv") |>
+  ggplot() +
+  aes(x=date, y=count) +
+  geom_line(colour = 'steelblue') +
+  geom_text(data = labels, mapping=aes(label = archive), hjust=-0.1, vjust=0.5, col='steelblue') +
+  scale_y_log10(limits = c(30, 1500), expand = c(0, 0.03)) +
+  scale_x_date(expand=c(0,0.05)) +
+  theme_minimal(base_size=20) +
+  theme(plot.margin = margin(r = 2, unit="inch")) +
+  coord_cartesian(clip='off') +
+  labs(x=NULL, y="Pre-prints per month")
+```
+
+:::{.fragment}
+[**Challenge**]{.absolute right=350 bottom=250}
+:::
+
+## Example: Preprints in biology
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+arxiv <- read_csv(here::here("data/arxiv_submissions.csv")) |>
+  filter(count > 0)
+labels <- arxiv |> slice_max(date)
+arxiv |>
+  ggplot() +
+  aes(x=date, y=count, col=archive) +
+  geom_line() +
+  geom_text(data = labels, mapping=aes(label = archive), hjust=-0.1, vjust=0.5) +
+  scale_y_log10(limits = c(30, 1500), expand = c(0, 0.03)) +
+  scale_x_date(expand=c(0,0.05)) +
+  scale_colour_manual(values = c('steelblue', 'brown')) +
+  guides(colour = 'none') +
+  theme_minimal(base_size=20) +
+  theme(plot.margin = margin(r = 2, unit="inch")) +
+  coord_cartesian(clip='off') +
+  labs(x=NULL, y="Pre-prints per month")
+```
+
+:::{.fragment}
+[**Resolution**]{.absolute right=300 bottom=250}
+:::
 
 ## Example: Egg prices
 
@@ -215,13 +268,7 @@ TODO: Finish him!
 
 TODO: Finish him!
 
-## The ggplot2 recipe
-
-1. Create a chart with `ggplot2()`
-2. Assign some data to the chart with `data=foo`, i.e. `ggplot2(data=foo)`
-3. Define the mapping from features of the chart to variables/columns in the data with `aes()`
-4. Choose which type of geometry to use with `geom_*()`.
-
+# Labelling
 
 ## Labelling
 

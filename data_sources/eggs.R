@@ -6,18 +6,17 @@ library(tidyverse)
 
 prices <- read_csv("data_sources/raw/selected-price-indexes-may-2026.csv")
 
-prices |>
-  filter(str_detect("Eggs", Series_title_1)) |>
-  print(n=200)
+eggs <- prices |>
+  filter(str_detect(Series_title_1, "Eggs,")) |>
+  mutate(month = ym(as.character(Period))) |>
+  select(month, price = Data_value, product = Series_title_1) |>
+  mutate(price = if_else(str_detect(product, "6 pack"), price*10/6, price)) |>
+  mutate(product = fct_recode(product,
+                              Standard = "Eggs, dozen",
+                              `Free range` = "Eggs, free range, 6 pack"))
 
-arxiv <- read_csv("data_sources/raw/get_monthly_submissions.csv") |>
-  mutate(month = ym(month)) |>
-  select(month, arxiv=submissions)
-biorxiv <- read_csv("data_sources/raw/biorxiv.csv") |>
-  mutate(month = my(Month)) |>
-  select(month, biorxiv=`New Papers`)
+write_csv(eggs, "data/eggs.csv")
 
-biorxiv 
-both <- arxiv |> full_join(biorxiv, by=join_by(month))
-
-write_csv(both, "data/arxiv_submissions.csv")
+ggplot(eggs) +
+  aes(x=month, y=price, col=product) +
+  geom_line()
