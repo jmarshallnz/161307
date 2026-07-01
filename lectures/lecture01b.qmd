@@ -262,11 +262,59 @@ arxiv |>
 
 ## Example: Egg prices
 
-TODO: Finish him!
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+eggs <- read_csv(here::here("data/eggs.csv"))
+labels <- eggs |> slice_max(month)
+base <- eggs |>
+  ggplot() +
+  aes(x=month, y=price, col=product, group=product) +
+  geom_line(col='black', linewidth=1.5) +
+  geom_line(linewidth=1) +
+  geom_text(data = labels, mapping=aes(label = product), hjust=-0.1, vjust=0.5) +
+  scale_y_continuous(limits = c(0, 13.5), expand = c(0, 0.03), labels=scales::label_dollar()) +
+  scale_x_date(expand=c(0,0.05)) +
+  scale_colour_manual(values = c('black', 'gold')) +
+  guides(colour = 'none') +
+  theme_minimal(base_size=20) +
+  theme(plot.margin = margin(r = 2, unit="inch"),
+        plot.caption = element_text(size=rel(0.6))) +
+  coord_cartesian(clip='off') +
+  labs(x=NULL, y="Price per dozen",
+       caption="Free range price scaled from 6 pack to equivalent dozen assuming two free eggs")
+base
+```
+
+:::{.fragment}
+[**Challenge**]{.absolute right=200 bottom=250}
+:::
+
+## Example: Egg prices
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+eggs <- read_csv(here::here("data/eggs.csv"))
+labels <- eggs |> slice_max(month)
+base +
+  geom_vline(xintercept = ymd('2023-01-01'), col='grey50', linewidth=4,
+             alpha=0.5) +
+  annotate('text', x=ymd('2023-01-01'), y=1, label="Battery caging banned", hjust=-0.03,
+           col='grey50')
+
+```
+
+:::{.fragment}
+[**Resolution?!?**]{.absolute right=200 bottom=250}
+:::
 
 ## Example: Sheep numbers
 
-TODO: Finish him!
 
 # Labelling
 
