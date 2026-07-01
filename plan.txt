@@ -18,8 +18,8 @@ Lectures:
 
 Week 1a
 
-Intro to ggplot, aesthetics
-Data wrangling
+Intro to ggplot, aesthetics DONE
+Data wrangling DONE
 
 Week 1b
 
