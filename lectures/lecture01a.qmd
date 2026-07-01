@@ -13,6 +13,8 @@ format:
 ---
 
 ```{css}
+/*| echo: false */
+
 div.sourceCode {
   font-size: 1.4em;
 }
@@ -22,10 +24,8 @@ div.cell-output-stdout {
 }
 ```
 
-##
-
 ```{r}
-#| setup: true
+#| echo: false
 
 library(tidyverse)
 theme_set(theme_gray(base_size=16))
@@ -37,9 +37,12 @@ theme_set(theme_gray(base_size=16))
 
 ## Data for today
 
-[Figure.nz](https://figure.nz) has data on agriculture production in Aotearoa NZ from 1935 and population from 1937:
+[Figure.nz](https://figure.nz) has data on agriculture production in Aotearoa NZ from 1935:
 
 [https://figure.nz/table/NteyKZu48ZHuqab1](https://figure.nz/table/NteyKZu48ZHuqab1)
+
+And also population data from 1937:
+
 [https://figure.nz/table/83PJnWFeJehqJYaS](https://figure.nz/table/83PJnWFeJehqJYaS)
 
 ::: aside
@@ -63,6 +66,31 @@ ag_production
 population <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/nz_population.csv")
 population
 ```
+
+##
+
+```{r sheep_vs_humans_final}
+#| echo: false
+#| fig.width: 16
+#| fig.height: 9
+ag_production |>
+  left_join(population, by=join_by(year)) |>
+  filter(animal == "Sheep",
+         !is.na(population)) |>
+  mutate(ratio = value/population) |>
+  ggplot() +
+  aes(x=year, y=ratio) +
+  geom_line(col = "purple", linewidth=2) +
+  geom_hline(yintercept = 1, linewidth=1, linetype='dotted', col='grey40') +
+  annotate(geom='text', x=1935, y=1, label='1 sheep per person', vjust=-0.3, col='grey40', hjust=0) +
+  scale_y_continuous(limits = \(y) range(y, 1)) +
+  labs(x = NULL,
+       y = "Sheep per person",
+       title = "Gap between people and sheep rapidly closing") +
+  theme_minimal(base_size=32)
+```
+
+# ggplot2
 
 ## The ggplot2 recipe
 
@@ -189,7 +217,7 @@ ggplot(data=ag_production) +
 
 `colour=animal` maps the colour aesthetic to the `animal` column.
 
-Note it automatically supplies a *scale*, in this case a legend or **guide**.
+Note it automatically supplies a **scale**, in this case a legend or **guide**.
 
 `x` and `y` also have scales!
 :::
@@ -253,9 +281,6 @@ If there are no groups, all lines will be joined up.
 
 ::::
 
-
-::::
-
 ## Groups are important
 
 :::: {.columns}
@@ -282,73 +307,6 @@ But it has no scale or guide.
 
 ::::
 
-## Labelling
-
-:::: {.columns}
-
-::: {.column width="50%"}
-```{r gg9}
-#| eval: false
-ggplot(data=ag_production) +
-  aes(x=year, y=value, colour=animal) +
-  geom_line() +
-  labs(x = "Year",
-       y = "Number of animals",
-       colour = "Animal")
-```
-
-The `labs()` command allows you to override the default labels.
-
-The parameters it takes are the same as aesthetics.
-
-:::
-
-::: {.column width="50%"}
-```{r}
-#| echo: false
-#| ref.label: "gg9"
-```
-:::
-
-::::
-
-## Label dictionary
-
-:::: {.columns}
-
-::: {.column width="50%"}
-```{r gg10}
-#| eval: false
-
-labels = c(year = "Year",
-           animal = "Animal",
-           value = "Number of Animals")
-
-ggplot(data=ag_production) +
-  aes(x=year, y=value, colour=animal) +
-  geom_line() +
-  labs(dictionary = labels)
-```
-
-A label dictionary is a named vector mapping the columns
-in your data to the label you want to use.
-
-This can be useful for consistency across multiple plots.
-:::
-
-::: {.column width="50%"}
-```{r}
-#| echo: false
-#| ref.label: "gg10"
-```
-:::
-
-::::
-
-::: aside
-Recall the `c()` function combines multiple entries into a single vector.
-:::
-
 ## The grammar of graphics
 
 ggplot2 is based on the Grammar of Graphics defined by Leland Wilkinson in 1999.
@@ -357,6 +315,7 @@ In the same way that a grammar defines the structures and composition of a langu
 
 Most widely used graphics packages for charting have been informed by this idea.
 
+::: {.fragment}
 The grammar in ggplot2 breaks down a chart into:
 
 - Data
@@ -366,27 +325,45 @@ The grammar in ggplot2 breaks down a chart into:
 - Statistics
 - Coordinates
 - Themes
+:::
 
 ## Data
 
-The data 'layer' in `ggplot2` needs to be **tidy**. That is, you need to ensure that each observation is in its own row and each variable is in its own column.
+The data 'layer' in `ggplot2` needs to be **tidy**. That is, you need to ensure that
 
-The `ag_production` data are tidy in **long form**: each row represents a single observation the count (`value`) of `animal` in a particular `year`.
+- each observation is in its own row and
+- each variable is in its own column.
 
-However, we could also present these data in **wide form** where each animal has its own column instead:
+::: {.fragment}
+The `ag_production` data are tidy:
+
+- there are three variables (`year`, `animal`, `value`) in separate columns.
+- each row represents a single observation: the count (`value`) of `animal` in a particular `year`.
+:::
+
+## Data
+
+We could also present these data in **wide form** where each animal has its own column instead:
 
 ```{r}
-ag_wide <- ag_production |> pivot_wider(names_from=animal, values_from=value) |>
+ag_production |> pivot_wider(names_from=animal, values_from=value) |>
   filter(year > 1970)
 ```
 
-It's the same data, just formatted the other way around. For charting though, it probably doesn't make sense to plot the `Sheep` column against the `Goats` column directly: both are changing through time, and having time be on the `x` axis is likely sensible!
+It's the same data, just formatted the other way around. But if we want to chart both `Sheep` and `Goats` we need the counts to be in a single column for `y`.
 
 ## Aesthetics
 
 Aesthetics are features of the plot that allow us to distinguish one observation from another.
 
-We've already seen position aesthetics (`x` and `y`) as well as the `colour` and `group` aesthetics. Others are `shape`, `size`, `alpha` (transparency) `linewidth` and `linetype`.
+The most common aesthetics are:
+
+- positions `x`, `y`
+- colours `colour`, `fill`
+- point style `shape`, `size`
+- line style `linewidth`, `linetype`
+- transparency `alpha`
+- grouping `group`
 
 ## Aesthetics
 
@@ -395,12 +372,16 @@ We've already seen position aesthetics (`x` and `y`) as well as the `colour` and
 ::: {.column width="50%"}
 ```{r gg11}
 #| eval: false
-ggplot(data=ag_production) +
+ag_production |>
+  filter(animal != "Goats") |>
+  ggplot() +
   aes(x=year, y=value, shape=animal) +
   geom_point()
 ```
 
 `shape` can be useful when we have a relatively small number of groups.
+
+By default it is limited to 6 groups only.
 :::
 
 ::: {.column width="50%"}
@@ -445,8 +426,12 @@ ggplot(data=ag_production) +
 ::: {.column width="50%"}
 ```{r gg13}
 #| eval: false
-ggplot(data=ag_production) +
-  aes(x=year, y=value, colour=animal, shape=animal) +
+ag_production |>
+  filter(animal != "Goats") |>
+  ggplot() +
+  aes(x=year, y=value,
+      colour=animal,
+      shape=animal) +
   geom_point()
 ```
 
@@ -471,7 +456,8 @@ You can combine aesthetics and the guides will try and combine as well.
 ```{r gg14}
 #| eval: false
 ggplot(data=ag_production) +
-  aes(x=year, y=value, linewidth=animal) +
+  aes(x=year, y=value,
+      linewidth=animal) +
   geom_line()
 ```
 
@@ -487,7 +473,6 @@ Line geometries can be distinguished using width and line type.
 
 ::::
 
-
 ## Aesthetics
 
 :::: {.columns}
@@ -496,7 +481,8 @@ Line geometries can be distinguished using width and line type.
 ```{r gg15}
 #| eval: false
 ggplot(data=ag_production) +
-  aes(x=year, y=value, linetype=animal) +
+  aes(x=year, y=value,
+      linetype=animal) +
   geom_line()
 ```
 
@@ -508,6 +494,467 @@ Line geometries can be distinguished using width and line type.
 #| echo: false
 #| ref.label: "gg15"
 ```
+:::
+
+::::
+
+## Setting vs mapping an aesthetic
+
+::: {.fragment}
+If we use an aesthetic to differentiate observations, we do so by **mapping** it to a column of data via `aes()`:
+
+```{r}
+#| eval: false
+ggplot(data) + aes(x=x, y=y, colour=variable) + geom_point()
+```
+
+In this case the colour of points will vary according to `variable`.
+
+:::
+
+::: {.fragment}
+We can also **set** the aesthetic properties of the geometries we include to be the same for all observations by specifying them as parameters to the `geom_*()` functions:
+
+```{r}
+#| eval: false
+ggplot(data) + aes(x=x, y=y) + geom_point(colour='pink')
+```
+
+In this case all points will be pink.
+
+:::
+
+## Setting vs mapping
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r set1}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value,
+      colour=animal) +
+  geom_line(linewidth=2)
+```
+
+`colour` is **mapped** to `animal`.
+
+`linewidth` is **set** to 2.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "set1"
+```
+:::
+
+::::
+
+## Setting vs mapping
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r set2}
+#| eval: false
+ggplot(data=ag_production) +
+  aes(x=year, y=value,
+      colour=animal) +
+  geom_point(size=3,
+             alpha=0.5)
+```
+
+`colour` is **mapped** to `animal`.
+
+`size` is set to 3.
+
+`alpha` is set to 0.5 (half transparent).
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| ref.label: "set2"
+```
+:::
+
+::::
+
+## Geometries and Statistics
+
+We've already seen two geometries: the point and line. ggplot2 includes about 50 or so.
+
+Many of them are refinements on others.
+
+- `geom_bar()` is the same as `geom_col()` but `bar` counts rows to compute `y`, whereas `col` assumes you have `y` already.
+
+- `geom_histogram()` is just a `geom_col()` as well, where the `y` aesthetic is computed again by counting (divide `x` range into bins, count within each bin).
+
+::: {.fragment}
+
+The difference between these is the **statistic** used.
+
+- `geom_col()` doesn't do anything with your data (the identity function).
+- `geom_bar()` first uses `stat_count()` to count things thus producing the `y`.
+- `geom_histogram()` uses `stat_bin()` to bin the `x` variable and then count within each bin.
+
+:::
+
+## Geometries and Statistics
+
+Each geometry has a default **statistic** function `stat_*()`.
+
+When your data are passed to a geometry, first the statistic is run, producing a new version of the data with additional columns for the computed statistics, along with updated aesthetic mappings.
+
+This is then passed to one of the base geometries (points, lines, bars etc)
+
+::: {.fragment}
+
+```{r}
+geom_histogram
+```
+
+:::
+
+## Geometries and Statistics
+
+Sometimes it's useful to utilise a different statistic, or a different computed value from a statistic in our charts.
+
+For example, `stat_bin()` for histograms computes `count` (the default `y`) as well as `density`, the probability of `x` being in a particular bin.
+
+We can override the default computed aesthetic `y` by using the `after_stat()` function.
+
+## Count histogram
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r gg16}
+#| eval: false
+ag_production |>
+  filter(animal == "Sheep") |>
+  ggplot() +
+  aes(x=value) +
+  geom_histogram()
+```
+
+The default histogram assigns `y` to the computed variable `count`.
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: false
+#| ref.label: 'gg16'
+```
+
+:::
+
+::::
+
+## Density histogram
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r gg17}
+#| eval: false
+ag_production |>
+  filter(animal == "Sheep") |>
+  ggplot() +
+  aes(x=value, y=after_stat(density)) +
+  geom_histogram()
+```
+
+We can choose a different computed value for `y` by using `after_stat()`.
+
+`after_stat()` implies that this value isn't available until after the statistic function has run.
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: false
+#| ref.label: 'gg17'
+```
+
+:::
+
+::::
+
+# Data wrangling
+
+## Data wrangling
+
+Recall that there are 5 key 'verbs' for wrangling data:
+
+- `filter()` for choosing rows/observations
+- `select()` for choosing columns/variables
+- `arrange()` for ordering rows/observations
+- `mutate()` for adding columns/variables
+- `summarise()` for computing summaries across multiple rows/observations
+
+## The pipe
+
+Recall that the pipe `|>` is pronounced "and then". We use it like this:
+
+```{r}
+#| eval: false
+object |> function(extra, parameters)
+```
+
+It takes the `object` on the left and inserts it as the first parameter to the `function()` on the right.
+
+::: {.fragment fragment-index=1}
+
+It is completely equivalent[^1] to:
+
+```{r}
+#| eval: false
+function(object, extra, parameters)
+```
+
+:::
+
+::: {.fragment fragment-index=2}
+
+The `dplyr` verbs all take a `data.frame` or `tibble` as their first argument and return `data.frame` or `tibble`[^2]. That way we can chain them together like this:
+
+```{r}
+#| eval: false
+ag_production |> filter(animal=="Sheep") |> arrange(desc(value))
+```
+
+:::
+
+[^1]: [This is done in the R parser, so no extra code is being run here to achieve this - both expressions are parsed identically.]{.fragment fragment-index=1}
+
+[^2]: [A `tibble` is a modern update of the `data.frame`.]{.fragment fragment-index=2}
+
+## `filter()`
+
+The `filter()` argument takes a boolean *expression* that returns true or false for each row in the dataset.
+
+The expression might be "is it equal to" using `==` or "is it greater than" with `>`. Or it might be something more complicated.
+
+```{r}
+ag_production |> filter(str_detect(animal, "Cattle"))
+```
+
+## `arrange()`
+
+We order rows with `arrange()`.
+
+Typically we'd pass it a column to order by.
+
+We can change to descending using the `desc()` helper:
+
+```{r}
+ag_production |> arrange(desc(value))
+```
+
+## Chaining together with the pipe
+
+To find the year with the most pigs:
+
+```{r}
+ag_production |> filter(animal == "Pigs") |>
+  arrange(desc(value))
+```
+
+## `select()`
+
+Select is used for choosing columns. The uses are mainly:
+
+- Presenting data in a table.
+- "Eye balling" data during interactive processing (e.g. what is in column 11?).
+- Janitor work on the data (dropping columns we don't care about).
+
+```{r}
+ag_production |> filter(animal == "Poultry") |>
+  select(year, value)
+```
+
+## `mutate()`
+
+We use `mutate()` to create new columns, often using existing columns in a computation.
+
+```{r}
+ag_production |> mutate(millions = round(value/1e6, 1))
+```
+
+## `mutate()`
+
+Often once we've used columns we might want to drop them.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+ag_production |>
+  mutate(millions = round(value/1e6, 1)) |>
+  select(-value)
+```
+:::
+
+::: {.column width="50%"}
+
+```{r}
+ag_production |>
+  mutate(millions = round(value/1e6, 1),
+         .keep = 'unused')
+```
+:::
+
+::::
+
+## `summarise()`
+
+We can `summarise()` the data by applying a summary function to all rows.
+
+```{r}
+ag_production |> summarise(max_animals = max(value),
+                           min_animals = min(value))
+```
+
+::: {.fragment}
+
+This summary isn't particularly useful though, as the `max_animals` will be from `Sheep` whereas the `min_animals` will be from something else.
+
+:::
+
+::: {.fragment}
+
+A more useful summary might be for just sheep:
+
+```{r}
+ag_production |> filter(animal == "Sheep") |>
+  summarise(max_sheep = max(value),
+            min_sheep = min(value))
+```
+
+:::
+
+## Grouping
+
+Even more useful would be to find the maximum and minimum number of animals for all animal types. As our data are tidy, we can do this by grouping by animal:
+
+```{r}
+ag_production |>
+  group_by(animal) |>
+  summarise(min_animals = min(value),
+            max_animals = max(value))
+```
+
+::: aside
+A shortcut for 'summarise by group' behaviour is `ag_production |> summarise(min_animals = min(value), .by=animal)`
+:::
+
+## Joining datasets
+
+What if we wanted to address the humans versus sheep question?
+
+We need to take our `ag_production` data and join it up with our `population` data.
+
+The most common join operation is
+
+```{r}
+#| eval: false
+data1 |> left_join(data2, by=join_by(key1, key2, ...))
+```
+
+where columns from a second dataset are added to the data on the left.
+
+- All rows of the left dataset are returned.
+
+- Rows are found in the second dataset based on matches in the `key` columns.
+
+- Columns (excluding the keys) from the second dataset are then added in.
+
+- If the second dataset doesn't have a match it'll be given an `NA` for those columns.
+
+- If the second dataset has multiple matches, then the corresponding rows are duplicated.
+
+## Joining datasets
+
+We join these datasets using `year` as the key:
+
+```{r}
+combined <- ag_production |> left_join(population, by=join_by(year))
+combined
+```
+
+## Joining datasets
+
+Notice that the combined data has `NA` values for years where there wasn't a match,and has repeated the `population` data across rows with the same `year` match:
+
+```{r}
+combined |> filter(year %in% c(1936, 1971))
+```
+
+Similarly, if `population` had two entries for 1971, they would both appear in the resulting data for each row in `ag_production`, resulting in 8 rows (4 lots of 2).
+
+## Sheep vs Humans
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r sheep_vs_humans}
+#| eval: false
+combined |>
+  filter(animal == "Sheep",
+         !is.na(population)) |>
+  mutate(ratio = value/population) |>
+  ggplot() +
+  aes(x=year, y=ratio) +
+  geom_line()
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: false
+#| ref.label: "sheep_vs_humans"
+```
+
+:::
+
+::::
+
+## Beast vs Human
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r beast_vs_humans}
+#| eval: false
+combined |>
+  filter(animal != "Sheep",
+         !is.na(population)) |>
+  mutate(ratio = value/population) |>
+  ggplot() +
+  aes(x=year, y=ratio) +
+  geom_line() +
+  facet_wrap(vars(animal))
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| echo: false
+#| ref.label: "beast_vs_humans"
+```
+
 :::
 
 ::::
