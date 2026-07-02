@@ -23,8 +23,8 @@ Data wrangling DONE
 
 Week 1b
 
-Telling a story
-Coordinate systems/axes
+Telling a story DONE
+Coordinate systems/axes DONE
 
 Week 2a
 
