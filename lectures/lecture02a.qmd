@@ -64,7 +64,7 @@ ggplot(animals) +
         panel.grid.minor = element_blank())
 ```
 
-## Angled labels are ugly
+## Long labels on angles?
 
 ```{r}
 #| fig.width: 10
@@ -75,14 +75,14 @@ ggplot(animals) +
   geom_col(width=0.6, fill='steelblue') +
   scale_y_continuous(expand=expansion(mult = c(0,0.05))) +
   labs(x=NULL, y="Number of animals (m)") +
-  annotate('text', x=7, y=25, label="nope", col='darkred', size=10) +
+  annotate('text', x=6.5, y=25, label="yeah nah", col='darkred', size=10) +
   theme(axis.ticks.x = element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 30, hjust=1))
 ```
 
-## Swap the axes instead
+## We have the power of horizontal bars
 
 ```{r}
 #| fig.width: 10
@@ -93,12 +93,801 @@ ggplot(animals) +
   geom_col(width=0.6, fill='steelblue') +
   scale_x_continuous(expand=expansion(mult = c(0,0.05))) +
   labs(y=NULL, x="Number of animals (m)") +
-  annotate('text', x=20, y=1, label="nice", col='green4', size=10) +
+  annotate('text', x=20, y=1, label="yeah nah yeah", col='green4', size=10) +
   theme(axis.ticks.y = element_blank(),
         panel.grid.major.y = element_blank(),
         panel.grid.minor = element_blank())
 ```
 
+## Points are an option
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: 'center'
+lego <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+sets_per_year <- lego |>
+  count(theme, year) |>
+  summarise(sets=median(n), .by=theme) |>
+  filter(sets > 5)
+ggplot(sets_per_year) +
+  aes(y=fct_reorder(theme, sets), x=sets) +
+  geom_point(col='steelblue', size=5) +
+  scale_x_continuous(limits=c(0, 51), expand=expansion(mult = c(0,0.05))) +
+  labs(y=NULL, x="Median sets per year") +
+#  annotate('text', x=20, y=1, label="yeah nah yeah", col='green4', size=10) +
+  theme(axis.ticks.y = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+## Bars should start at zero
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: 'center'
+lego <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+sets_per_year <- lego |>
+  count(theme, year) |>
+  summarise(sets=median(n), .by=theme) |>
+  filter(sets > 5)
+ggplot(sets_per_year) +
+  aes(y=fct_reorder(theme, sets), x=sets) +
+  geom_col(fill='steelblue', width=0.6) +
+  scale_x_continuous(limits=c(0, 51), expand=expansion(mult = c(0,0.05))) +
+  coord_cartesian(xlim=c(10, 51)) +
+  labs(y=NULL, x="Median sets per year") +
+  annotate('text', x=45, y=1, label="yeah nah", col='darkred', size=10) +
+  theme(axis.ticks.y = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+## Use points if zero is less important
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: 'center'
+ggplot(sets_per_year) +
+  aes(y=fct_reorder(theme, sets), x=sets) +
+  geom_point(col='steelblue', size=5) +
+  scale_x_continuous(limits=c(10, 51), expand=expansion(mult = c(0,0.05))) +
+  labs(y=NULL, x="Median sets per year") +
+  annotate('text', x=45, y=1, label="yeah nah yeah", col='green4', size=10) +
+  theme(axis.ticks.y = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+## Choose the 'right' order
+
+:::: {.columns}
+
+::: {.column}
+```{r order1}
+#| eval: false
+#| echo: true
+ggplot(sets_per_year) +
+  aes(y=theme,
+      x=sets) +
+  geom_col()
+```
+
+The default order is alphabetical.
+
+The `y` axis points up.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'order1'
+```
+:::
+
+::::
+
+## Choose the 'right' order
+
+:::: {.columns}
+
+::: {.column}
+```{r order2}
+#| eval: false
+#| echo: true
+ggplot(sets_per_year) +
+  aes(y=fct_reorder(theme, sets),
+      x=sets) +
+  geom_col()
+```
+
+`fct_reorder` will reorder the
+grouping variable by the measure.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'order2'
+```
+:::
+
+::::
 
 
+## Choose the 'right' order
 
+:::: {.columns}
+
+::: {.column}
+```{r order3}
+#| eval: false
+#| echo: true
+ggplot(sets_per_year) +
+  aes(x=fct_reorder(theme, sets),
+      y=sets) +
+  geom_col()
+```
+
+Ascending order not as good for `x`
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'order3'
+```
+:::
+
+::::
+
+## Choose the 'right' order
+
+:::: {.columns}
+
+::: {.column}
+```{r order4}
+#| eval: false
+#| echo: true
+ggplot(sets_per_year) +
+  aes(x=fct_rev(
+          fct_reorder(theme, sets)
+        ),
+      y=sets) +
+  geom_col()
+```
+
+`fct_rev` to reverse.
+
+Alternatively `fct_reorder(.desc=TRUE)`
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'order4'
+```
+:::
+
+::::
+
+## Grouped bars
+
+```{r}
+set_counts <- lego |>
+  count(theme, year, name = 'sets') |>
+  filter(year > 2015, year < 2021) |>
+  group_by(theme) |>
+  filter(sum(sets) > 30) |>
+  mutate(year = as_factor(year))
+options('ggplot2.discrete.fill' = scales::viridis_pal(option="rocket")(6))
+```
+
+:::: {.columns}
+
+::: {.column}
+```{r group1}
+#| eval: false
+#| echo: true
+ggplot(set_counts) +
+  aes(x=theme,
+      y=sets,
+      fill=year) +
+  geom_col()
+```
+
+Side by side often better
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'group1'
+```
+:::
+
+::::
+
+## Grouped bars
+
+
+:::: {.columns}
+
+::: {.column}
+```{r group2}
+#| eval: false
+#| echo: true
+ggplot(set_counts) +
+  aes(x=theme,
+      y=sets,
+      fill=year) +
+  geom_col(position='dodge')
+```
+
+Side by side often better
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'group2'
+```
+:::
+
+::::
+
+
+## Grouped bars
+
+:::: {.columns}
+
+::: {.column}
+```{r group3}
+#| eval: false
+#| echo: true
+ggplot(set_counts) +
+  aes(x=year,
+      y=sets,
+      fill=theme) +
+  geom_col(position='dodge')
+```
+
+Can swap `fill` and `x`
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'group3'
+```
+:::
+
+::::
+
+## Grouped bars
+
+:::: {.columns}
+
+::: {.column}
+```{r group4}
+#| eval: false
+#| echo: true
+ggplot(set_counts) +
+  aes(x=year,
+      y=sets) +
+  geom_col() +
+  facet_wrap(vars(theme))
+```
+
+Facetting is another option
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'group4'
+```
+:::
+
+::::
+
+## Counting first?
+
+In the above charts we utilised `geom_col()` as our data were already summarised into counts.
+
+::: {.fragment}
+If your data aren't summarised, then you can:
+
+::: {.incremental}
+- Summarise it first with `dplyr::count()`.
+
+- Use `geom_bar()` so that `stat_count()` does it for you.
+:::
+:::
+
+## Counting first?
+
+Consider the uncounted lego data for 2020:
+
+```{r}
+uncounted <- lego |> filter(year == 2020) |>
+  add_count(theme) |> filter(n > 6) |> select(set, name, theme)
+uncounted
+```
+
+## Counting first?
+
+:::: {.columns}
+
+::: {.column}
+```{r count1}
+#| eval: false
+#| echo: true
+ggplot(uncounted) +
+  aes(y=theme) +
+  geom_bar()
+```
+
+`geom_bar` uses `stat_count()` to count each `theme` to get `x`.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'count1'
+```
+:::
+
+::::
+
+## Counting first?
+
+:::: {.columns}
+
+::: {.column}
+```{r count2}
+#| eval: false
+#| echo: true
+ggplot(uncounted) +
+  aes(y=fct_infreq(theme)) +
+  geom_bar()
+```
+
+`fct_infreq()` will order by frequency.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'count2'
+```
+:::
+
+::::
+
+## Counting first?
+
+:::: {.columns}
+
+::: {.column}
+```{r count2b}
+#| eval: false
+#| echo: true
+ggplot(uncounted) +
+  aes(y=fct_rev(
+          fct_infreq(theme)
+        )) +
+  geom_bar()
+```
+
+Reversing is required for `y`.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'count2b'
+```
+:::
+
+::::
+
+## Counting first?
+
+:::: {.columns}
+
+::: {.column}
+```{r count3}
+#| eval: false
+#| echo: true
+uncounted |>
+  count(theme) |>
+  ggplot() +
+  aes(y=theme, x=n) +
+  geom_col()
+```
+
+Alternatively we can count first and use `geom_col()`
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'count3'
+```
+:::
+
+::::
+
+## Counting first?
+
+:::: {.columns}
+
+::: {.column}
+```{r count4}
+#| eval: false
+#| echo: true
+uncounted |>
+  count(theme) |>
+  ggplot() +
+  aes(y=fct_reorder(theme, n),
+      x=n) +
+  geom_col()
+```
+
+And use `fct_reorder()` for the count order.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'count4'
+```
+:::
+
+::::
+
+# Proportions
+
+## Proportions
+
+The traditional chart for proportions of a whole is the pie.
+
+::: {.fragment}
+The problems with a pie are two fold:
+
+::: {.incremental}
+- Humans are only good at large differences or simple fractions (1/2, 1/4).
+
+- "Hard" to do in `ggplot2`: use a bar with polar coordinates.
+:::
+
+:::
+
+::: {.fragment}
+Often a barchart (stacked or unstacked) is just as good. But not always!
+:::
+
+## Pie charts in ggplot2
+
+```{r}
+sets_2020 <- set_counts |> filter(year == 2020) |>
+  ungroup() |>
+  mutate(theme = fct_reorder(theme, sets))
+```
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pie1}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y = "YY",
+      fill=theme) +
+  geom_col()
+```
+
+Start with a stacked bar chart.
+
+Y axis is set to a single value so that `fill` stacks.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pie1'
+```
+:::
+
+::::
+
+## Pie charts in ggplot2
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pie2}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y = "YY",
+      fill=theme) +
+  geom_col() +
+  coord_polar()
+```
+
+Switch to polar coordinates.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pie2'
+```
+:::
+
+::::
+
+
+## Pie charts in ggplot2
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pie3}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y = "YY",
+      fill=theme) +
+  geom_col() +
+  coord_polar() +
+  scale_x_continuous(name=NULL,
+                   breaks=NULL) +
+  scale_y_discrete(name=NULL,
+                   breaks=NULL)
+```
+
+Drop the axis names and breaks.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pie3'
+```
+:::
+
+::::
+
+
+## Pie charts in ggplot2
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pie4}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y = "YY",
+      fill=theme) +
+  geom_col() +
+  coord_polar() +
+  scale_x_continuous(name=NULL,
+                   breaks=NULL) +
+  scale_y_discrete(name=NULL,
+                   breaks=NULL) +
+  theme(panel.grid=element_blank())
+```
+
+Remove panel grid.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pie4'
+```
+:::
+
+::::
+
+
+## Pie vs bar
+
+```{r}
+#| echo: false
+#| fig.width: 12
+#| fig.height: 7
+#| fig.align: 'center'
+library(patchwork)
+pie <- ggplot(sets_2020) +
+  aes(x=sets, y = "YY",
+      fill=theme) +
+  geom_col() +
+  coord_polar() +
+  scale_x_continuous(name=NULL,
+                   breaks=NULL) +
+  scale_y_discrete(name=NULL,
+                   breaks=NULL) +
+  theme(panel.grid=element_blank())
+
+bar <- ggplot(sets_2020) +
+  aes(x=sets, y=theme, fill=theme) +
+  geom_col() +
+  scale_x_continuous(expand=expansion(mult=c(0,0.05))) +
+  guides(fill='none') +
+  theme(panel.grid.major.y=element_blank(),
+        panel.grid.minor=element_blank()) +
+  labs(y=NULL, x = "Number of sets")
+
+pie + bar
+```
+
+## Making bars prettier
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pretty1}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y=theme) +
+  geom_col()
+```
+
+Start simple.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pretty1'
+```
+:::
+
+::::
+
+## Making bars prettier
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pretty2}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y=theme) +
+  geom_col() +
+  scale_x_continuous(
+    expand=expansion(mult=c(0,0.05))
+    )
+```
+
+Change `expand` so the axis is at 0.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pretty2'
+```
+:::
+
+::::
+
+## Making bars prettier
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pretty3}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y=theme, fill=theme) +
+  geom_col() +
+  scale_x_continuous(
+    expand=expansion(mult=c(0,0.05))
+    ) +
+  guides(fill='none')
+```
+
+Add some colour.
+
+Turn off the guide.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pretty3'
+```
+:::
+
+::::
+
+
+## Making bars prettier
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pretty4}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y=theme, fill=theme) +
+  geom_col() +
+  scale_x_continuous(
+    expand=expansion(mult=c(0,0.05))
+    ) +
+  guides(fill='none') +
+  labs(y=NULL, x = "Number of sets")
+```
+
+Improve the labels.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pretty4'
+```
+:::
+
+::::
+
+## Making bars prettier
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pretty5}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y=theme, fill=theme) +
+  geom_col() +
+  scale_x_continuous(
+    expand=expansion(mult=c(0,0.05))
+    ) +
+  guides(fill='none') +
+  labs(y=NULL, x = "Number of sets") +
+  theme(panel.grid.major.y=element_blank(),
+        panel.grid.minor=element_blank())
+```
+
+Tweak the theme to remove some of the grid.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pretty5'
+```
+:::
+
+::::
+
+
+## Making bars prettier
+
+:::: {.columns}
+
+::: {.column}
+
+```{r pretty6}
+#| eval: false
+#| echo: true
+ggplot(sets_2020) +
+  aes(x=sets, y=theme, fill=theme) +
+  geom_col(width=0.8) +
+  scale_x_continuous(
+    expand=expansion(mult=c(0,0.05))
+    ) +
+  guides(fill='none') +
+  labs(y=NULL, x = "Number of sets") +
+  theme(panel.grid.major.y=element_blank(),
+        panel.grid.minor=element_blank())
+```
+
+Reduce the bar width.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'pretty6'
+```
+:::
+
+::::

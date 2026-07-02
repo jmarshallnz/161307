@@ -28,7 +28,7 @@ Coordinate systems/axes DONE
 
 Week 2a
 
-Visualising amounts (barplots, ordering, proportions)
+Visualising amounts (barplots, ordering, proportions) DONE
 
 Week 2b
 
