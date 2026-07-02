@@ -1,0 +1,104 @@
+---
+title: "Amounts and proportions"
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    margin: 0.1
+    echo: false
+    message: false
+    fig-width: 7
+    fig-height: 7
+---
+
+## Amounts
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+theme_set(theme_minimal(base_size=20))
+
+ag_production <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/ag_production.csv")
+population <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/nz_population.csv")
+```
+
+Often we have data that are as simple as some amounts.
+
+:::{.fragment}
+
+:::: {.columns}
+
+::: {.column}
+**Example:** Number of production animals in 2025.
+:::
+
+:::{.column}
+```{r}
+animals <- 
+  ag_production |>
+  slice_max(year) |> select(-year) |>
+  mutate(value = value/1e6)
+
+knitr::kable(animals, digits=1)
+```
+:::
+
+::::
+
+:::
+
+## Bar charts are usually best
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: 'center'
+ggplot(animals) +
+  aes(x=fct_rev(fct_reorder(animal, value)), y=value) +
+  geom_col(width=0.6, fill='steelblue') +
+  scale_y_continuous(expand=expansion(mult = c(0,0.05))) +
+  labs(x=NULL, y="Number of animals (m)") +
+  theme(axis.ticks.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+## Angled labels are ugly
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: 'center'
+ggplot(animals) +
+  aes(x=fct_rev(fct_reorder(animal, value)), y=value) +
+  geom_col(width=0.6, fill='steelblue') +
+  scale_y_continuous(expand=expansion(mult = c(0,0.05))) +
+  labs(x=NULL, y="Number of animals (m)") +
+  annotate('text', x=7, y=25, label="nope", col='darkred', size=10) +
+  theme(axis.ticks.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 30, hjust=1))
+```
+
+## Swap the axes instead
+
+```{r}
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: 'center'
+ggplot(animals) +
+  aes(y=fct_reorder(animal, value), x=value) +
+  geom_col(width=0.6, fill='steelblue') +
+  scale_x_continuous(expand=expansion(mult = c(0,0.05))) +
+  labs(y=NULL, x="Number of animals (m)") +
+  annotate('text', x=20, y=1, label="nice", col='green4', size=10) +
+  theme(axis.ticks.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
+
+
+
