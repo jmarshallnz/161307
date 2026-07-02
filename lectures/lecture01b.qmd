@@ -173,11 +173,11 @@ Ending
 :::
 
 :::{.fragment}
-**Ending:** Our dining table is intended for camping and the chairs are plastic.
+**Ending:** There's still lots to do: our dining table is intended for camping and the chairs are plastic.
 :::
 
 
-## Another story structure: News paper articles
+## Another story structure: Newspaper articles
 
 :::{.fragment}
 Lead
@@ -198,7 +198,7 @@ Development
 :::
 
 :::{.fragment}
-But I soon realised that building with recycled native timber didn't just meet a need: it was also a new hobby with lots to learn, lots of toys to play with and lots of pleasure both during building and enjoyment afterwards.
+But I soon realised that building with recycled native timber didn't just meet a need: it was also a new hobby with lots to learn, lots of toys to play with and lots of fun during building and enjoyment afterwards.
 :::
 
 # Telling a story with figures
@@ -228,7 +228,7 @@ arxiv |>
 ```
 
 :::{.fragment}
-[**Challenge**]{.absolute right=350 bottom=250}
+[**Challenge**: why the flat line?]{.absolute right=10 bottom=150}
 :::
 
 ## Example: Preprints in biology
@@ -257,7 +257,7 @@ arxiv |>
 ```
 
 :::{.fragment}
-[**Resolution**]{.absolute right=300 bottom=250}
+[**Resolution**: A competitor emerged]{.absolute right=0 bottom=100}
 :::
 
 ## Example: Egg prices
@@ -289,7 +289,7 @@ base
 ```
 
 :::{.fragment}
-[**Challenge**]{.absolute right=200 bottom=250}
+[**Challenge**: big price jump?]{.absolute right=0 top=400}
 :::
 
 ## Example: Egg prices
@@ -299,7 +299,6 @@ base
 #| fig-width: 10
 #| fig-height: 6
 #| fig-align: 'center'
-eggs <- read_csv(here::here("data/eggs.csv"))
 labels <- eggs |> slice_max(month)
 base +
   geom_vline(xintercept = ymd('2023-01-01'), col='grey50', linewidth=4,
@@ -310,15 +309,100 @@ base +
 ```
 
 :::{.fragment}
-[**Resolution?!?**]{.absolute right=200 bottom=250}
+[**Resolution**: why did it<br />affect free range?!?]{.absolute right=10 top=400}
 :::
 
 ## Example: Sheep numbers
 
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+base <- ag_production |>
+  filter(animal == "Sheep") |>
+  mutate(value = value/1e6) |>
+  ggplot() +
+  aes(x=year, y=value) +
+  geom_line(col='royalblue', linewidth=1.5) +
+  scale_y_continuous(limits=c(0,71), expand = c(0, 0.03), breaks=seq(0,70,by=10)) +
+  scale_x_continuous(expand=c(0,0.05)) +
+  theme_minimal(base_size=20) +
+  labs(x=NULL, y="Millions of sheep") +
+  theme(panel.grid.minor.y = element_blank())
+base
+```
+
+:::{.fragment}
+[**Challenge**: why the drop?]{.absolute right=20 top=150}
+:::
+
+## Example: Sheep numbers
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+base +
+  geom_vline(xintercept = 1985.5, col='grey50', linewidth=4,
+             alpha=0.5) +
+  annotate('text', x=1985.5, y=3, label="Farmer subsidies removed", hjust=-0.03,
+           col='grey50')
+
+```
+
+:::{.fragment}
+[**Resolution**: Government reform]{.absolute right=0 bottom=200}
+:::
+
+## Telling a story with figures
+
+Keep in mind that
+
+::: {.incremental}
+- Every figure needs a clear purpose within the arc of the story (e.g. challenge, response).
+
+- A complete arc is difficult with just one figure! Usually requires at least two.
+
+- Stories work best in presentations or a series of figures in an article.
+
+- Simpler figures are better as simple stories are easier to grasp.
+:::
 
 # Labelling
 
 ## Labelling
+
+One of the ways we can help tell stories is with labels and annotation.
+
+:::{.fragment}
+Axis and guide labels need to be descriptive.
+:::
+
+:::{.fragment}
+```{r}
+#| eval: false
+my_plot + labs(x = NULL, # no need for an x label for dates/years/labelled categories
+               y = "My y axis scale (units)",
+               colour = "Colour guide")
+```
+:::
+
+:::{.fragment}
+Items within guides need to be descriptive as well!
+:::
+
+:::{.fragment}
+Either change in the data or use the `labels` parameter in `scale_*()`:
+```{r}
+#| eval: false
+my_plot + scale_colour_manual(labels = c("Adelie", "Chinstrap", "Gentoo"))
+```
+:::
+
+
+## Labelling example
 
 :::: {.columns}
 
@@ -348,7 +432,7 @@ The parameters it takes are the same as aesthetics.
 
 ::::
 
-## Label dictionary
+## Label dictionaries
 
 :::: {.columns}
 
@@ -384,3 +468,251 @@ This can be useful for consistency across multiple plots.
 ::: aside
 Recall the `c()` function combines multiple entries into a single vector.
 :::
+
+## Titles, captions
+
+Titles, subtitles and captions are an opportunity to provide context or story
+
+:::{.fragment}
+```{r}
+#| eval: false
+my_plot + labs(title = "Gap between people and sheep rapidly closing",
+               subtitle = "Sheep:Human ratio over time in Aotearoa New Zealand",
+               caption = "Data from Figure.NZ")
+```
+:::
+
+:::{.fragment}
+Adding some editorialising in figure titles is useful to help direct the reader to the key story idea.
+:::
+
+## Annotations
+
+:::{.fragment}
+`annotate()` can be used to add a single label or other geometry to a chart.
+:::
+
+:::{.fragment}
+`geom_vline()` and `geom_hline()` are also useful for pointing out key points.
+:::
+
+:::{.fragment}
+Both of these often require a bit of tuning to get the position correct.
+:::
+
+:::{.fragment}
+```{r}
+#| eval: false
+plot +
+  geom_vline(xintercept = ymd('2023-01-01'),
+             colour='grey50', linewidth=4,
+             alpha=0.5) +
+  annotate('text', x=ymd('2023-01-01'), y=1,
+           label="Battery caging banned", hjust=-0.03,
+           colour='grey50')
+```
+:::
+
+# Coordinates and scales
+
+## Most charts use Cartesian coordinates
+
+```{r}
+#| echo: false
+d <- tibble(x = c(-1,0,1), y=c(-1,0,2)) |>
+  mutate(label = paste0('(',x,',',y,')'), nudge_x = if_else(x > 0, 0.1, -0.1), nudge_y = if_else(y < 0, -0.1, 0.1),
+         hjust = if_else(x > 0, 0, 1), vjust = if_else(y < 0, 1, 0))
+ggplot(d) +
+  aes(x=x, y=y, label=label) +
+  geom_point(col='royalblue') +
+  geom_text(aes(nudge_x=nudge_x, nudge_y=nudge_y,
+                hjust=hjust, vjust=vjust), size=15/.pt) +
+  theme_minimal(base_size=20) +
+  coord_fixed(xlim=c(-2,2), ylim=c(-2,3)) +
+  labs(x = 'x axis', y = 'y axis')
+```
+
+## Units don't matter in cartesian coordinates
+
+::::{.columns}
+
+:::{.column width="50%"}
+```{r}
+#| echo: false
+ag_production |>
+  filter(animal == "Sheep") |>
+  ggplot() +
+  aes(x=year, y=value) +
+  geom_line(colour='royalblue') +
+  labs(y = "Number of sheep") +
+  theme_minimal(base_size=20)
+```
+:::
+
+:::{.column width="50%"}
+
+:::{.fragment}
+```{r}
+#| echo: false
+sheep_chart <- ag_production |>
+  filter(animal == "Sheep") |>
+  mutate(value = value/1e6) |>
+  ggplot() +
+  aes(x=year, y=value) +
+  geom_line(colour='royalblue') +
+  labs(y = "Millions of sheep") +
+  theme_minimal(base_size=20)
+sheep_chart
+```
+:::
+
+:::
+
+::::
+
+## Aspect ratio may not matter
+
+```{r}
+#| echo: false
+#| fig_width: 10
+#| fig_height: 7
+library(patchwork)
+(sheep_chart + sheep_chart + plot_layout(widths=c(1,2))) / sheep_chart  & theme_minimal(base_size=16)
+```
+
+## Logarithmic scales
+
+Some measures change **multiplicatively** rather than additively.
+
+:::{.fragment}
+You start with just two rabbits, but soon you've got 4, then 8, then 16...
+:::
+
+:::{.fragment}
+There's a constant increase but it is done through multiplying.
+:::
+
+## Log scales{.smaller}
+
+Visualising doubling: 1, 2, 4, 8, 16
+
+::: {.fragment style="text-align: center;"}
+Original data, linear scale
+```{r}
+#| echo: false
+#| fig.height: 1
+#| fig.width: 8
+#| fig.align: 'center'
+d <- tibble(x=2^(0:4))
+ggplot(d) +
+  aes(x=x) +
+  geom_point(y=0, col='royalblue') +
+  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
+  scale_x_continuous(limits=c(0,16)) +
+  theme_minimal(base_size=16)
+```
+:::
+
+::: {.r-stack}
+
+::: {.fragment .fade-in-then-out style="text-align: center;"}
+Log base 2 data, linear scale
+```{r}
+#| echo: false
+#| fig.height: 1
+#| fig.width: 8
+d <- tibble(x=2^(0:4))
+ggplot(d) +
+  aes(x=log2(x)) +
+  geom_point(y=0, col='royalblue') +
+  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
+  scale_x_continuous(limits=c(0,4)) +
+  theme_minimal(base_size=16) +
+  labs(x = expression(log[2](x)))
+```
+:::
+
+:::{.fragment style="text-align: center;"}
+Log base 10 data, linear scale
+```{r}
+#| echo: false
+#| fig.height: 1
+#| fig.width: 8
+d <- tibble(x=2^(0:4))
+ggplot(d) +
+  aes(x=log10(x)) +
+  geom_point(y=0, col='royalblue') +
+  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
+  scale_x_continuous(limits=c(0,log10(16))) +
+  theme_minimal(base_size=16) +
+  labs(x = expression(log[10](x)))
+```
+:::
+
+:::
+
+:::{.fragment style="text-align: center;"}
+Original data, log scale
+```{r}
+#| echo: false
+#| fig.height: 1
+#| fig.width: 8
+#| fig.align: 'center'
+d <- tibble(x=2^(0:4))
+ggplot(d) +
+  aes(x=x) +
+  geom_point(y=0, col='royalblue') +
+  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
+  scale_x_log10(limits=c(1,16), breaks=c(1,2,4,8,16)) +
+  theme_minimal(base_size=16)
+```
+:::
+
+## Log scales
+
+:::: {.r-stack}
+
+::: {.fragment}
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+base <- 
+  arxiv |> filter(archive == "bioRxiv") |>
+  ggplot() +
+  aes(x=date, y=count) +
+  geom_line(colour='brown', linewidth=1.5) +
+  theme_minimal(base_size=20) +
+  labs(x=NULL, y="BioRxiv submissions")
+base
+```
+:::
+
+::: {.fragment}
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+base +
+  scale_y_log10()
+```
+:::
+
+::::
+
+## Polar coordinates
+
+Polar coordinates are suited where data are 'circular' in some way.
+
+:::{.incremental}
+- hourly or within-day patterns
+
+- daily or within week patterns
+
+- yearly patterns (seasonality)
+
+- longitude (maps!)
+:::
+
+## Solar generation in Palmerston North
+
