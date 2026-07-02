@@ -716,3 +716,30 @@ Polar coordinates are suited where data are 'circular' in some way.
 
 ## Solar generation in Palmerston North
 
+```{r}
+#| echo: false
+solar <- read_csv(here::here("data/solar_by_month.csv")) |>
+  mutate(produced = produced/1e3) |>
+  mutate(month = as_factor(month)) |>
+  mutate(month_num = as.integer(month))
+
+solar <- solar |> bind_rows(solar |> slice(1) |> mutate(month_num = month_num+12))
+
+ggplot(solar) +
+  aes(x=month_num, y=produced) +
+  geom_line() +
+  scale_x_continuous(breaks=1:12, labels=month.abb) +
+  scale_y_continuous(limits=c(0,1300)) +
+  labs(x=NULL, y="Solar production (KWh)")
+```
+
+```{r}
+#| echo: false
+ggplot(solar) +
+  aes(x=month_num, y=produced) +
+  geom_line() +
+  scale_x_continuous(breaks=1:12, labels=month.abb) +
+  scale_y_continuous(limits=c(0,1300)) +
+  labs(x=NULL, y="Solar production (KWh)") +
+  coord_polar()
+```
