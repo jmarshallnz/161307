@@ -19,3 +19,11 @@ gam(produced ~ s(day), data=foo) |>
   filter(wch == 2) |>
   select(produced, smoothed=.fitted, day) |>
   write_csv("data/solar_by_day.csv")
+
+solar |>
+  mutate(date = mdy_hm(`Date/Time`)) |>
+  mutate(day = date(date)) |>
+  group_by(day) |>
+  summarise(produced = sum(`Energy Produced (Wh)`),
+            consumed = sum(`Energy Consumed (Wh)`)) |>
+  write_csv("data/solar_surplus.csv")
