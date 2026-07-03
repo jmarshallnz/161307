@@ -1,0 +1,361 @@
+---
+title: "Colours"
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    margin: 0.1
+    echo: false
+    message: false
+    fig-width: 7
+    fig-height: 7
+---
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+theme_set(theme_minimal(base_size=20))
+
+ag_production <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/ag_production.csv")
+population <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/nz_population.csv")
+```
+
+# Colour spaces
+
+## RGB colour space
+
+The default colour space for most computer things is RGB:
+
+- red R: amount of red, usually 0-255.
+- red G: amount of green, usually 0-255.
+- red B: amount of blue, usually 0-255.
+
+:::{.fragment}
+This is a strange scale that is hard to reason about.
+:::
+
+## RGB colour space
+
+:::{.incremental}
+- The 0-255 scale on each of the components is due to computers holding value in memory in bytes.
+
+- A byte is 8 binary bits of 0/1 so can represent $2^8=256$ different combinations (0 through 255).
+
+- Typically it is represented in **hexadecimal** or base 16, where the digits are 0-9 and A-F (for 10 through 15).
+
+- e.g. #FF007F would represent R=255, G=0, B=127.
+:::
+
+## RGB colour space
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+expand_grid(red=seq(0,256,by=32), green=seq(0,256,by=2), blue=seq(0,256,by=2)) |>
+  mutate(col=rgb(red,green,blue,maxColorValue=256)) |>
+  ggplot() +
+  aes(x=green, y=blue, fill=col) +
+  geom_tile() +
+  scale_fill_identity() +
+  facet_wrap(vars(red), labeller=label_both)
+```
+
+## HSV colour space
+
+Colours are described by their
+
+- Hue H (0-360): the hue (from a colour wheel).
+
+- Saturation S (0-1): the intensity of the colour for a given brightness.
+
+- Value V (0-1): how much light is emitted.
+
+:::{.fragment}
+Unlike RGB which is a cartesian colour space, HSV is a cylindrical space (polar coordinates for hue and saturation)
+:::
+
+## HSV colour space
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+library(colorspace)
+expand_grid(hue=seq(0,320,by=40)+20, saturation=seq(0,1,length.out=100), value=seq(0,1,length.out=100)) |>
+  mutate(col=HSV(hue, saturation, value) |> hex()) |>
+  ggplot() +
+  aes(x=value, y=saturation, fill=col) +
+  geom_tile() +
+  scale_fill_identity() +
+  facet_wrap(vars(hue), labeller=label_both)
+```
+
+## HLS colour space
+
+HLS is related to HSV: instead of 'value' it has 'lightness':
+
+- Hue H (0-360): the hue (from a colour wheel).
+
+- Lightness L (0-1): how bright it is compared to white.
+
+- Saturation S (0-1): the intensity of the colour for a given brightness.
+
+## HLS colour space
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+library(colorspace)
+expand_grid(hue=seq(0,320,by=40)+20, lightness=seq(0,1,length.out=100), saturation=seq(0,1,length.out=100)) |>
+  mutate(col=HLS(hue, lightness, saturation) |> hex()) |>
+  ggplot() +
+  aes(x=lightness, y=saturation, fill=col) +
+  geom_tile() +
+  scale_fill_identity() +
+  facet_wrap(vars(hue), labeller=label_both)
+```
+
+:::{.fragment}
+Encodes hue directly but HSV or HLS luminance doesn't match how we see colour.
+:::
+
+## LUV colour space
+
+LUV uses a non-linear encoding of colour in an **opponent** space:
+
+- Luminance L (0-100): amount of light emitted
+
+- Green/red balance u (-100 to 100): amount of green vs red
+
+- Blue/yellow balance v (-100 to 100): amount of blue vs yellow
+
+:::{.fragment}
+LUV's luminance operates very similarly to human perception of luminance.
+:::
+
+## LUV colour space
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+expand_grid(luminance=seq(10,90,length.out=9), u=seq(-120,120,length.out=100), v=seq(-120,120,length.out=100)) |>
+  mutate(col=LUV(luminance, u, v) |> hex()) |>
+  ggplot() +
+  aes(x=u, y=v, fill=col) +
+  geom_tile() +
+  scale_fill_identity() +
+  facet_wrap(vars(luminance), labeller=label_both) +
+  labs(x = 'green/red U', y='blue/yellow V')
+```
+
+:::{.fragment}
+The space is confined to what most devices can represent.
+:::
+
+## HCL color space
+
+The disadvantage of LUV is it doesn't have a single parameter for hue (colour).
+
+:::{.fragment}
+HCL solves this:
+
+- Hue H (0-360): the hue from a colour wheel.
+
+- Chroma C (approx 0-150): the colour intensity.
+
+- Luminance L (0-100): how bright the colour is compared with white.
+:::
+
+## HCL color space
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+expand_grid(hue=seq(0,320,length.out=9)+20, chroma=seq(0, 150), luminance=1:100) |>
+  mutate(col=hcl(hue, chroma, luminance, fixup=FALSE)) |>
+  ggplot() +
+  aes(x=chroma, y=luminance, fill=col) +
+  geom_tile() +
+  scale_fill_identity() +
+  facet_wrap(vars(hue), labeller=label_both)
+```
+
+:::{.fragment}
+This space is usually the most intuitive for humans to reason about.
+:::
+
+##
+
+<div>
+```{=html}
+<iframe src="https://shiny.massey.ac.nz/jcmarsha/hclcolorpicker" width=960 height=720></iframe>
+```
+</div>
+
+[`color_picker()`<br>from `colorspace`]{.absolute right=0 top=200}
+
+# Colour blindness
+
+## Colour blindness is a thing
+
+```{r}
+#| fig.width: 9
+#| fig.align: 'center'
+cols = darken(scales::brewer_pal(palette='RdYlGn')(5), amount=0.04)
+swatchplot(cols, cvd=TRUE, border='transparent', cex=2)
+```
+
+Dueteranomaly (red-green colour blind) is the most common.
+
+## Choose colours with this in mind
+
+```{r}
+#| fig.width: 9
+#| fig.align: 'center'
+cols = darken(scales::brewer_pal(palette='PiYG')(5), amount=0.04)
+swatchplot(cols, cvd=TRUE, border='transparent', cex=2)
+```
+
+Use `colorspace::swatchplot(cols, cvd=TRUE)` to simulate.
+
+# Colour scales
+
+## Purpose of colour
+
+:::{.incremental}
+- Distinguish categories (qualitative scales)
+
+- Represent numeric value (sequential)
+
+- Represent numeric value (diverging)
+
+- Highlight a set of observations.
+:::
+
+## Distinguishing categories
+
+```{r}
+animals <- ag_production |> filter(year > 1995) |>
+  mutate(value = value/1e6) |> filter(value > 3)
+```
+
+::::{.columns}
+
+:::{.column}
+```{r qual1}
+#| echo: true
+#| eval: false
+ggplot(animals) +
+  aes(x=year, y=value, col=animal)+
+  geom_line(linewidth=2) +
+  scale_color_brewer(palette="Set1")
+```
+
+"Set1" from Color Brewer
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'qual1'
+```
+:::
+
+::::
+
+## Distinguishing categories
+
+::::{.columns}
+
+:::{.column}
+```{r qual2}
+#| echo: true
+#| eval: false
+ggplot(animals) +
+  aes(x=year, y=value, col=animal)+
+  geom_line(linewidth=2) +
+  scale_color_brewer(palette="Dark2")
+```
+
+"Dark2" from Color Brewer
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'qual2'
+```
+:::
+
+::::
+
+
+## Distinguishing categories
+
+::::{.columns}
+
+:::{.column}
+```{r qual3}
+#| echo: true
+#| eval: false
+ggplot(animals) +
+  aes(x=year, y=value, col=animal)+
+  geom_line(linewidth=2) +
+  scale_color_manual(
+    values = c(Sheep = "#E69F00",
+               `Beef Cattle` = "#0072B2",
+               `Dairy Cattle` = "#009E73", 
+               Poultry = "#F0E442")
+  )
+```
+
+Picking some colours from the Okabe-Ito palette.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'qual3'
+```
+:::
+
+::::
+
+## Sequential values
+
+::::{.columns}
+
+:::{.column}
+```{r seq1}
+#| echo: true
+#| eval: false
+ggplot(animals) +
+  aes(x=year, y=value, col=animal)+
+  geom_line(linewidth=2) +
+  scale_color_manual(
+    values = c(Sheep = "#E69F00",
+               `Beef Cattle` = "#0072B2",
+               `Dairy Cattle` = "#009E73", 
+               Poultry = "#F0E442")
+  )
+```
+
+Picking some colours from the Okabe-Ito palette.
+:::
+
+:::{.column}
+```{r}
+#| ref.label: 'seq1'
+```
+:::
+
+::::
+
+## Diverging values
+
+```{r}
+#| fig-width: 7
+#| fig-height: 1
+#| fig-align: 'center'
+par(mar=rep(0,4))
+swatchplot(scales::brewer_pal(palette='RdYlBu')(7), mar=rep(0, 4), off=c(0.1, 0.1), border='transparent')
+```
+
+## Highlighting
