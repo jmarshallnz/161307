@@ -254,7 +254,7 @@ ggplot(animals) +
 "Set1" from Color Brewer
 :::
 
-:::{.column}
+:::{.column .absolute top=0 right=-5%}
 ```{r}
 #| ref.label: 'qual1'
 ```
@@ -279,7 +279,7 @@ ggplot(animals) +
 "Dark2" from Color Brewer
 :::
 
-:::{.column}
+:::{.column .absolute top=0 right=-5%}
 ```{r}
 #| ref.label: 'qual2'
 ```
@@ -300,19 +300,47 @@ ggplot(animals) +
   aes(x=year, y=value, col=animal)+
   geom_line(linewidth=2) +
   scale_color_manual(
-    values = c(Sheep = "#E69F00",
-               `Beef Cattle` = "#0072B2",
-               `Dairy Cattle` = "#009E73", 
-               Poultry = "#F0E442")
+    values=c(Sheep="#E69F00",
+             `Beef Cattle`="#0072B2",
+             `Dairy Cattle`="#009E73",
+             Poultry="#F0E442")
   )
 ```
 
 Picking some colours from the Okabe-Ito palette.
 :::
 
-:::{.column}
+:::{.column .absolute top=0 right=-5%}
 ```{r}
 #| ref.label: 'qual3'
+```
+:::
+
+::::
+
+## Sequential values
+
+```{r}
+births <- read_csv(here::here("data/births_tidy.csv"))
+```
+
+::::{.columns}
+
+:::{.column}
+```{r seq1}
+#| echo: true
+#| eval: false
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile()
+```
+
+Default is blue to black.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'seq1'
 ```
 :::
 
@@ -323,26 +351,124 @@ Picking some colours from the Okabe-Ito palette.
 ::::{.columns}
 
 :::{.column}
-```{r seq1}
+```{r seq2}
 #| echo: true
 #| eval: false
-ggplot(animals) +
-  aes(x=year, y=value, col=animal)+
-  geom_line(linewidth=2) +
-  scale_color_manual(
-    values = c(Sheep = "#E69F00",
-               `Beef Cattle` = "#0072B2",
-               `Dairy Cattle` = "#009E73", 
-               Poultry = "#F0E442")
-  )
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile() +
+  scale_fill_gradient(low='grey30', high='orange')
 ```
 
-Picking some colours from the Okabe-Ito palette.
+You can specify the end points of a gradient.
 :::
 
-:::{.column}
+:::{.column .absolute top=0 right=-5%}
 ```{r}
-#| ref.label: 'seq1'
+#| ref.label: 'seq2'
+```
+:::
+
+::::
+
+## Sequential values
+
+::::{.columns}
+
+:::{.column}
+```{r seq3}
+#| echo: true
+#| eval: false
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile() +
+  scale_fill_binned(low='grey30', high='orange',
+                    n.breaks=5)
+```
+
+Binning the guide can be useful.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'seq3'
+```
+:::
+
+::::
+
+
+## Sequential values
+
+::::{.columns}
+
+:::{.column}
+```{r seq4}
+#| echo: true
+#| eval: false
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile() +
+  scale_fill_viridis_c()
+```
+
+Viridis is colorblind safe.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'seq4'
+```
+:::
+
+::::
+
+## Sequential values
+
+::::{.columns}
+
+:::{.column}
+```{r seq5}
+#| echo: true
+#| eval: false
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile() +
+  scale_fill_viridis_b()
+```
+
+`viridis_b` for a binned version.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'seq5'
+```
+:::
+
+::::
+
+
+## Sequential values
+
+::::{.columns}
+
+:::{.column}
+```{r seq6}
+#| echo: true
+#| eval: false
+ggplot(births) +
+  aes(x=year, y=age, fill=births) +
+  geom_tile() +
+  scale_fill_viridis_c(option="mako")
+```
+
+There are 8 different options.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'seq6'
 ```
 :::
 
@@ -351,11 +477,97 @@ Picking some colours from the Okabe-Ito palette.
 ## Diverging values
 
 ```{r}
-#| fig-width: 7
-#| fig-height: 1
-#| fig-align: 'center'
-par(mar=rep(0,4))
-swatchplot(scales::brewer_pal(palette='RdYlBu')(7), mar=rep(0, 4), off=c(0.1, 0.1), border='transparent')
+solar <- read_csv(here::here("data/solar_surplus.csv")) |>
+  mutate(surplus = (produced-consumed)/1000)
 ```
 
+::::{.columns}
+
+:::{.column}
+```{r div1}
+#| echo: true
+#| eval: false
+ggplot(solar) +
+  aes(x=day, y=1, fill=surplus) +
+  geom_tile() +
+  scale_fill_distiller(palette="RdYlBu") +
+  scale_y_continuous(name=NULL,
+                     breaks=NULL)
+```
+
+`scale_fill_distiller` extends the ColorBrewer scales to continuous.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'div1'
+```
+:::
+
+::::
+
+
+## Diverging values
+
+::::{.columns}
+
+:::{.column}
+```{r div2}
+#| echo: true
+#| eval: false
+ggplot(solar) +
+  aes(x=day, y=1, fill=surplus) +
+  geom_tile() +
+  scale_fill_fermenter(
+    palette="RdYlBu",
+    n.breaks=5
+    ) +
+  scale_y_continuous(name=NULL,
+                     breaks=NULL)
+```
+
+`scale_fill_fermenter` bins colours.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'div2'
+```
+:::
+
+::::
+
 ## Highlighting
+
+::::{.columns}
+
+:::{.column}
+```{r high1}
+#| echo: true
+#| eval: false
+animals |>
+  mutate(highlight=fct_collapse(
+    animal, 
+    Sheep='Sheep',
+    other_level="Others")) |>
+  ggplot() +
+  aes(x=year, y=value,
+      group=animal,
+      col=highlight) +
+  geom_line(linewidth=2) +
+  scale_colour_manual(
+    values=c(Sheep = "darkorange",
+             Others="grey30")
+  )
+```
+
+Highlighting is best done with a new column.
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label: 'high1'
+```
+:::
+
+::::
