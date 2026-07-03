@@ -32,7 +32,7 @@ Visualising amounts (barplots, ordering, proportions) DONE
 
 Week 2b
 
-Distributions
+Distributions DONE
 
 Week 3a
 

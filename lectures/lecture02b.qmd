@@ -1,0 +1,677 @@
+---
+title: "Distributions"
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    margin: 0.1
+    echo: false
+    message: false
+    fig-width: 7
+    fig-height: 7
+---
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+theme_set(theme_minimal(base_size=20))
+
+ag_production <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/ag_production.csv")
+population <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/nz_population.csv")
+```
+
+## Distributions
+
+There are a number of options for visualising distributions:
+
+:::{.incremental}
+- Histograms
+- Densities
+- Boxplots
+- Violins (densities again)
+- Dots (jittered scatter, dot plot)
+:::
+
+:::{.fragment}
+Except for the jittered scatter, these display a **statistical summary** of the data.
+:::
+
+## Petrels caught as by-catch in NZ waters{.smaller}
+
+```{r}
+petrels <- read_csv("https://www.massey.ac.nz/~jcmarsha/227212/data/petrels.csv") |> select(year=Year, month=Month, area=Area, sex=Sex, wing_length=R.Wing.Lth, tarsus_length=R.Tarsus.Lth) |>
+  na.omit()
+petrels |>
+  slice_head(n=10) |>
+  knitr::kable()
+```
+## Histograms: Bin and count{.smaller}
+
+::::{.columns}
+
+```{r}
+petrel_counts <- petrels |> mutate(range = cut(wing_length, breaks=seq(340,420,by=5), labels=FALSE)) |>
+  mutate(`wing range` = paste(seq(340,415,by=5)[range], seq(345,420,by=5)[range], sep="-")) |>
+  count(`wing range`, range, name='count') |>
+  arrange(`wing range`)
+```
+
+:::{.column width="25%"}
+```{r}
+petrel_counts |> filter(range <= 9) |> select(-range) |> knitr::kable()
+```
+:::
+
+:::{.column width="25%"}
+```{r}
+petrel_counts |> filter(range > 9) |> select(-range) |> knitr::kable()
+```
+:::
+
+:::{.column width="50%"}
+
+:::{.fragment}
+
+```{r}
+#| fig.height: 5
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(breaks = seq(340,420,by=5),colour='white', fill='darkorange') +
+  scale_y_continuous(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)")
+```
+:::
+
+:::
+
+::::
+
+## Depends on chosen bins
+
+::::{.columns}
+
+:::{.column}
+```{r bin1}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(bins=50)
+```
+:::
+
+:::{.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bin1"
+```
+:::
+
+::::
+
+## Depends on chosen bins
+
+::::{.columns}
+
+:::{.column}
+```{r bin2}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(bins=25)
+```
+:::
+
+:::{.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bin2"
+```
+:::
+
+::::
+
+
+## Depends on chosen bins
+
+::::{.columns}
+
+:::{.column}
+```{r bin3}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(bins=5)
+```
+:::
+
+:::{.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bin3"
+```
+:::
+
+::::
+
+
+## Depends on chosen bins
+
+::::{.columns}
+
+:::{.column}
+```{r bin4}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(bins=16)
+```
+:::
+
+:::{.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bin4"
+```
+:::
+
+::::
+
+
+## Depends on chosen bins
+
+::::{.columns}
+
+:::{.column}
+```{r bin5}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(binwidth=5)
+```
+
+We can specify `binwidth` instead.
+:::
+
+:::{.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bin5"
+```
+:::
+
+::::
+
+
+## Depends on chosen bins
+
+::::{.columns}
+
+:::{.column}
+```{r bin6}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(binwidth=5,
+                 boundary=340)
+```
+
+We can specify `binwidth` instead.
+
+And position exactly with `boundary` or `center`.
+:::
+
+:::{.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bin6"
+```
+:::
+
+::::
+
+## Densities
+
+Kernel density estimates are a smooth alternative.
+
+:::{.fragment}
+A kernel density estimates the **probability density** by averaging the contribution of kernels centered on each data point.
+:::
+
+:::{.fragment}
+$$
+f(x) = \frac{1}{n}\sum_{i=1}^n K_h(x - x_i)
+$$
+:::
+
+:::{.fragment}
+The kernel $K_h$ is often a normal distribution with standard deviation $h$.
+:::
+
+:::{.fragment}
+The **bandwidth** $h$ determines the smoothness of the estimate
+:::
+
+## Densities
+
+:::: {.columns}
+
+::: {.column}
+```{r}
+#| fig.height: 5
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(breaks = seq(340,420,by=5),colour='white', fill='darkorange') +
+  scale_y_continuous(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)")
+```
+:::
+
+::: {.column}
+::: {.fragment}
+```{r}
+#| fig.height: 5
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_density(colour='white', fill='darkorange') +
+  scale_y_continuous(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)")
+```
+:::
+
+:::{.fragment}
+The scale is proportions (area is 1)
+:::
+
+:::
+
+::::
+
+## Choosing bandwidth
+
+:::: {.columns}
+
+::: {.column}
+```{r bw1}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_density(fill='pink',
+               adjust=0.5)
+```
+
+`adjust < 1` for less smoothing.
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bw1"
+```
+:::
+
+::::
+
+## Choosing bandwidth
+
+:::: {.columns}
+
+::: {.column}
+```{r bw2}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_density(fill='pink',
+               adjust=2)
+```
+
+`adjust > 1` for more smoothing.
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bw2"
+```
+:::
+
+::::
+
+## Choosing bandwidth
+
+:::: {.columns}
+
+::: {.column}
+```{r bw3}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_density(fill='pink')
+```
+
+The default is usually pretty good.
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "bw3"
+```
+:::
+
+::::
+
+## What about groups?
+
+:::: {.columns}
+
+::: {.column}
+```{r groups1}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=sex) +
+  geom_histogram(binwidth=5)
+```
+
+By default bars stack.
+
+Not what we want!
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups1"
+```
+:::
+
+::::
+
+## What about groups?
+
+:::: {.columns}
+
+::: {.column}
+```{r groups2}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=sex) +
+  geom_histogram(binwidth=5,
+                 position='identity')
+```
+
+Use 'identity' to position all bars at zero.
+
+One will be in front of the other.
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups2"
+```
+:::
+
+::::
+
+## What about groups?
+
+:::: {.columns}
+
+::: {.column}
+```{r groups3}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=sex) +
+  geom_histogram(binwidth=5,
+                 position='identity',
+                 alpha=0.4)
+```
+
+Use 'identity' to position all bars at zero.
+
+Possibly use transparency?
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups3"
+```
+:::
+
+::::
+
+## What about groups?
+
+:::: {.columns}
+
+::: {.column}
+```{r groups4}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=fct_rev(sex)) +
+  geom_histogram(binwidth=5,
+                 position='identity',
+                 alpha=0.8)
+```
+
+Use 'identity' to position all bars at zero.
+
+Reorder the groups?
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups4"
+```
+:::
+
+::::
+
+
+## What about groups?
+
+:::: {.columns}
+
+::: {.column}
+```{r groups5}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(binwidth=5) +
+  facet_wrap(vars(sex))
+```
+
+Using facets is probably best.
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups5"
+```
+:::
+
+::::
+
+## Grouped densities are better
+
+:::: {.columns}
+
+::: {.column}
+```{r groups6}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=sex) +
+  geom_density()
+```
+
+Densities don't stack.
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups6"
+```
+:::
+
+::::
+
+## Grouped densities are better
+
+:::: {.columns}
+
+::: {.column}
+```{r groups7}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=sex) +
+  geom_density(position='stack')
+```
+
+Stacking is not advised!
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups7"
+```
+:::
+
+::::
+
+## Grouped densities are better
+
+:::: {.columns}
+
+::: {.column}
+```{r groups8}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length, fill=sex) +
+  geom_density(alpha=0.6)
+```
+
+A bit of transparency will work.
+
+Densities are better than
+:::
+
+::: {.column}
+```{r}
+#| fig.height: 5
+#| ref.label: "groups8"
+```
+:::
+
+::::
+
+## Many groups don't work so well
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+ggplot(petrels) +
+  aes(x=wing_length, fill=area) +
+  geom_density(colour='white', alpha=0.5) +
+  scale_y_continuous(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)") +
+  scale_fill_viridis_d()
+```
+
+## Facets work better
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_density(colour='white', fill='darkorange') +
+  scale_y_continuous(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)") +
+  facet_wrap(vars(area))
+```
+
+## Boxplots instead?
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+ggplot(petrels) +
+  aes(x=area, y=wing_length) +
+  geom_boxplot(fill='orange', alpha=0.5) +
+  labs(x="Area", y="Wing length (mm)")
+```
+
+:::{.fragment}
+Side by side boxplots are excellent for many groups.
+:::
+
+## Violins?
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+ggplot(petrels) +
+  aes(x=area, y=wing_length) +
+  geom_violin(fill='orange', alpha=0.5) +
+  labs(x="Area", y="Wing length (mm)")
+```
+
+:::{.fragment}
+Violins are back to back densities per group.
+:::
+
+## Scatterplots?
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+ggplot(petrels) +
+  aes(x=area, y=wing_length) +
+  geom_point(position=position_jitter(height=0, width=0.3), alpha=0.6) +
+  labs(x="Area", y="Wing length (mm)")
+```
+
+:::{.fragment}
+Scatterplots with some horizontal jitter can work too.
+:::
+
+## Ridge lines
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+library(ggdist)
+ggplot(petrels) +
+  aes(x=wing_length, y=area) +
+  geom_slab(stat='slab', height=2, fill='darkorange', colour='white', trim=FALSE, density='unbounded') +
+  scale_y_discrete(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)", y="Area") +
+  theme(axis.text.y = element_text(vjust=0))
+```
+
+:::{.fragment}
+Offsetting densities on the y axis with `geom_slab()` from `ggdist`.
+:::
