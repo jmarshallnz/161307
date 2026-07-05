@@ -27,3 +27,14 @@ solar |>
   summarise(produced = sum(`Energy Produced (Wh)`),
             consumed = sum(`Energy Consumed (Wh)`)) |>
   write_csv("data/solar_surplus.csv")
+
+solar |>
+  mutate(date = mdy_hm(`Date/Time`)) |>
+  mutate(day = date(date)) |>
+  mutate(hour = hour(date)) |>
+  group_by(day, hour) |>
+  summarise(produced = sum(`Energy Produced (Wh)`),
+            consumed = sum(`Energy Consumed (Wh)`)) |>
+  write_csv("data/solar_hourly_surplus.csv")
+
+
