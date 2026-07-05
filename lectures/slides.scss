@@ -1,0 +1,15 @@
+/*-- scss:defaults --*/
+
+$body-bg: #ffffff;
+
+/*-- scss:rules --*/
+
+.reveal .slide p {
+  font-size: 0.9em;
+}
+
+/*-- a bit of breathing room around code blocks in columns
+     should probably do this with a custom code class? --*/
+.reveal .slide .column div.code-copy-outer-scaffold {
+  padding: 20px 9px;
+}

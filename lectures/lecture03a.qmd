@@ -2,6 +2,7 @@
 title: "Colours"
 format:
   revealjs:
+    theme: [solarized, slides.scss]
     width: 1280
     height: 720
     margin: 0.1
@@ -58,7 +59,8 @@ expand_grid(red=seq(0,256,by=32), green=seq(0,256,by=2), blue=seq(0,256,by=2)) |
   aes(x=green, y=blue, fill=col) +
   geom_tile() +
   scale_fill_identity() +
-  facet_wrap(vars(red), labeller=label_both)
+  facet_wrap(vars(red), labeller=label_both) +
+  theme(panel.grid.minor=element_blank())
 ```
 
 ## HSV colour space
@@ -87,7 +89,8 @@ expand_grid(hue=seq(0,320,by=40)+20, saturation=seq(0,1,length.out=100), value=s
   aes(x=value, y=saturation, fill=col) +
   geom_tile() +
   scale_fill_identity() +
-  facet_wrap(vars(hue), labeller=label_both)
+  facet_wrap(vars(hue), labeller=label_both) +
+  theme(panel.grid.minor=element_blank())
 ```
 
 ## HLS colour space
@@ -112,7 +115,8 @@ expand_grid(hue=seq(0,320,by=40)+20, lightness=seq(0,1,length.out=100), saturati
   aes(x=lightness, y=saturation, fill=col) +
   geom_tile() +
   scale_fill_identity() +
-  facet_wrap(vars(hue), labeller=label_both)
+  facet_wrap(vars(hue), labeller=label_both) +
+  theme(panel.grid.minor=element_blank())
 ```
 
 :::{.fragment}
@@ -145,7 +149,8 @@ expand_grid(luminance=seq(10,90,length.out=9), u=seq(-120,120,length.out=100), v
   geom_tile() +
   scale_fill_identity() +
   facet_wrap(vars(luminance), labeller=label_both) +
-  labs(x = 'green/red U', y='blue/yellow V')
+  labs(x = 'green/red U', y='blue/yellow V') +
+  theme(panel.grid.minor=element_blank())
 ```
 
 :::{.fragment}
@@ -177,7 +182,8 @@ expand_grid(hue=seq(0,320,length.out=9)+20, chroma=seq(0, 150), luminance=1:100)
   aes(x=chroma, y=luminance, fill=col) +
   geom_tile() +
   scale_fill_identity() +
-  facet_wrap(vars(hue), labeller=label_both)
+  facet_wrap(vars(hue), labeller=label_both) +
+  theme(panel.grid.minor=element_blank())
 ```
 
 :::{.fragment}
@@ -477,7 +483,7 @@ There are 8 different options.
 ## Diverging values
 
 ```{r}
-solar <- read_csv(here::here("data/solar_surplus.csv")) |>
+solar <- read_csv(here::here("data/solar_hourly_surplus.csv")) |>
   mutate(surplus = (produced-consumed)/1000)
 ```
 
@@ -488,11 +494,9 @@ solar <- read_csv(here::here("data/solar_surplus.csv")) |>
 #| echo: true
 #| eval: false
 ggplot(solar) +
-  aes(x=day, y=1, fill=surplus) +
+  aes(x=day, y=hour, fill=surplus) +
   geom_tile() +
-  scale_fill_distiller(palette="RdYlBu") +
-  scale_y_continuous(name=NULL,
-                     breaks=NULL)
+  scale_fill_distiller(palette="RdYlBu")
 ```
 
 `scale_fill_distiller` extends the ColorBrewer scales to continuous.
@@ -516,14 +520,12 @@ ggplot(solar) +
 #| echo: true
 #| eval: false
 ggplot(solar) +
-  aes(x=day, y=1, fill=surplus) +
+  aes(x=day, y=hour, fill=surplus) +
   geom_tile() +
   scale_fill_fermenter(
     palette="RdYlBu",
     n.breaks=5
-    ) +
-  scale_y_continuous(name=NULL,
-                     breaks=NULL)
+    )
 ```
 
 `scale_fill_fermenter` bins colours.
