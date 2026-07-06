@@ -2,9 +2,11 @@
 title: "Telling stories"
 format:
   revealjs:
+    theme: [solarized, slides.scss]
     width: 1280
     height: 720
     margin: 0.1
+    smaller: false
     echo: true
     message: false
     fig-width: 7
@@ -24,18 +26,6 @@ format:
 
 ## What is a story?
 
-```{css}
-/*| echo: false */
-
-div.sourceCode {
-  font-size: 1em;
-}
-
-div.cell-output-stdout {
-  font-size: 1em;
-}
-```
-
 ```{r}
 #| echo: false
 
@@ -51,23 +41,23 @@ population <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/nz_population
 ## Every story has an arc
 
 :::{.fragment}
-Opening
+**Opening**
 :::
 
 :::{.fragment}
-Challenge
+**Challenge**
 :::
 
 :::{.fragment}
-Action
+**Action**
 :::
 
 :::{.fragment}
-Resolution
+**Resolution**
 :::
 
 :::{.fragment}
-<small>Challenge and resolution are the most important parts.</small>
+(Challenge and resolution are the most important parts.)
 :::
 
 ## Wood working as a story
@@ -88,26 +78,50 @@ Resolution
 **Resolution:** We still buy cheap, poorly built furniture until I get round to it.
 :::
 
-## Other story structures (the action movie)
+## Story structures: newspaper articles
 
 :::{.fragment}
-Action
+**Lead**
 :::
 
 :::{.fragment}
-Background
+**Development**
+:::
+
+## Woodworking in this format
+
+:::{.fragment}
+**Lead:** Because I'm sick of poorly built furniture, I spent a bunch of money on tools and learnt to build things.
 :::
 
 :::{.fragment}
-Development
+**Development:** I started simple with just a couple of tools and bought laminated panels to build a bookshelf.
 :::
 
 :::{.fragment}
-Climax
+But I soon realised that building with recycled native timber didn't just meet a need: it was also a new hobby with lots to learn, lots of toys to play with and lots of fun during building and enjoyment afterwards.
+:::
+
+## Story structures: the action movie
+
+:::{.fragment}
+**Action**
 :::
 
 :::{.fragment}
-Ending
+**Background**
+:::
+
+:::{.fragment}
+**Development**
+:::
+
+:::{.fragment}
+**Climax**
+:::
+
+:::{.fragment}
+**Ending**
 :::
 
 ## Woodworking in this format
@@ -132,30 +146,6 @@ Ending
 **Ending:** There's still lots to do: our dining table is intended for camping and the chairs are plastic.
 :::
 
-
-## Another story structure: Newspaper articles
-
-:::{.fragment}
-Lead
-:::
-
-:::{.fragment}
-Development
-:::
-
-## Woodworking in this format
-
-:::{.fragment}
-**Lead:** Because I'm sick of poorly built furniture, I spent a bunch of money on tools and learnt to build things.
-:::
-
-:::{.fragment}
-**Development:** I started simple with just a couple of tools and bought laminated panels to build a bookshelf.
-:::
-
-:::{.fragment}
-But I soon realised that building with recycled native timber didn't just meet a need: it was also a new hobby with lots to learn, lots of toys to play with and lots of fun during building and enjoyment afterwards.
-:::
 
 # Telling a story with figures
 
@@ -201,6 +191,68 @@ base +
 
 :::{.fragment}
 [**Resolution**: Government reform]{.absolute right=0 bottom=200}
+:::
+
+## Example: Penguins
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+ggplot(penguins) +
+  aes(x=bill_len, y=bill_dep) +
+  geom_point(alpha=0.5, col='grey40') +
+  geom_smooth(method='lm', se = FALSE, linewidth=1, linetype='dashed', col='grey40') +
+  labs(x="Bill length (mm)", y="Bill depth (mm)") +
+  theme_minimal(base_size=20)
+```
+
+:::{.fragment}
+[**Challenge**: decreasing trend?]{.absolute right=10 bottom=150}
+:::
+
+
+## Example: Penguin species
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+ggplot(penguins) +
+  aes(x=bill_len, y=bill_dep, col=species) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', se = FALSE, linewidth=1, linetype='dashed', col='grey70') +
+  labs(x="Bill length (mm)", y="Bill depth (mm)") +
+  theme_minimal(base_size=20) +
+  scale_colour_manual(values=c("#E69F00","#0072B2","#009E73")) +
+  guides(col='none')
+```
+
+:::{.fragment}
+[**Challenge**: hmmm...]{.absolute right=10 bottom=150}
+:::
+
+## Example: Penguin species
+
+```{r}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6
+#| fig-align: 'center'
+ggplot(penguins) +
+  aes(x=bill_len, y=bill_dep, col=species, group=species) +
+  geom_point(alpha=0.5) +
+  geom_smooth(method='lm', se = FALSE, linewidth=1, linetype='dashed') +
+  labs(x="Bill length (mm)", y="Bill depth (mm)") +
+  theme_minimal(base_size=20) +
+  scale_colour_manual(values=c("#E69F00","#0072B2","#009E73")) +
+  guides(col='none')
+```
+
+:::{.fragment}
+[**Resolution**: increasing!]{.absolute right=10 bottom=150}
 :::
 
 ## Example: Preprints in biology
@@ -366,7 +418,7 @@ my_plot + scale_colour_manual(labels = c("Adelie", "Chinstrap", "Gentoo"))
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg9}
 #| eval: false
 ggplot(data=ag_production) +
@@ -383,7 +435,7 @@ The parameters it takes are the same as aesthetics.
 
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg9"
@@ -396,7 +448,7 @@ The parameters it takes are the same as aesthetics.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg10}
 #| eval: false
 
@@ -416,7 +468,7 @@ in your data to the label you want to use.
 This can be useful for consistency across multiple plots.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg10"
@@ -431,7 +483,7 @@ Recall the `c()` function combines multiple entries into a single vector.
 
 ## Titles, captions
 
-Titles, subtitles and captions are an opportunity to provide context or story
+Titles, subtitles and captions are an opportunity to provide context or story.
 
 :::{.fragment}
 ```{r}
@@ -443,7 +495,7 @@ my_plot + labs(title = "Gap between people and sheep rapidly closing",
 :::
 
 :::{.fragment}
-Adding some editorialising in figure titles is useful to help direct the reader to the key story idea.
+Editorialising in figure titles is useful to help direct the reader to the key story idea.
 :::
 
 ## Annotations
@@ -472,572 +524,3 @@ plot +
            colour='grey50')
 ```
 :::
-
-# Coordinates and scales
-
-## Most charts use Cartesian coordinates
-
-```{r}
-#| echo: false
-#| fig.width: 8
-#| fig.height: 6
-#| fig.align: 'center'
-d <- tibble(x = c(-2,0,1), y=c(-1,0,1)) |>
-  mutate(label = paste0('(',x,',',y,')'), nudge_x = if_else(x > 0, 0.1, -0.1), nudge_y = if_else(y < 0, -0.1, 0.1),
-         hjust = if_else(x > 0, 0, 1), vjust = if_else(y < 0, 1, 0))
-ggplot(d) +
-  aes(x=x, y=y, label=label) +
-  geom_point(col='royalblue') +
-  geom_text(aes(nudge_x=nudge_x, nudge_y=nudge_y,
-                hjust=hjust, vjust=vjust), size=15/.pt) +
-  theme_minimal(base_size=20) +
-  theme(panel.grid.minor = element_blank()) +
-  coord_fixed(xlim=c(-3,2), ylim=c(-2,2)) +
-  labs(x = 'x axis', y = 'y axis')
-```
-
-## Units don't matter in cartesian coordinates
-
-::::{.columns}
-
-:::{.column width="50%"}
-```{r}
-#| echo: false
-ag_production |>
-  filter(animal == "Sheep") |>
-  ggplot() +
-  aes(x=year, y=value) +
-  geom_line(colour='royalblue') +
-  labs(y = "Number of sheep") +
-  theme_minimal(base_size=20)
-```
-:::
-
-:::{.column width="50%"}
-
-:::{.fragment}
-```{r}
-#| echo: false
-sheep_chart <- ag_production |>
-  filter(animal == "Sheep") |>
-  mutate(value = value/1e6) |>
-  ggplot() +
-  aes(x=year, y=value) +
-  geom_line(colour='royalblue') +
-  labs(y = "Millions of sheep") +
-  theme_minimal(base_size=20)
-sheep_chart
-```
-:::
-
-:::
-
-::::
-
-## Aspect ratio may not matter either
-
-```{r}
-#| echo: false
-#| fig.width: 10
-#| fig.height: 7
-#| fig.align: 'center'
-library(patchwork)
-(sheep_chart + sheep_chart + plot_layout(widths=c(1,2))) / sheep_chart  & theme_minimal(base_size=16)
-```
-
-## Logarithmic scales
-
-Some measures change **multiplicatively** rather than additively.
-
-:::{.fragment}
-You start with just two rabbits, but soon you've got 4, then 8, then 16...
-:::
-
-:::{.fragment}
-There's a constant increase but it is done through multiplying.
-:::
-
-## Log scales{.smaller}
-
-Visualising doubling: 1, 2, 4, 8, 16
-
-::: {.fragment style="text-align: center;"}
-Original data, linear scale
-```{r}
-#| echo: false
-#| fig.height: 1
-#| fig.width: 8
-#| fig.align: 'center'
-d <- tibble(x=2^(0:4))
-ggplot(d) +
-  aes(x=x) +
-  geom_point(y=0, col='royalblue') +
-  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
-  scale_x_continuous(limits=c(0,16)) +
-  theme_minimal(base_size=16)
-```
-:::
-
-::: {.r-stack}
-
-::: {.fragment .fade-in-then-out style="text-align: center;"}
-Log base 2 data, linear scale
-```{r}
-#| echo: false
-#| fig.height: 1
-#| fig.width: 8
-d <- tibble(x=2^(0:4))
-ggplot(d) +
-  aes(x=log2(x)) +
-  geom_point(y=0, col='royalblue') +
-  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
-  scale_x_continuous(limits=c(0,4)) +
-  theme_minimal(base_size=16) +
-  labs(x = expression(log[2](x)))
-```
-:::
-
-:::{.fragment style="text-align: center;"}
-Log base 10 data, linear scale
-```{r}
-#| echo: false
-#| fig.height: 1
-#| fig.width: 8
-d <- tibble(x=2^(0:4))
-ggplot(d) +
-  aes(x=log10(x)) +
-  geom_point(y=0, col='royalblue') +
-  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
-  scale_x_continuous(limits=c(0,log10(16))) +
-  theme_minimal(base_size=16) +
-  labs(x = expression(log[10](x)))
-```
-:::
-
-:::
-
-:::{.fragment style="text-align: center;"}
-Original data, log scale
-```{r}
-#| echo: false
-#| fig.height: 1
-#| fig.width: 8
-#| fig.align: 'center'
-d <- tibble(x=2^(0:4))
-ggplot(d) +
-  aes(x=x) +
-  geom_point(y=0, col='royalblue') +
-  scale_y_continuous(limits=c(-0.1,0.1), breaks=0, labels="") +
-  scale_x_log10(limits=c(1,16), breaks=c(1,2,4,8,16)) +
-  theme_minimal(base_size=16)
-```
-:::
-
-## Log scales
-
-```{r}
-#| echo: false
-biorxiv <- arxiv |> filter(archive == "bioRxiv") |> filter(count > 0)
-```
-
-```{r}
-#| fig-width: 10
-#| fig-height: 6
-ggplot(biorxiv) + aes(x=date, y=count) + geom_line()
-```
-
-
-## Log scales
-
-```{r}
-#| fig-width: 10
-#| fig-height: 6
-ggplot(biorxiv) + aes(x=date, y=count) + geom_line() + scale_y_log10()
-```
-
-##  Transformations
-
-The log10 scale is implemented through the `transform` parameter of `scale_*_continuous()`.
-
-:::{.fragment}
-
-```{r}
-#| eval: false
-plot + scale_y_log10()
-```
-
-is equivalent to:
-
-:::
-
-:::{.fragment}
-```{r}
-#| eval: false
-plot + scale_y_continuous(transform=scales::log10_trans())
-```
-:::
-
-## Transformations
-
-The `transform` functions provide all the details needed for the transformation:
-
-:::{.incremental}
-- The function to transform from x.
-- The inverse to transform back to x.
-- The breaks that should be used (or a function for them) on an axes.
-- The domain that the transformation operates on.
-:::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-```{r bio1}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line()
-```
-
-The bioRxiv example.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio1"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio2}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date() +
-  scale_y_continuous()
-```
-
-Add `scale` functions.
-
-No change in figure as using defaults.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio2"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio3}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL # none!
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv"
-  )
-```
-
-The `name` parameter is another
-way to do `labs(x=,y=)`.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio3"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio4}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL, # none!
-    
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv",
-    limits = c(0,1600)
-  )
-```
-
-The `limits` parameter changes axis limits.
-
-Alternatives are `xlim()` and `ylim()`.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio4"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio5}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL # none!
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv",
-    limits = c(0,1600),
-    breaks = seq(0, 1600, by=400)
-  )
-```
-
-The `breaks` parameter sets major breaks.
-
-`seq(a, b, by=c)` produces a sequence
-from `a` to `b` with steps of size `c`.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio5"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio6}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL # none!
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv",
-    limits = c(0,1600),
-    breaks = seq(0, 1600, by=400),
-    labels = c("0/m", "400/m", "800/m",
-               "1,200/m", "1,600/m")
-  )
-```
-
-The `labels` parameter sets the labels for those breaks.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio6"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio7}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL # none!
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv",
-    limits = c(0,1600),
-    breaks = seq(0, 1600, by=400),
-    labels = function(x) paste0(x,"/m")
-  )
-```
-
-The `labels` parameter can be a function.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio7"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio8}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL # none!
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv",
-    limits = c(0,1600),
-    breaks = seq(0, 1600, by=400),
-    labels = scales::label_comma(
-      suffix="/m"
-      )
-  )
-```
-
-The `scales` package has lots of common labellers.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio8"
-```
-:::
-
-::::
-
-## Scale customisation
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```{r bio9}
-#| eval: false
-ggplot(biorxiv) +
-  aes(x=date, y=count) +
-  geom_line() +
-  scale_x_date(
-    name = NULL, # none!
-    date_breaks = "2 years"
-    ) +
-  scale_y_continuous(
-    name = "Preprints at bioRxiv",
-    limits = c(0,1600),
-    breaks = c(0, 400, 800, 1200, 1600),
-    labels = scales::label_comma(
-      suffix="/m"
-      )
-  )
-```
-
-Some scales have alternate versions of breaks.
-:::
-
-::: {.column width="50%"}
-
-```{r}
-#| echo: false
-#| ref.label: "bio9"
-```
-:::
-
-::::
-
-## Polar coordinates
-
-The **coordinate** system defaults to cartesian.
-
-Polar coordinates are suited where data are 'circular' in some way.
-
-:::{.incremental}
-- hourly or within-day patterns
-
-- daily or within week patterns
-
-- yearly patterns (seasonality)
-
-- longitude (maps!)
-:::
-
-## Solar generation in Palmerston North
-
-```{r}
-#| echo: false
-solar <- read_csv(here::here("data/solar_by_day.csv")) |>
-  mutate(kWh = smoothed/1e3)
-```
-
-```{r}
-#| fig-width: 10
-#| fig-height: 7
-ggplot(solar) + aes(x=day, y=kWh) + geom_line()
-```
-
-## Solar in Palmerston North
-
-```{r}
-#| fig-width: 10
-#| fig-height: 7
-ggplot(solar) + aes(x=day, y=kWh) + geom_line() + coord_polar()
-```
-
-## Fixing up the `kWh` scale
-
-```{r}
-#| fig-width: 10
-#| fig-height: 7
-ggplot(solar) + aes(x=day, y=kWh) + geom_line() + coord_polar() +
-  scale_y_continuous(limits=c(0,40))
-```
