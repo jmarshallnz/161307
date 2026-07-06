@@ -2,27 +2,16 @@
 title: "Recall: ggplot2 and dplyr"
 format:
   revealjs:
+    theme: [solarized, slides.scss]
     width: 1280
     height: 720
-    margin: 0.02
-    smaller: true
+    margin: 0.1
+    smaller: false
     echo: true
     message: false
     fig-width: 7
     fig-height: 7
 ---
-
-```{css}
-/*| echo: false */
-
-div.sourceCode {
-  font-size: 1.4em;
-}
-
-div.cell-output-stdout {
-  font-size: 1.4em;
-}
-```
 
 ```{r}
 #| echo: false
@@ -94,16 +83,18 @@ ag_production |>
 
 ## The ggplot2 recipe
 
+:::{.incremental}
 1. Create a chart with `ggplot2()`
 2. Assign some data to the chart with `data=foo`, i.e. `ggplot2(data=foo)`
 3. Define the mapping from features of the chart to variables/columns in the data with `aes()`
 4. Choose which type of geometry to use with `geom_*()`.
+:::
 
 ## The ggplot2 recipe
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg1}
 #| eval: false
 ggplot()
@@ -112,7 +103,7 @@ ggplot()
 `ggplot()` creates a new chart
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg1"
@@ -126,7 +117,7 @@ ggplot()
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg2}
 #| eval: false
 ggplot(data=ag_production)
@@ -137,7 +128,7 @@ ggplot(data=ag_production)
 `data=ag_production` assigns the data to the chart
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg2"
@@ -150,7 +141,7 @@ ggplot(data=ag_production)
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg3}
 #| eval: false
 ggplot(data=ag_production) +
@@ -164,7 +155,7 @@ ggplot(data=ag_production) +
 `aes(x=year, y=value)` maps features of chart to columns of data
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg3"
@@ -177,7 +168,7 @@ ggplot(data=ag_production) +
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg4}
 #| eval: false
 ggplot(data=ag_production) +
@@ -194,7 +185,7 @@ ggplot(data=ag_production) +
 `geom_point()` chooses the point geometry
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg4"
@@ -207,7 +198,7 @@ ggplot(data=ag_production) +
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg5}
 #| eval: false
 ggplot(data=ag_production) +
@@ -217,12 +208,15 @@ ggplot(data=ag_production) +
 
 `colour=animal` maps the colour aesthetic to the `animal` column.
 
+:::{.fragment}
 Note it automatically supplies a **scale**, in this case a legend or **guide**.
 
 `x` and `y` also have scales!
 :::
 
-::: {.column width="50%"}
+:::
+
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg5"
@@ -235,7 +229,7 @@ Note it automatically supplies a **scale**, in this case a legend or **guide**.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg6}
 #| eval: false
 ggplot(data=ag_production) +
@@ -248,7 +242,7 @@ The line geometry draws lines between observations within 'groups'.
 The grouping is automatic when you have assigned `colour` or `fill`.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg6"
@@ -261,7 +255,7 @@ The grouping is automatic when you have assigned `colour` or `fill`.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg7}
 #| eval: false
 ggplot(data=ag_production) +
@@ -272,7 +266,7 @@ ggplot(data=ag_production) +
 If there are no groups, all lines will be joined up.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg7"
@@ -285,7 +279,7 @@ If there are no groups, all lines will be joined up.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg8}
 #| eval: false
 ggplot(data=ag_production) +
@@ -298,7 +292,7 @@ The `group` aesthetic can be useful in this case.
 But it has no scale or guide.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg8"
@@ -311,19 +305,31 @@ But it has no scale or guide.
 
 ggplot2 is based on the Grammar of Graphics defined by Leland Wilkinson in 1999.
 
-In the same way that a grammar defines the structures and composition of a language, the grammar of graphics defines the structures and composition of statistical graphics.
+:::{.incremental}
+- A grammar defines the structures and composition of a language.
 
-Most widely used graphics packages for charting have been informed by this idea.
+- The grammar of graphics defines the structures and composition of statistical graphics.
 
-::: {.fragment}
+- Most widely used graphics packages for charting have been informed by this idea.
+:::
+
+## The grammar of graphics
+
 The grammar in ggplot2 breaks down a chart into:
 
+:::{.incremental}
 - Data
+
 - Aesthetics
+
 - Geometries
+
 - Facets
+
 - Statistics
+
 - Coordinates
+
 - Themes
 :::
 
@@ -332,12 +338,14 @@ The grammar in ggplot2 breaks down a chart into:
 The data 'layer' in `ggplot2` needs to be **tidy**. That is, you need to ensure that
 
 - each observation is in its own row and
+
 - each variable is in its own column.
 
 ::: {.fragment}
 The `ag_production` data are tidy:
 
 - there are three variables (`year`, `animal`, `value`) in separate columns.
+
 - each row represents a single observation: the count (`value`) of `animal` in a particular `year`.
 :::
 
@@ -347,10 +355,14 @@ We could also present these data in **wide form** where each animal has its own 
 
 ```{r}
 ag_production |> pivot_wider(names_from=animal, values_from=value) |>
-  filter(year > 1970)
+  filter(year > 1970) |> slice_head(n=5)
 ```
 
-It's the same data, just formatted the other way around. But if we want to chart both `Sheep` and `Goats` we need the counts to be in a single column for `y`.
+It's the same data, just formatted the other way around.
+
+:::{.fragment}
+But if we want to chart both `Sheep` and `Goats` we need the counts to be in a single column for `y`.
+:::
 
 ## Aesthetics
 
@@ -359,17 +371,22 @@ Aesthetics are features of the plot that allow us to distinguish one observation
 The most common aesthetics are:
 
 - positions `x`, `y`
+
 - colours `colour`, `fill`
+
 - point style `shape`, `size`
+
 - line style `linewidth`, `linetype`
+
 - transparency `alpha`
+
 - grouping `group`
 
 ## Aesthetics
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg11}
 #| eval: false
 ag_production |>
@@ -384,7 +401,7 @@ ag_production |>
 By default it is limited to 6 groups only.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg11"
@@ -398,7 +415,7 @@ By default it is limited to 6 groups only.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg12}
 #| eval: false
 ggplot(data=ag_production) +
@@ -409,7 +426,7 @@ ggplot(data=ag_production) +
 `size` is typically a continuous measure rather than a discrete one.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg12"
@@ -423,7 +440,7 @@ ggplot(data=ag_production) +
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg13}
 #| eval: false
 ag_production |>
@@ -438,7 +455,7 @@ ag_production |>
 You can combine aesthetics and the guides will try and combine as well.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg13"
@@ -452,7 +469,7 @@ You can combine aesthetics and the guides will try and combine as well.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg14}
 #| eval: false
 ggplot(data=ag_production) +
@@ -464,7 +481,7 @@ ggplot(data=ag_production) +
 Line geometries can be distinguished using width and line type.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg14"
@@ -477,7 +494,7 @@ Line geometries can be distinguished using width and line type.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r gg15}
 #| eval: false
 ggplot(data=ag_production) +
@@ -489,7 +506,7 @@ ggplot(data=ag_production) +
 Line geometries can be distinguished using width and line type.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "gg15"
@@ -500,7 +517,6 @@ Line geometries can be distinguished using width and line type.
 
 ## Setting vs mapping an aesthetic
 
-::: {.fragment}
 If we use an aesthetic to differentiate observations, we do so by **mapping** it to a column of data via `aes()`:
 
 ```{r}
@@ -510,10 +526,8 @@ ggplot(data) + aes(x=x, y=y, colour=variable) + geom_point()
 
 In this case the colour of points will vary according to `variable`.
 
-:::
-
 ::: {.fragment}
-We can also **set** the aesthetic properties of the geometries we include to be the same for all observations by specifying them as parameters to the `geom_*()` functions:
+We can also **set** the aesthetic properties of geometries directly:
 
 ```{r}
 #| eval: false
@@ -528,7 +542,7 @@ In this case all points will be pink.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r set1}
 #| eval: false
 ggplot(data=ag_production) +
@@ -542,7 +556,7 @@ ggplot(data=ag_production) +
 `linewidth` is **set** to 2.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "set1"
@@ -555,7 +569,7 @@ ggplot(data=ag_production) +
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 ```{r set2}
 #| eval: false
 ggplot(data=ag_production) +
@@ -572,7 +586,7 @@ ggplot(data=ag_production) +
 `alpha` is set to 0.5 (half transparent).
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 ```{r}
 #| echo: false
 #| ref.label: "set2"
@@ -583,43 +597,53 @@ ggplot(data=ag_production) +
 
 ## Geometries and Statistics
 
-We've already seen two geometries: the point and line. ggplot2 includes about 50 or so.
+We've already seen two geometries: the point and line. ggplot2 includes about 50.
 
 Many of them are refinements on others.
 
+:::{.incremental}
 - `geom_bar()` is the same as `geom_col()` but `bar` counts rows to compute `y`, whereas `col` assumes you have `y` already.
 
 - `geom_histogram()` is just a `geom_col()` as well, where the `y` aesthetic is computed again by counting (divide `x` range into bins, count within each bin).
+:::
 
-::: {.fragment}
+## Geometries and Statistics
 
 The difference between these is the **statistic** used.
 
-- `geom_col()` doesn't do anything with your data (the identity function).
-- `geom_bar()` first uses `stat_count()` to count things thus producing the `y`.
-- `geom_histogram()` uses `stat_bin()` to bin the `x` variable and then count within each bin.
+:::{.incremental}
+- `geom_col()` doesn't do anything with your data via `stat_identity()`.
 
+- `geom_bar()` first uses `stat_count()` to count things, producing `y`.
+
+- `geom_histogram()` uses `stat_bin()` to bin the `x` variable and then count within each bin, producing `y`.
 :::
 
 ## Geometries and Statistics
 
 Each geometry has a default **statistic** function `stat_*()`.
 
-When your data are passed to a geometry, first the statistic is run, producing a new version of the data with additional columns for the computed statistics, along with updated aesthetic mappings.
+:::{.fragment}
+The statistic function produces a new version of the data with
 
-This is then passed to one of the base geometries (points, lines, bars etc)
+- additional columns for computed values.
 
-::: {.fragment}
+- updated aesthetic mappings.
+:::
+
+:::{.fragment}
+This is then passed to one of the base geometries (points, lines, bars etc).
+:::
+
+## Geometrires and Statistics
 
 ```{r}
 geom_histogram
 ```
 
-:::
-
 ## Geometries and Statistics
 
-Sometimes it's useful to utilise a different statistic, or a different computed value from a statistic in our charts.
+Sometimes it's useful to utilise a different statistic, or a different computed value in our charts.
 
 For example, `stat_bin()` for histograms computes `count` (the default `y`) as well as `density`, the probability of `x` being in a particular bin.
 
@@ -629,21 +653,20 @@ We can override the default computed aesthetic `y` by using the `after_stat()` f
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 
 ```{r gg16}
 #| eval: false
-ag_production |>
-  filter(animal == "Sheep") |>
+penguins |>
   ggplot() +
-  aes(x=value) +
-  geom_histogram()
+  aes(x=body_mass) +
+  geom_histogram(bins=15)
 ```
 
 The default histogram assigns `y` to the computed variable `count`.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 
 ```{r}
 #| echo: false
@@ -658,15 +681,15 @@ The default histogram assigns `y` to the computed variable `count`.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 
 ```{r gg17}
 #| eval: false
-ag_production |>
-  filter(animal == "Sheep") |>
+penguins |>
   ggplot() +
-  aes(x=value, y=after_stat(density)) +
-  geom_histogram()
+  aes(x=body_mass, y=after_stat(density)) +
+  aes(x=) +
+  geom_histogram(bins=15)
 ```
 
 We can choose a different computed value for `y` by using `after_stat()`.
@@ -674,7 +697,7 @@ We can choose a different computed value for `y` by using `after_stat()`.
 `after_stat()` implies that this value isn't available until after the statistic function has run.
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 
 ```{r}
 #| echo: false
@@ -692,9 +715,13 @@ We can choose a different computed value for `y` by using `after_stat()`.
 Recall that there are 5 key 'verbs' for wrangling data:
 
 - `filter()` for choosing rows/observations
+
 - `select()` for choosing columns/variables
+
 - `arrange()` for ordering rows/observations
+
 - `mutate()` for adding columns/variables
+
 - `summarise()` for computing summaries across multiple rows/observations
 
 ## The pipe
@@ -719,32 +746,36 @@ function(object, extra, parameters)
 
 :::
 
-::: {.fragment fragment-index=2}
+[^1]: [This is done in the R parser, so no extra code is being run here to achieve this - both expressions are parsed identically.]{.fragment fragment-index=1}
 
-The `dplyr` verbs all take a `data.frame` or `tibble` as their first argument and return `data.frame` or `tibble`[^2]. That way we can chain them together like this:
+## The pipe
+
+The `dplyr` verbs all take a `data.frame` or `tibble` as their first argument.
+
+They all return a `data.frame` or `tibble`[^2].
+
+:::{.fragment fragment-index=1}
+That way we can chain them together like this:
 
 ```{r}
 #| eval: false
 ag_production |> filter(animal=="Sheep") |> arrange(desc(value))
 ```
-
 :::
 
-[^1]: [This is done in the R parser, so no extra code is being run here to achieve this - both expressions are parsed identically.]{.fragment fragment-index=1}
+[^2]: [A `tibble` is a modern update of the `data.frame`.]{.fragment fragment-index=1}
 
-[^2]: [A `tibble` is a modern update of the `data.frame`.]{.fragment fragment-index=2}
-
-## `filter()`
+## Filtering
 
 The `filter()` argument takes a boolean *expression* that returns true or false for each row in the dataset.
 
-The expression might be "is it equal to" using `==` or "is it greater than" with `>`. Or it might be something more complicated.
+The expression might be "is it equal to" using `==` or something more complicated.
 
 ```{r}
 ag_production |> filter(str_detect(animal, "Cattle"))
 ```
 
-## `arrange()`
+## Arranging
 
 We order rows with `arrange()`.
 
@@ -765,12 +796,14 @@ ag_production |> filter(animal == "Pigs") |>
   arrange(desc(value))
 ```
 
-## `select()`
+## Choosing columns
 
 Select is used for choosing columns. The uses are mainly:
 
 - Presenting data in a table.
+
 - "Eye balling" data during interactive processing (e.g. what is in column 11?).
+
 - Janitor work on the data (dropping columns we don't care about).
 
 ```{r}
@@ -778,7 +811,7 @@ ag_production |> filter(animal == "Poultry") |>
   select(year, value)
 ```
 
-## `mutate()`
+## Creating new columns
 
 We use `mutate()` to create new columns, often using existing columns in a computation.
 
@@ -786,13 +819,13 @@ We use `mutate()` to create new columns, often using existing columns in a compu
 ag_production |> mutate(millions = round(value/1e6, 1))
 ```
 
-## `mutate()`
+## Creating new columns
 
 Often once we've used columns we might want to drop them.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 
 ```{r}
 ag_production |>
@@ -801,7 +834,7 @@ ag_production |>
 ```
 :::
 
-::: {.column width="50%"}
+::: {.column}
 
 ```{r}
 ag_production |>
@@ -812,7 +845,7 @@ ag_production |>
 
 ::::
 
-## `summarise()`
+## Summarising
 
 We can `summarise()` the data by applying a summary function to all rows.
 
@@ -869,6 +902,13 @@ data1 |> left_join(data2, by=join_by(key1, key2, ...))
 
 where columns from a second dataset are added to the data on the left.
 
+## Left join
+
+```{r}
+#| eval: false
+data1 |> left_join(data2, by=join_by(key1, key2, ...))
+```
+
 - All rows of the left dataset are returned.
 
 - Rows are found in the second dataset based on matches in the `key` columns.
@@ -902,7 +942,7 @@ Similarly, if `population` had two entries for 1971, they would both appear in t
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 
 ```{r sheep_vs_humans}
 #| eval: false
@@ -917,7 +957,7 @@ combined |>
 
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 
 ```{r}
 #| echo: false
@@ -932,7 +972,7 @@ combined |>
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column}
 
 ```{r beast_vs_humans}
 #| eval: false
@@ -948,7 +988,7 @@ combined |>
 
 :::
 
-::: {.column width="50%"}
+::: {.column .absolute top=0 right=-5%}
 
 ```{r}
 #| echo: false
