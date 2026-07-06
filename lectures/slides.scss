@@ -13,3 +13,7 @@ $body-bg: #ffffff;
 .reveal .slide .column div.code-copy-outer-scaffold {
   padding: 20px 9px;
 }
+
+.reveal pre.sourceCode code {
+  max-height: 600px;
+}

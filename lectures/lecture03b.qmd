@@ -1,0 +1,1023 @@
+---
+title: "Design"
+knitr:
+  opts_chunk: 
+    dev: "ragg_png"
+format:
+  revealjs:
+    theme: [solarized, slides.scss]
+    width: 1280
+    height: 720
+    margin: 0.1
+    echo: false
+    message: false
+    fig-width: 7
+    fig-height: 8
+---
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+library(patchwork)
+theme_set(theme_minimal(base_size=20))
+```
+
+# Chart layout
+
+## Chart layout
+
+- We've already seen that facetting allows multiple charts of the same type to be composed into one image.
+
+- What if we have disparate charts that we wish to display at once?
+
+- The `patchwork` package is useful for this.
+
+## Using patchwork
+
+The `patchwork` package overrides arithmetic operators[^1] to combine `ggplot2` chart objects.
+
+:::{.fragment}
+```{r}
+#| eval: false
+#| echo: true
+library(patchwork)
+
+# code for plot 1 saved
+plot1 <- ggplot(data=foo) + ...
+
+# code for plot 2 saved
+plot2 <- ggplot(data=bar) + ...
+
+# code to combine
+plot1 + plot2 # side-by-side
+```
+:::
+
+[^1]: similar to how `ggplot2` overrides `+`
+
+## Side bar: print is magic
+
+Saving the result of `ggplot2` code not print the chart.
+
+:::{.incremental}
+- The assignment `plot1 <- ggplot(data=foo) + ...` executes the `ggplot2` expression and assigns the result to the `plot1` object.
+
+- But this does not draw the chart!
+
+- Instead it produces an object that tells R how to produce a chart when we need to do so.
+
+- Why do we normally get a chart when we don't have assignment then?
+
+- **Because the default R action when running an expression without assignment is to print the result.**
+
+- The **print** method of `ggplot2` is what does the actual drawing.
+:::
+
+## Side by side
+
+```{r patch1}
+#| echo: true
+#| fig.width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g1 + g2
+```
+
+## Above and below
+
+```{r patch2}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g1 / g2
+```
+
+## Combinations
+
+```{r patch3}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g3 <- ggplot(penguins) + aes(x=bill_len, fill=species) + geom_density(alpha=0.7)
+g1 / (g2+g3)
+```
+
+## Gathering guides
+
+```{r patch4}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g3 <- ggplot(penguins) + aes(x=bill_len, fill=species) + geom_density(alpha=0.7)
+g1 / (g2+g3) + plot_layout(guides = 'collect')
+```
+
+## Gathering guides
+
+```{r patch5}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g4 <- ggplot(penguins) + aes(x=bill_len, y=bill_dep, col=species) + geom_point()
+g1 / (g2+g4) + plot_layout(guides = 'collect')
+```
+
+## Tuning width and height
+
+```{r patch6}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g4 <- ggplot(penguins) + aes(x=bill_len, y=bill_dep, col=species) + geom_point()
+g1 / (g2+g4 + plot_layout(widths=c(1, 3))) + plot_layout(guides = 'collect')
+```
+
+## Tuning width and height
+
+```{r patch7}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 <- ggplot(penguins) + aes(x=flipper_len, y=body_mass, col=species) + geom_point()
+g2 <- ggplot(penguins) + aes(x=species, fill=species) + geom_bar()
+g4 <- ggplot(penguins) + aes(x=bill_len, y=bill_dep, col=species) + geom_point()
+g1 / (g2+g4 + plot_layout(widths=c(1, 3))) + plot_layout(heights=c(5,3), guides = 'collect')
+```
+
+## Theme modification
+
+```{r patch8}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 / (g2+g4) + plot_layout(widths=c(1, 3)) &
+  theme_bw(base_size=20)
+```
+
+# Themes
+
+## Theming
+
+:::{.incremental}
+- Themes in `ggplot2` are governed by the `theme_*()` functions.
+
+- Individual elements can be modified using `theme()`.
+
+- Everything you see can be modified.
+
+- Good figure design often requires a bunch of customisation.
+:::
+
+## Theming
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 + theme_grey()
+```
+
+
+## Theming
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 + theme_bw()
+```
+
+
+## Theming
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 + theme_dark()
+```
+
+## Theming
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+g1 + theme_minimal()
+```
+
+
+## Theming: ggthemes
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+library(ggthemes)
+g1 + theme_economist()
+```
+
+## Theming: ggthemes (NOPE!)
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+library(ggthemes)
+g1 + theme_excel() + scale_colour_excel()
+```
+
+# Fonts
+
+## Fonts and typefaces
+
+The 'language' of fonts is a bit confusing!
+
+:::{.incremental}
+- A **typeface** is a style of lettering that forms a cohesive whole.
+
+- Typically it combines different weights (bold, normal, light) as well as stylistic changes (italics, upright, small caps).
+
+- A **font** is a subset of a typeface that describes a particular variation. It's a combination of width, weight and style/slant.
+
+- This distinction doesn't really matter too much.
+:::
+
+## Digital font files
+
+Fonts are stored on your computer in a number of different formats:
+
+:::{.incremental}
+
+- TrueType (ttf/ttc). Developed by Apple in the 1980s, it's what all modern fonts are based on.
+
+- OpenType (otf/otc). Developed by Microsoft and Adobe to improve upon TrueType. Introduced more glyphs (letters) and additional features for **shaping**.
+
+- Web Open Font Format (woff/woff2). A compression wrapper around TrueType/OpenType and reduces the number of opentype features to ensure download sizes are minimal for web browsing. Limited support outside of browsers.
+:::
+
+## Digital font files
+
+Where fonts are stored depends on your system. The `systemfonts` package is designed to find them and make them usable from R:
+
+```{r}
+#| echo: true
+systemfonts::system_fonts() |> select(name, family, style, weight, path)
+```
+
+## Limitations of fonts in ggplot2
+
+:::{.incremental}
+- In `ggplot2` the type face is known as `family` and the font is `face` (or `fontface`).
+
+- The main limitation is that `face` or `fontface` can take only four options: plain, bold, italic and bold-italic.
+
+- To get an 'extra bold' or 'light' version of a typeface we need to load it as a separate `family`.
+:::
+
+## Limitations of fonts in the graphics device
+
+:::{.incremental}
+- The **graphics device** is the library and code that draws stuff on a screen, or into a file.
+
+- The choice of font file to use, how the text should be 'shaped' (spacing, ligatures etc) and sized is up to the graphics device.
+
+- The graphics device on a Mac is different to the one on Windows!
+
+- There are at least 3 different graphics devices available for drawing a plot to a .png file!
+:::
+
+## Best graphic devices to use for nice fonts
+
+:::{.incremental}
+- Use the `ragg` device along with for rendering raster (i.e. pixels) graphics.
+
+- Use the `svglite` device for rendering vector graphics (SVG) for the web.
+
+- In RStudio, set "AGG" as the backend under Global Options -> General -> Graphics.
+
+- In Quarto add `ragg_png` as the chunk output device:
+:::
+
+:::{.fragment}
+```{r}
+#| echo: true
+#| eval: false
+---
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+---
+```
+:::
+
+## Getting fonts
+
+To ensure your work is reproducible, you probably want to make sure you use an open font that is available to everyone.
+
+One of the easiest ways to do this is to use a font repository online such as Google fonts or FontSquirrel.
+
+The functions `get_from_google_fonts()`, `get_from_font_squirrel()` and `require_font()` are available for this.
+
+`require_font()` checks if you already have the font, and if not, will download it.
+
+```{r}
+#| echo: true
+library(systemfonts)
+require_font("Ubuntu")
+```
+
+## Using the font
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+require_font("Ubuntu")
+g1 +
+  theme_minimal(base_family="Ubuntu", base_size=20)
+```
+
+## Using a font
+
+```{r}
+#| echo: true
+#| fig-width: 10
+#| fig.height: 5
+#| fig.align: 'center'
+require_font("Barrio")
+g1 +
+  theme_minimal(base_family="Barrio", base_size=20)
+```
+
+## Using different font weights
+
+Some fonts have different weights available: more than just plain and bold:
+
+```{r}
+#| echo: true
+system_fonts() |> filter(family == "Ubuntu") |>
+  select(name, style, weight, width, path)
+```
+
+## Using different font weights
+
+We can register these as variants so we can use them within the restricted plain vs bold system in R:
+
+```{r}
+#| echo: true
+register_variant(
+  "Ubuntu Light",
+  "Ubuntu",
+  weight='light'
+)
+font_info("Ubuntu Light") |> select(family, style, name, weight)
+```
+
+## Using different font weights
+
+:::: .columns
+
+:::{.column}
+```{r}
+#| echo: true
+#| fig-width: 6
+#| fig.height: 4
+#| fig.align: 'center'
+g1 +
+  theme_minimal(base_family="Ubuntu", base_size=20)
+```
+
+:::
+
+:::{.column}
+```{r}
+#| echo: true
+#| fig-width: 6
+#| fig.height: 4
+#| fig.align: 'center'
+g1 +
+  theme_minimal(base_family="Ubuntu Light", base_size=20)
+```
+:::
+
+::::
+
+# Figure design
+
+## Original
+
+```{r}
+vacc <- read_csv(here::here("data/covid_vacc.csv")) |>
+  filter(Dose == "Fully vaccinated")
+theme_set(theme_grey(base_size=20))
+```
+
+::::{.columns}
+
+:::{.column}
+```{r design1}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=DHB, col=Age) +
+  geom_point()
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design1"
+```
+:::
+
+::::
+
+## Reverse Y
+
+::::{.columns}
+
+:::{.column}
+```{r design2}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), col=Age) +
+  geom_point()
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design2"
+```
+:::
+
+::::
+
+## Clean labels
+
+::::{.columns}
+
+:::{.column}
+```{r design3}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), col=Age) +
+  geom_point() +
+  labs(x = NULL, y = NULL)
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design3"
+```
+:::
+
+::::
+
+## Percent scale{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design4}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), col=Age) +
+  geom_point() +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(labels = scales::label_percent())
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design4"
+```
+:::
+
+::::
+
+## Theme{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design5}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), col=Age) +
+  geom_point() +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(labels = scales::label_percent()) +
+  theme_minimal(base_size=16)
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design5"
+```
+:::
+
+::::
+
+## Guide position{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design6}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), col=Age) +
+  geom_point() +
+  labs(x = NULL, y = NULL) +
+  scale_x_continuous(labels = scales::label_percent()) +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin()) # zero margin
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design6"
+```
+:::
+
+::::
+
+## Point shape/colour{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design7}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), shape=Age, fill=Prop >= 0.9) +
+  geom_point() +
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent()) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin()) # zero margin
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design7"
+```
+:::
+
+::::
+
+## 90% goal{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design8}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), shape=Age, fill=Prop >= 0.9) +
+  geom_point() +
+  geom_vline(xintercept=0.9, col='grey30')+
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent()) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin()) # zero margin
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design8"
+```
+:::
+
+::::
+
+## Axis range and space{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design9}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB), shape=Age, fill=Prop >= 0.9) +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point() +
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  guides(fill = 'none') +
+  theme_minimal(base_size=20) +
+  theme(legend.position='bottom',
+        legend.margin=margin()) # zero margin
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design9"
+```
+:::
+
+::::
+
+## Link points{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design10}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin()) # zero margin
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design10"
+```
+:::
+
+::::
+
+
+## Remove panel grid{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design11}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(colour='grey90', size=0.5))
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design11"
+```
+:::
+
+::::
+
+
+## Axis size/colour{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design12}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color='grey90', size=0.5),
+        axis.text.x = element_text(size=rel(0.8), colour='grey70'))
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design12"
+```
+:::
+
+::::
+
+## Add 90% label{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design13}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  annotate(geom='text', x=0.9, y=21, label="90%", size=7) +
+  labs(x = NULL, y = NULL, shape = NULL) +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  coord_cartesian(clip='off') +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(colour='grey90', size=0.5),
+        axis.text.x = element_text(size=rel(0.8), colour='grey70'))
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design13"
+```
+:::
+
+::::
+
+
+## Add title{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design14}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  annotate(geom='text', x=0.9, y=21, label="90%", size=7) +
+  labs(x = NULL, y = NULL, shape = NULL,
+       title = "The 90% project: Covid-19 vaccination rates by DHB") +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  coord_cartesian(clip='off') +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(colour='grey90', size=0.5),
+        axis.text.x = element_text(size=rel(0.8), colour='grey70'),
+        plot.title.position = 'plot')
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design14"
+```
+:::
+
+::::
+
+## Plot margins{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design15}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  annotate(geom='text', x=0.9, y=21, label="90%", size=7) +
+  labs(x = NULL, y = NULL, shape = NULL,
+       title = "The 90% project: Covid-19 vaccination rates by DHB") +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  coord_cartesian(clip='off') +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(colour='grey90', size=0.5),
+        axis.text.x = element_text(size=rel(0.8), colour='grey70'),
+        plot.title.position = 'plot',
+        plot.margin = margin(6, 12, 6, 6)) # more on right
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design15"
+```
+:::
+
+::::
+
+## Add caption{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design16}
+#| echo: true
+#| eval: false
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  annotate(geom='text', x=0.9, y=21, label="90%", size=7) +
+  labs(x = NULL, y = NULL, shape = NULL,
+       title = "The 90% project: Covid-19 vaccination rates by DHB",
+       caption = "Data from Ministry of Health. Chart by Jonathan Marshall") +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  coord_cartesian(clip='off') +
+  guides(fill = 'none') +
+  theme_minimal(base_size=16) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(colour='grey90', size=0.5),
+        axis.text.x = element_text(size=rel(0.8), colour='grey70'),
+        plot.title.position = 'plot',
+        plot.margin = margin(6, 12, 6, 6), # more space top and right
+        plot.caption = element_text(size=rel(0.6), colour='grey50'))
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design16"
+```
+:::
+
+::::
+
+
+## Change font{.smaller}
+
+::::{.columns}
+
+:::{.column}
+```{r design17}
+#| echo: true
+#| eval: false
+require_font('Source Sans 3')
+ggplot(vacc) +
+  aes(x=Prop, y=fct_rev(DHB)) +
+  geom_line(col="grey70") +
+  geom_vline(xintercept=0.9, col='grey30')+
+  geom_point(mapping=aes(shape=Age, fill=Prop >= 0.9)) +
+  annotate(geom='text', x=0.9, y=21, label="90%", size=7) +
+  labs(x = NULL, y = NULL, shape = NULL,
+       title = "The 90% project: Covid-19 vaccination rates by DHB",
+       caption = "Data from Ministry of Health. Chart by Jonathan Marshall") +
+  scale_shape_manual(values=21:24) +
+  scale_x_continuous(labels = scales::label_percent(),
+                     limits=c(0,1),
+                     expand=c(0,0)) +
+  scale_fill_manual(values = c('pink', 'steelblue')) +
+  coord_cartesian(clip='off') +
+  guides(fill = 'none') +
+  theme_minimal(base_family="Source Sans 3", base_size=18) +
+  theme(legend.position='bottom',
+        legend.margin=margin(), # zero margin
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(colour='grey90', size=0.5),
+        axis.text.x = element_text(size=rel(0.8), colour='grey70'),
+        plot.title.position = 'plot',
+        plot.title = element_text(face='bold'),
+        plot.margin = margin(6, 12, 6, 6), # more space top and right
+        plot.caption = element_text(size=rel(0.6), colour='grey50'))
+```
+
+:::
+
+:::{.column .absolute top=0 right=-5%}
+```{r}
+#| ref.label="design17"
+```
+:::
+
+::::

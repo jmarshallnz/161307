@@ -40,8 +40,9 @@ Color scales, deficiencies DONE
 
 Week 3b
 
-Figure design
-Compound figures
+Compound figures DONE
+Themes, fonts DONE
+Figure design DONE
 
 Week 4a
 
