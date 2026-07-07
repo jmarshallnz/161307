@@ -998,3 +998,20 @@ combined |>
 :::
 
 ::::
+
+
+## Further reading
+
+- [Data visualisation](https://r4ds.had.co.nz/data-visualisation.html) from R for Data Science
+
+- [Make a plot](http://vissoc.co/03-ggplot-basics.html) from Data Visualisation - A Practical Introduction
+
+- [Visualising data](https://clauswilke.com/dataviz/aesthetic-mapping.html) from Fundamentals of Data Visualisation
+
+- [Pipes](https://r4ds.had.co.nz/pipes.html) from R for Data Science
+
+- [Data transformation](https://r4ds.had.co.nz/transform.html) from R for Data Science
+
+- [Pivoting](https://r4ds.had.co.nz/tidy-data.html?q=pivot#pivoting) from R for Data Science
+
+- [Relational Data](https://r4ds.had.co.nz/relational-data.html) from R for Data Science

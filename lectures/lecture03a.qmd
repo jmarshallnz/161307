@@ -573,3 +573,15 @@ Highlighting is best done with a new column.
 :::
 
 ::::
+
+## Further reading
+
+- [Colour scales and legends](https://ggplot2-book.org/scales-colour.html) from ggplot2: Elegant Graphics for Data Analysis
+
+- [Colour scales](https://clauswilke.com/dataviz/color-basics.html) from Fundamentals of Data Visualisation
+
+- [Use Colour to your Advantage](http://vissoc.co/08-polishing.html#use-color-to-your-advantage) from Data Visualisation - A Practical Introduction
+
+- [Common pitfalls of colour use](https://clauswilke.com/dataviz/color-pitfalls.html) from Fundamentals of Data Visualisation
+
+- The [colorspace](https://colorspace.r-forge.r-project.org/index.html) package.

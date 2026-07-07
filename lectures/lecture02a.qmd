@@ -1466,3 +1466,14 @@ More of this in week 3!
 :::
 
 ::::
+
+
+## Further reading
+
+- [Position scales and axes](https://ggplot2-book.org/scales-position.html) from ggplot2: Elegent Graphics for Data Analysis
+
+- [Coordinate systems and axes](https://clauswilke.com/dataviz/coordinate-systems-axes.html) from Fundamentals of Data Visualisation
+
+- [Geoms can transform data](http://vissoc.co/04-group-facet-transform.html#sec-statfunctions) from Data Visualisation - A Practical Introduction
+
+- [Visualizing amounts](https://clauswilke.com/dataviz/visualizing-amounts.html) from Fundamentals of Data Visualisation

@@ -524,3 +524,9 @@ plot +
            colour='grey50')
 ```
 :::
+
+## Further reading
+
+- [Telling a story and making a point](https://clauswilke.com/dataviz/telling-a-story.html) from Fundamentals of Data Visualisation
+
+- [Workhorses, Show Ponies, Unicorns](http://vissoc.co/08-polishing.html#workhorses-show-ponies-unicorns) from Data Visualisation - A Practical Introduction

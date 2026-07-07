@@ -727,3 +727,13 @@ ggplot(petrels) +
 :::{.fragment}
 Offsetting densities on the y axis with `geom_slab()` from `ggdist`.
 :::
+
+## Further reading
+
+- [Displaying distributions](https://ggplot2-book.org/statistical-summaries.html#sec-distributions) from ggplot2: Elegent Graphics for Data Analysis
+
+- [Visualising distributions](https://clauswilke.com/dataviz/histograms-density-plots.html) from Fundamentals of Data Visualisation
+
+- [Histograms and density plots](http://vissoc.co/04-group-facet-transform.html#sec-histograms) from Data Visualisation - A Practical Introduction
+
+- [ggdist: visualisations of distributions and uncertainty](https://mjskay.github.io/ggdist/)

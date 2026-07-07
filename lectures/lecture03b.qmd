@@ -1021,3 +1021,17 @@ ggplot(vacc) +
 :::
 
 ::::
+
+## Further reading
+
+- [Themes](https://ggplot2-book.org/themes.html) ggplot2: Elegant Graphics for Data Analysis
+
+- [Changing the Appearance of Plots with Themes](http://vissoc.co/08-polishing.html#change-the-appearance-of-plots-with-themes) from Data Visualisation - A Practical Introduction
+
+- [Multi-panel figures](https://clauswilke.com/dataviz/multi-panel-figures.html) from Fundamentals of Data Visualisation
+
+- [Workhorses, Show Ponies, Uniconrs](http://vissoc.co/08-polishing.html#workhorses-show-ponies-unicorns) from Data Visualisation - A Practical Introduction
+
+- [Balance the data and the context](https://clauswilke.com/dataviz/balance-data-context.html) from Fundamentals of Data Visualisation
+
+- The [patchwork](https://patchwork.data-imaginist.com) package.
