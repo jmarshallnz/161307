@@ -94,7 +94,7 @@ ggplot(data=lego_sets) +
 
 1. Breakdown the above code by running it line by line: i.e. what does just the `ggplot(data=lego_sets)` line do? What happens when you add on the `aes()` line etc? Write some notes on this process.
 
-2. There's quite a lot of overlapping of the points, so it's hard to see the *point density* to get a feel for where the 'center' of the price is across time. This is due to overplotting as both year and price are essentially discrete rather than continuous (price likely being closer to continuous than the year in this case!). Recall that two ways for dealing with this are jittering the points or adding transparency. Implement both techniques (potentially at once!) and see what you think.
+2. There's quite a lot of overlapping of the points, so it's hard to see the *point density* to get a feel for where the 'center' of the price is across time. This is due to *overplotting* as both year and price are essentially discrete rather than continuous (price likely being closer to continuous than the year in this case!). Recall that two ways for dealing with this are jittering the points or adding transparency. Implement both techniques (potentially at once!) and see what you think.
 
 ## Aesthetics
 
@@ -294,7 +294,7 @@ Our goal here is to assess how the `price_per_part` changes over time by `theme`
 
 3. Even with the filter you should see that it's still pretty hard to distinguish any trend (e.g. add a smoother and see if you can see anything). This is partly because price per part tends to 'live' on a log scale: most of them are cheap, but there's a few that are a lot more expensive. Try switching the plot to use a log10 scale for y with `scale_y_log10()`.
 
-4. Finally, tidy up the plot by adding some colour, fixing up labels etc.
+4. Finally, tidy up the plot by fixing up labels, adding a title etc.
 
 ## An alternate model: weight?
 
