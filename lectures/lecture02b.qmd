@@ -2,9 +2,11 @@
 title: "Distributions"
 format:
   revealjs:
+    theme: [solarized, slides.scss]
     width: 1280
     height: 720
     margin: 0.1
+    smaller: false
     echo: false
     message: false
     fig-width: 7
