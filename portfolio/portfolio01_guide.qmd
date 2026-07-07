@@ -38,26 +38,19 @@ Download the `portfolio01.qmd` template file below and write code using the `set
 
  - Ensure you fill in your name in the author field.
  - Ensure you have a facetted plot (facet by theme is recommended).
- - Show both the data (all sets) and a trend on each facet.
+ - Show both the data and a trend on each facet.
  - Your chart should have appropriate labels, a title and subtitle.
  - Use the title to help tell the story of the chart.
- - Your chart should utilise a different colour in each facet. You don't need a guide for this.
- - The colours you choose should be different to the defaults. You may utilise a palette or choose your own.
- - You should submit this .qmd file. You should ensure that it renders correctly before submission.
+ - You should submit the `portfolio.qmd` file to the stream dropbox.
+ - Make sure that it renders correctly before submission.
  
 ## Grading rubric
 
-You will be graded based on:
+You will be graded out of 10 based on:
 
  - Your submission must be reproducible and render without errors or warnings (2 marks).
- - Your submission must include your name in the author field (1 mark)
- - Your submission must include the code used for the chart (1 mark)
- - Your chart should have appropriate labels (1 mark)
- - Your chart should utilise facets (1 mark)
- - Your chart should show both data and trend (1 mark)
- - Your title should help tell the story (1 mark)
- - You should use a different colour per facet and not have a colour guide (1 mark)
- - The colours used should be something other than the defaults (1 mark)
+ - Your submission must include your name in the author field and the code for your chart (2 marks).
+ - Your chart should satisfy the requirements given above (6 marks).
 
 ## Template file
 
