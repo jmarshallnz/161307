@@ -1,0 +1,48 @@
+---
+title: "Portfolio 2: Daily use of He Ara Kotahi bridge"
+format:
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+For this portfolio you'll be creating a visualisation of the distribution of the number of people using the bridge on He Ara Kotahi walkway per day in Palmerston North.
+
+We use data from one year which we've summarised by all users per day:
+
+```{r}
+#| message: false
+library(tidyverse)
+walk_cycle <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/pncc_cycle_counts/he_ara_kotahi_one_year.csv") |>
+  group_by(Date) |>
+  summarise(Count = sum(Count)) |>
+  mutate(Day = wday(Date, label=TRUE))
+```
+
+## Requirements
+
+Download the `portfolio02.qmd` template file below and write code using the `walk_cycle` data to produce ONE chart of the **distribution** of the number of people using the bridge per day.
+
+**It is your choice as to which chart type you choose to use. There is not necessarily a "best" chart type.**
+
+ - Ensure you fill in your name in the author field.
+ - Your chart should clearly show the **distribution** of the number of people using the bridge for each of the 7 days separately.
+ - Consider carefully what the "story" of your chart is and use the title/subtitle or annotation to help highlight the story.
+ - Ensure your chart has clear labels.
+ - You should submit the `portfolio.qmd` file to the stream dropbox.
+ - Make sure that it renders correctly before submission.
+ 
+## Grading rubric
+
+You will be graded out of 10 based on:
+
+ - Your submission must be reproducible and render without errors or warnings (2 marks).
+ - Your submission must include your name in the author field and the code for your chart (2 marks).
+ - Your chart should satisfy the requirements given above (6 marks).
+
+## Template file
+
+Download your template file by right clicking and selecting Save File As...
+
+[https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio02.qmd](https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio02.qmd)
