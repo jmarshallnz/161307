@@ -1,0 +1,33 @@
+---
+title: "Extras from labs"
+format: html
+---
+## Colour and scales
+
+You should have noticed in the above that the guide for colour differed depending on whether the colour variable was categorical (`theme`) or numeric (`price`). ggplot2 distinguishes these cases as in the former you want a set of 'discrete' colours, and in the latter you want a continuum.
+
+The colours chosen for each of these guides are governed by the *scales* used. For some aesthetics these are fairly straight-forward: the x and y axes on a scatterplot are continuous numeric scales, so the choices for them are limited mostly to the range (which is typically just the full range of the variable plus a bit of extra at each end) and the number of marks to use across the range.
+
+For other aesthetics such as colour there are a few more choices to make: if we have a set of discrete colours (for a grouping variable) we need to chose which colours to use. If we have a colour gradient for a continuous measure we need to choose the end points of that gradient (and possibly intermediate colours as well).
+
+All scales are controlled using the `scale_<aesthetic>_<type>()` set of functions, where `<aesthetic>` is the corresponding aesthetic (`x`, `y`, `colour`, `fill`, `alpha`, `size` etc) and `<type>` is the type of scale to use which might depend on the type of variable mapped to that aesthetic (continuous, discrete, binned, gradient etc)
+
+For example, lets look in detail at the scale for `x` on our first plot where `year` is on the x axis. We could treat year (and ggplot2 has) as numeric, so will be by default controlled by `scale_x_continuous()`. Looking up the help on that notes that we have the following arguments available to us:
+
+ - `name`
+ - `breaks`
+ - `minor_breaks`
+ - `n.breaks`
+ - `labels`
+ - `limits`
+ - `expand`
+ - `oob`
+ - `na.value`
+ - `transform`
+ - `guide`
+ - `position`
+ - `sec.axis`
+
+Most of these are reasonably self-explanatory as to what they control: `name` is for the axis or legend title, `breaks`, `minor_breaks` or `n.breaks` are about how many divisions are used across the range (marked for breaks, unmarked for minor breaks), `labels` are for how those breaks are labelled, `limits` defines the end points, `expand` defines how those limits are increased to provide a bit of whitespace at either end. `oob` then defines what to do with points that lie outside the limits while `na.value` defines what should be done with `NA` values in the data (e.g. replace with a specific value). `transform` specifies whether the data are transformed prior to charting (e.g. via a log transform), while `guide` specifies the type of guide used (usually most useful for colour and other legend style guides) and `position` specifies where the axis should be (left vs right, top vs bottom). Lastly, `sec.axis` is used to specify a secondary axis (something we normally avoid where possible!)
+
+This gives us an extraordinary amount of control over the guides in our plots. Fortunately the defaults typically work fine anyway, and we need only alter things to fine-tune in most cases for axis scales. Colour scales typically do need to be altered (at least the colour choices) though!
