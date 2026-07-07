@@ -27,7 +27,6 @@ library(colorspace)
 
 lego_sets <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
 lego_parts <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_parts.csv")
-lego_colours <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_colours.csv")
 ```
 
 The `#| message: false` line is a quarto chunk option: in this case we're telling R to suppress startup messages from the tidyverse.
@@ -46,7 +45,7 @@ ggplot(data=lego_sets) +
 
 This shows an increase in the number of sets in 2015 through 2020 with 2021 likely a partial year.
 
-What you might not be aware of in this chart is this is a *data summary*. Yes, it's the actual data, but notice that all we did is specify the `x` aesthetic: the `y` aesthetic has been computed directly in the `geom`.
+What you might not be aware of in this chart is this is a *data summary*. Notice that we didn't supply a `y` aesthetic: it was computed for us.
 
 The alternate way to do the same chart is to compute this summary first and then specify both `x` and `y`:
 
@@ -59,27 +58,19 @@ lego_sets |>
   geom_col()
 ```
 
-This gives the same chart, but note we had to change the geometry from `geom_bar` to `geom_col` (for column chart). Why the difference? In fact, they're not really different at all: the column chart and bar geometries are basically the same, they just use different *statistics*: The column chart uses the `identity()` statistic (i.e. doesn't do anything) while the bar chart utilises `stat_count()` which counts by `x` to produce a new `y` statistic.
+This gives the same chart, but note we had to change the geometry from `geom_bar` to `geom_col` (for column chart).
 
-e.g. we could do the original plot using `geom_col()` and changing the `stat` (statistic):
+### Try yourself
 
-```{r}
-ggplot(data=lego_sets) +
-  aes(x = year) +
-  geom_col(stat = "count")
-```
+1. Redo the same chart but instead of summarising the data first, set only `x` and then use `geom_col()` with `stat="count"`.
 
-or we could use `geom_bar()` and change it's statistic:
+2. Try counting sets by year first and then use `geom_bar()` with `stat="identity"` to confirm this is the same.
 
-```{r}
-lego_sets |>
-  count(year, name='count') |> # alternate to group_by/summarise
-  ggplot() +
-  aes(x=year, y=count) +
-  geom_bar(stat='identity')
-```
+## Geometries and statistics
 
-The trick is to note that each *geometry* in ggplot has a corresponding *statistic*. And often when there's more than one geometry that does basically the same thing it's just for convenience. Indeed, every *statistic* in ggplot also has a corresponding default geometry. `stat_count()` (the count statistic) has `bar` as it's default geometry (it's technically doing a column chart!) 
+Each *geometry* in ggplot has a corresponding *statistic*.
+
+And, every *statistic* in ggplot also has a corresponding default geometry. `stat_count()` (the count statistic) has `bar` as it's default geometry, so this works:
 
 ```{r}
 ggplot(data=lego_sets) +
@@ -87,7 +78,7 @@ ggplot(data=lego_sets) +
   stat_count()
 ```
 
-What `stat_count()` is actually doing is computing new variables (in this case `count`) and then assigning the `y` aesthetic to `count`. We can make use of the computed `count` ourselves if we like by utilising *delayed evaluation* via `after_stat()`. The `after_stat()` function ensures that the `y` aesthetic is computed after the `stat` function has run (thus `count` is then available):
+`stat_count()` computes new variables (in this case `count`) and then assigns the `y` aesthetic to `count`. We can make use of the computed `count` ourselves if we like by utilising *delayed evaluation* via `after_stat()`. The `after_stat()` function ensures that the `y` aesthetic is computed after the `stat` function has run (thus `count` is then available):
 
 ```{r}
 ggplot(data=lego_sets) +
@@ -104,9 +95,13 @@ ggplot(data=lego_sets) +
   geom_text(stat='count', mapping=aes(label = after_stat(count)), vjust=-0.5)
 ```
 
-Here the bar geometry is using `stat_count()` (the default) so we don't need to specify `y`. Then the text geometry would normally use the identity statistic, but we've changed it to also use `stat_count()`: thus it's `y` aesthetic is automatically being assigned to the count. Then in addition we've added another `aes()` mapping to specify the `label` which is also set to `count`. The `vjust` line alters the justification of the text so it appears just above the bar.
+Here the bar geometry is using `stat_count()` (the default) so we don't need to specify `y`. But the text geometry will need to use `y` to place the text and set the label correctly.
 
-Now, this is all perhaps a little overly complicated: we could just as easily do the above chart just by computing the counts first using a `dplyr` chain (e.g. `count()`) and then specify both `x` and `y` directly. And this is exactly what we *should* do in general. But one thing to note is that the purpose of this summarisation of the data is for presentation on the plot: it's not part of the data itself, so by placing things directly into ggplot you're isolating the presentation data manipulation from any other data manipulation!
+We've put the `label` mapping into `geom_text()` as it's not useful for the bar geometry.
+
+We could do this by computing the counts first with a `dplyr` chain and specify `x`, `y` and `label` directly. **And this is exactly what we should do in general.**
+
+But it is sometimes useful to separate data manipulation for the purposes of a chart from any other data manipulation.
 
 ### Try yourself
 
@@ -171,15 +166,15 @@ This is not showing the actual data! Instead it has reduced the data down to jus
 
 ## More on statistical summary layers
 
-We noted above that `geom_boxplot()` isn't plotting all the data. Instead it's computing some new values and plotting those instead (in a particular way). Similarly, `geom_histogram()` isn't plotting the data either: it's instead computing the appropriate bins and then counting the number of observations in each bin.
+We noted above that `geom_boxplot()` isn't plotting all the data. Instead it's computing the five number summary and plotting that instead. Similarly, `geom_histogram()` isn't plotting the data either: it binning the measure, counting and then doing a bar chart.
 
 Similarly, `geom_density()` is computing a kernel density estimate so that `y` is set to the corresponding density at a grid of `x` values.
 
-All of these are using their corresponding statistic function `stat_boxplot`, `stat_bin` (histogram) and `stat_density`. Each statistic function produces new computed variables which are what end up being plotted.
+All of these are using their corresponding statistic function `stat_boxplot()`, `stat_bin()` (histogram) and `stat_density()`. Each statistic function produces new computed variables which are what end up being plotted.
 
-We can utilise these computed variables ourselves to plot things differently. e.g. perhaps we might want the histogram to produce a density scale rather than a count scale (i.e. probabilities of each bin rather than counts). It turns out the `stat_bin()` summary already produces both `count` and `density` variables (along with other things like bin widths): the geom_histogram() function just uses the `count` one instead of `density`.
+We can utilise these computed variables ourselves to plot things differently. e.g. perhaps we might want the histogram to produce a density scale rather than a count scale (i.e. probabilities of each bin rather than counts). It turns out the `stat_bin()` summary already produces both `count` and `density` variables (along with other things like bin widths): the `geom_histogram()` function just uses the `count` one instead of `density`.
 
-We can alter this behaviour by using the `after_stat()` helper that makes sure the statistic is computed first before evaluation of the aesthetic:
+We can alter this behaviour by using the `after_stat()` helper like we did earlier:
 
 ```{r}
 ggplot(data=lego_sets) +
@@ -188,25 +183,11 @@ ggplot(data=lego_sets) +
   scale_x_log10()
 ```
 
-Indeed, the geometry associated with the histogram is just `geom_bar`! It's just using a different statistic:
+### Try yourself
 
-```{r}
-ggplot(data=lego_sets) +
-  aes(x=price) +
-  geom_bar(stat='bin') +
-  scale_x_log10()
-```
+1. The geometry associated with the histogram is just `geom_bar` mixed with `stat_bin()`. Try using `geom_bar(stat='bin')` in place of `geom_histogram()`.
 
-Knowing this allows us to utilise the `count` variable to do things that might be unadvised such as highlighting the mode:
-
-```{r}
-ggplot(data=lego_sets) +
-  aes(x=price) +
-  geom_bar(stat='bin', mapping=aes(fill=after_stat(count == max(count)))) +
-  scale_x_log10()
-```
-
-But it can also be useful in some cases as we'll see below!
+2. Recall that `after_stat(count)` gives us the counts in the resulting barchart that make up the histogram. Try mapping the `fill` argument to `after_stat(count)` for a colourful histogram (probably unadvised!)
 
 ## Distributions by group
 
@@ -231,11 +212,11 @@ ggplot(data=lego_sets) +
 
 4. For densities and histograms with this many groups it's likely better to use a facetted plot. Try that instead and see which summary you think works best.
 
-### A use for the delayed evaluation magic
+### A use for delayed evaluation
 
-We saw above the use of `after_stat()` to utilise some of the computed variables. We can also make use of `after_scale()` as well, which returns variables in the state they're in after any statistical transformation and after any final scaling is done. This is useful for returning the final state of colours for example, which depend on the chosen scale for their colour choice.
+As well as `after_stat()`, we can also make use of `after_scale()` as well, which returns variables in the state they're in after any statistical transformation scaling is done. This is useful for returning the final state of colours for example, which depend on the chosen scale for their colour choice.
 
-For a multi-group boxplot, you often want to include a bit of colour, if only for interest: it's not required as you can utilise `x` or `y` to distinguish groups anyway:
+For a multi-group boxplot, you often want to include a bit of colour, if only for interest:
 
 ```{r}
 ggplot(data=lego_sets) +
@@ -244,29 +225,17 @@ ggplot(data=lego_sets) +
   scale_x_log10()
 ```
 
-What if you want to also set the `fill` argument to change as well? But you can't have both `fill` and `colour` set to both change, at least not without specifying separate scales (so you get different colours) or via transparency:
+### Try yourself
 
-```{r}
-ggplot(data=lego_sets) +
-  aes(x=price, y=theme, colour=theme, fill=theme) +
-  geom_boxplot() +
-  scale_x_log10()
-```
+1. Try setting the `fill` argument instead of `col`.
 
-One way around this is to ask the `fill` argument to just be a lighter version of `colour` using `after_scale()` for it's aesthetic:
+2. Try setting both `fill` and `col` at once.
 
-```{r}
-ggplot(data=lego_sets) +
-  aes(x=price, y=theme, colour=theme, fill=after_scale(lighten(colour, 0.5))) +
-  geom_boxplot() +
-  scale_x_log10()
-```
-
-Pretty!
+3. Set the `fill` aesthetic to `after_scale(lighten(colour, 0.5))` instead for a pretty result! *Note that `lighten()` is a function from `colorspace` for lightening colours. `darken()` is also available.*
 
 ## More geometries
 
-There are a bunch of other geometries available for visualising distributions such as violin plots:
+There are other geometries available for visualising distributions such as violin plots:
 
 ```{r}
 ggplot(data=lego_sets) +
@@ -277,7 +246,7 @@ ggplot(data=lego_sets) +
 
 These are just a density plot that is reflected so it's duplicated. By default they scale so the area inside is 1.
 
-There's also a bunch of geometries in the `ggdist` package such as `geom_dots` for dot-plots. These are particularly useful when you have a relatively small number of observations per group:
+The `ggdist` package includes others such as `geom_dots` for dot-plots. These are particularly useful when you have a relatively small number of observations per group:
 
 ```{r}
 library(ggdist)
@@ -287,7 +256,7 @@ lego_sets |> slice_sample(n = 100) |>
   geom_dots()
 ```
 
-If you have lots of data, you can reduce things down to quantiles using `stat_dots` instead. e.g. to plot with 50 points per group:
+If you have lots of data, you can reduce things down to quantiles using `stat_dots()` instead. e.g. to plot with 50 points per group:
 
 ```{r}
 lego_sets |> filter(theme %in% c("Star Wars", "Friends", "Town")) |>
@@ -330,7 +299,7 @@ lego_sets |>
   scale_x_log10()
 ```
 
-Finally, we can also do things like intentionally overlap densities using `stat_slab`. This creates what are known as "joy plots" (after Joy Division) or "ridge plots":
+Finally, we can also do things like intentionally overlap densities using `stat_slab`. This creates what are known as "ridge lines" or "joy plots" (after Joy Division):
 
 ```{r}
 lego_sets |>
@@ -341,7 +310,12 @@ lego_sets |>
   scale_x_log10()
 ```
 
-## Try yourself
+### Try yourself
 
 1. Explore the `trim` and `density` arguments to see if you can control how abruptly the densities end for each theme. By default the density is `bounded` which means the estimate is constrained to the range of the data. It is also trimmed to the range of the data. Visually these type of plots tend to work better with unbounded and untrimmed densities (albeit you need to remember that the true range of the data is less than the density range!)
 
+## Finishing up
+
+As this is a Quarto document, we can **Render** it to a nice, self-contained .HTML report.
+
+**Make sure you can Render your document successfully.**
