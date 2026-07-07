@@ -14,8 +14,6 @@ format:
 ---
 
 ```{r}
-#| echo: false
-
 library(tidyverse)
 theme_set(theme_minimal(base_size=20))
 
@@ -29,9 +27,13 @@ There are a number of options for visualising distributions:
 
 :::{.incremental}
 - Histograms
+
 - Densities
+
 - Boxplots
+
 - Violins (densities again)
+
 - Dots (jittered scatter, dot plot)
 :::
 
@@ -41,6 +43,9 @@ Except for the jittered scatter, these display a **statistical summary** of the 
 
 ## Petrels caught as by-catch in NZ waters{.smaller}
 
+::::{.columns}
+
+:::{.column width=65%}
 ```{r}
 petrels <- read_csv("https://www.massey.ac.nz/~jcmarsha/227212/data/petrels.csv") |> select(year=Year, month=Month, area=Area, sex=Sex, wing_length=R.Wing.Lth, tarsus_length=R.Tarsus.Lth) |>
   na.omit()
@@ -48,6 +53,9 @@ petrels |>
   slice_head(n=10) |>
   knitr::kable()
 ```
+:::
+::::
+
 ## Histograms: Bin and count{.smaller}
 
 ::::{.columns}
@@ -71,7 +79,7 @@ petrel_counts |> filter(range > 9) |> select(-range) |> knitr::kable()
 ```
 :::
 
-:::{.column width="50%"}
+:::{.column .absolute top=10% right=-5%}
 
 :::{.fragment}
 
@@ -103,7 +111,7 @@ ggplot(petrels) +
 ```
 :::
 
-:::{.column}
+:::{.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bin1"
@@ -126,7 +134,7 @@ ggplot(petrels) +
 ```
 :::
 
-:::{.column}
+:::{.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bin2"
@@ -150,7 +158,7 @@ ggplot(petrels) +
 ```
 :::
 
-:::{.column}
+:::{.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bin3"
@@ -174,7 +182,7 @@ ggplot(petrels) +
 ```
 :::
 
-:::{.column}
+:::{.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bin4"
@@ -200,7 +208,7 @@ ggplot(petrels) +
 We can specify `binwidth` instead.
 :::
 
-:::{.column}
+:::{.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bin5"
@@ -229,7 +237,7 @@ We can specify `binwidth` instead.
 And position exactly with `boundary` or `center`.
 :::
 
-:::{.column}
+:::{.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bin6"
@@ -257,7 +265,7 @@ The kernel $K_h$ is often a normal distribution with standard deviation $h$.
 :::
 
 :::{.fragment}
-The **bandwidth** $h$ determines the smoothness of the estimate
+The **bandwidth** $h$ determines the smoothness of the estimate.
 :::
 
 ## Densities
@@ -312,7 +320,7 @@ ggplot(petrels) +
 `adjust < 1` for less smoothing.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bw1"
@@ -338,7 +346,7 @@ ggplot(petrels) +
 `adjust > 1` for more smoothing.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bw2"
@@ -363,7 +371,7 @@ ggplot(petrels) +
 The default is usually pretty good.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "bw3"
@@ -390,7 +398,7 @@ By default bars stack.
 Not what we want!
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups1"
@@ -418,7 +426,7 @@ Use 'identity' to position all bars at zero.
 One will be in front of the other.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups2"
@@ -447,7 +455,7 @@ Use 'identity' to position all bars at zero.
 Possibly use transparency?
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups3"
@@ -476,7 +484,7 @@ Use 'identity' to position all bars at zero.
 Reorder the groups?
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups4"
@@ -503,10 +511,35 @@ ggplot(petrels) +
 Using facets is probably best.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups5"
+```
+:::
+
+::::
+
+## What about groups?
+
+:::: {.columns}
+
+::: {.column}
+```{r groups5b}
+#| eval: false
+#| echo: true
+ggplot(petrels) +
+  aes(x=wing_length) +
+  geom_histogram(binwidth=5) +
+  facet_wrap(vars(sex), ncol=1)
+```
+
+In a single column they share the scale.
+:::
+
+::: {.column .absolute top=5% right=-5%}
+```{r}
+#| ref.label: "groups5b"
 ```
 :::
 
@@ -528,7 +561,7 @@ ggplot(petrels) +
 Densities don't stack.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups6"
@@ -553,7 +586,7 @@ ggplot(petrels) +
 Stacking is not advised!
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups7"
@@ -577,10 +610,10 @@ ggplot(petrels) +
 
 A bit of transparency will work.
 
-Densities are better than
+Densities are better than histograms for a small number of groups.
 :::
 
-::: {.column}
+::: {.column .absolute top=10% right=-5%}
 ```{r}
 #| fig.height: 5
 #| ref.label: "groups8"
@@ -642,7 +675,7 @@ ggplot(petrels) +
 ```
 
 :::{.fragment}
-Violins are back to back densities per group.
+Violins are back to back densities per group. They show shape better than boxplots.
 :::
 
 ## Scatterplots?
@@ -657,7 +690,25 @@ ggplot(petrels) +
 ```
 
 :::{.fragment}
-Scatterplots with some horizontal jitter can work too.
+Scatterplots with some horizontal jitter can work too, showing the raw data.
+:::
+
+## A quantile dot plot
+
+```{r}
+#| fig.width: 10
+#| fig.align: 'center'
+library(ggdist)
+ggplot(petrels) +
+  aes(x=wing_length, y=area) +
+  stat_dots(quantiles=50, fill='darkorange', colour=NA) +
+  scale_y_discrete(expand=expansion(mult=c(0,0.05))) +
+  labs(x="Wing length (mm)", y="Area") +
+  theme(axis.text.y = element_text(vjust=0))
+```
+
+:::{.fragment}
+`stat_dots()` from `ggdist` shows representative individuals from the distribution.
 :::
 
 ## Ridge lines
@@ -665,7 +716,6 @@ Scatterplots with some horizontal jitter can work too.
 ```{r}
 #| fig.width: 10
 #| fig.align: 'center'
-library(ggdist)
 ggplot(petrels) +
   aes(x=wing_length, y=area) +
   geom_slab(stat='slab', height=2, fill='darkorange', colour='white', trim=FALSE, density='unbounded') +
