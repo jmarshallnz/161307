@@ -1,0 +1,17 @@
+---
+title: "Workshop 2: Distributions"
+format: html
+---
+
+In this workshop we're looking at:
+
+- Visualising amounts (barcharts)
+- Visualising distributions (histograms, densities, boxplots and more)
+
+Start by downloading lab02.qmd into your 161307 project folder
+
+[https://www.massey.ac.nz/~jcmarsha/161307/labs/lab02.qmd](https://www.massey.ac.nz/~jcmarsha/161307/labs/lab02.qmd)
+
+Open your 161307 project in RStudio and then load up `lab02.qmd` and work through the workshop.
+
+**Remember to take lots of notes and to ask questions of the teaching staff if there's anything you find unclear.**

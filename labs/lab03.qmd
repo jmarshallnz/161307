@@ -91,7 +91,7 @@ We need to convert the data to **long** form so that it's tidy. Recall we can do
 
 2. The `age` column is now a character variable rather than a number. We know these are age in years but we need to convert it to a number to summarise things nicely. Do this now. *Hint: the `extract()` function might be useful here. Remember you want to convert the type of the variable to numeric afterwards.
 
-3. Save the final dataset as `births`.
+3. Assign the final dataset to an object named `births`.
 
 4. Check that `births` has the same number of rows for each `age` and each `year` (e.g. using `count()`).
 
@@ -101,8 +101,7 @@ In case you haven't figured out how to get the data into the tidy form we want, 
 
 ```{r}
 # UNCOMMENT AND RUN THIS IF YOU NEED TO DO SO
-# births <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/births_tidy.csv")
-births <- read_csv("births_tidy.csv")
+# births <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/births_tidy.csv")
 ```
 
 Now that we have things tidy, we can do some summaries!
