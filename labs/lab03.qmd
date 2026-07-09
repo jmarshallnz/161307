@@ -11,7 +11,7 @@ There are two goals of todays workshop:
 
 1. Take a look at obtaining some real data from Statistics NZ, and tidying it up.
 
-2. Tidying up plots by looking at themes, fonts and sizing.
+2. Tidying up plots by looking at themes, fonts and sizing and adding annotation.
 
 Both of these are really important: data just about never comes in the form you've likely seen to date in your statistics education - it's hardly ever nice and tidy and thus needs a little (or a lot) of janitor work to get it cleaned up and ready for analysis or presentation.
 
@@ -23,20 +23,21 @@ Recall that the YAML (yet another markup language) at the top of the file specif
 
 In this workshop there's been a change. We've removed the `embed-resources: true` setting that we used in the first two workshops (and will likely use again!) so that we can look under the hood. We've also add a new option to switch the default graphics device to use `ragg` for `png` output.
 
-You will need to install the following packages for this workshop: `ragg`, `systemfonts`, `textshaping`. You would have been prompted about this when you first loaded this file into RStudio.
+You will need to install the following packages for this workshop: `ragg`, `systemfonts`, `textshaping` and `marquee`. You would have been prompted about this when you first loaded this file into RStudio.
 
 ```{r}
 library(tidyverse)
 library(ragg)        # These are only here so you get a prompt to install them. The `dev: ragg_png` line in the YAML takes care of it otherwise!
 library(systemfonts)
 library(textshaping)
+library(marquee)
 ```
 
 ## Getting some real data: Mothers age at birth in Ao/NZ by year
 
 We'll start by obtaining some data on mothers age at birth over time in Aotearoa New Zealand. Statistics NZ contains this (and lots more!) data on the Ao/NZ population. They have a variety of databases and interfaces to those data. The one we'll be using today is Infoshare which is a rather old-school interface. You can get there here:
 
-https://infoshare.stats.govt.nz
+<https://infoshare.stats.govt.nz>
 
 We'll be looking at births by mothers age and year. That is under Population -> Births VSB, so click through them to "Live births by age of Mother (Annual-Dec)"
 
@@ -48,14 +49,14 @@ You can also save this to .csv file by clicking on the "Save table" dropdown at 
 
 ```{r}
 library(tidyverse)
-stats_births_try1 <- read_csv("VSB355804_20260624_114159_2.csv") # TODO: Change me to the correct path/filename.
+stats_births_try1 <- read_csv("VSB355804_20260710_104445_99.csv") # TODO: Change me to the correct path/filename.
 stats_births_try1
 ```
 
 As you can see, that's a bit of a mess. The first reason is that all the column names for mother age are on row 2 instead of row 1. We can fix this by skipping the first row (at the expense of losing the first column's name):
 
 ```{r}
-stats_births_try2 <- read_csv("VSB355804_20260624_114159_2.csv", skip=1) # TODO: Change me to the correct path/filename.
+stats_births_try2 <- read_csv("VSB355804_20260710_104445_99.csv", skip=1) # TODO: Change me to the correct path/filename.
 stats_births_try2
 ```
 
@@ -101,7 +102,7 @@ In case you haven't figured out how to get the data into the tidy form we want, 
 
 ```{r}
 # UNCOMMENT AND RUN THIS IF YOU NEED TO DO SO
-# births <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/births_tidy.csv")
+births <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/births_tidy.csv")
 ```
 
 Now that we have things tidy, we can do some summaries!
@@ -136,6 +137,14 @@ ggplot(births) +
   aes(x=year, y=age, fill=births) +
   geom_tile()
 ```
+
+### Try yourself
+
+1. Modify the palette used in the above. Recall that this is a continuous measure so will be by default using `scale_fill_gradient()`. Try some different gradients.
+
+2. Try switching to a `viridis` palette or using `scale_fill_distiller()` to pick a color brewer palette.
+
+3. Tidy up the labels and add a title.
 
 The 45 degree 'lines' on the left of the plot are interesting. This corresponds to a single *cohort* (by birth year) of mothers. i.e. the square at 1963, age 21 corresponds to mothers born in 1942. That same cohort is age 22 in 1964 and 23 in 1965. So if a cohort/generation is having more births than a previous one you get the angled striping.
 
@@ -217,6 +226,8 @@ What if you want to use a different font? It turns out that fonts are a world of
 
 There are various solutions, but the best one in our view is to use `systemfonts` and `textshaping` along with the `ragg` graphics device. This ensures you have cross-platform (i.e. works on Windows, Mac and Linux) support for any fonts installed on your system.
 
+**NOTE: For this to work you need to set "AGG" as the Graphics Backend in RStudio -> Global Options -> General -> Graphics.**
+
 To see which fonts you have available, you can use:
 
 ```{r}
@@ -232,7 +243,7 @@ ggplot(mean_birth_age) + aes(x=year, y=mean_age) + geom_point() + theme_classic(
 
 ### Try yourself
 
-1. Go to googlefonts or font squirrel and have a look for a nice font you might like.
+1. Go to googlefonts and have a look for a nice font you might like.
 
 2. Use `systemfont::require_font()` to download it automatically.
 
@@ -332,3 +343,89 @@ If you Render this document you'll find you have a `lab03_files` folder that con
 5. You might also notice that old files stay around here. You can always delete the folder and they'll all re-generate on the next render.
 
 6. Add the YAML that turns embedding resources back on (see `lab01.qmd` for example). What will happen is these folders will still be generated, but the files therein will then be embedded directly in the HTML file. This is useful for distribution of a single document as it's just one file.
+
+## Annotation
+
+Often it is useful to highlight certain observations or key points on a chart using an additional label placed on the panel itself. There are two main ways this can be done: `geom_text()` is useful when you want to place labels for several, or perhaps all data points on a chart, whereas `annotate()` is useful for just one or two additions that needn't be aligned with data.
+
+```{r}
+base_chart <- ggplot(mean_birth_age) +
+  aes(x = year, y = mean_age) +
+  geom_point()
+
+base_chart + annotate(geom='text', x=1978, y=25, label="Mean birth age was lowest in 1972", hjust=0)
+```
+
+### Try yourself
+
+1. The `hjust` and `vjust` aesthetics/parameters are used for justifying text. Try removing the `hjust=0` from the above example to see how they work.
+
+2. Another option for highlighting is to use `geom_vline()` or `geom_hline()` to add horizontal or vertical lines. Try adding a vertical line at `xintercept=2008` to highlight the small dip. *Hint: you'll want to consider which geometry layer goes first, and think about use of `linewidth` and suitable colour.*
+
+3. Add another `annotate()` to add context to the line you've added at `x=2008`.
+
+A common but perhaps more complicated example is the `eggs` one from Lecture 1b where we labeled two timeseries:
+
+```{r}
+eggs <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/eggs.csv")
+ggplot(eggs) +
+  aes(x=month, y=price, col=product) +
+  geom_line()
+```
+
+To label these time series on the lines rather than have a guide we can utilise `geom_text` instead, where we restrict the data to just the points we need to label (i.e. the rightmost observations):
+
+```{r}
+egg_labels <- eggs |> slice_max(month, n=1)
+ggplot(eggs) +
+  aes(x=month, y=price, col=product, label=product) +
+  geom_line() +
+  geom_text(data=egg_labels)
+```
+
+Notice that we've add a `data=` argument to a geometry! This is a handy trick to display multiple different datasets on the same chart. Note however that they shouldn't be completely different - they should at least share the major aesthetic variables. It's particularly useful for adding things like labels.
+
+Now we need to tidy things up so we can see the labels and so they don't overlap the lines. We could left justify them but then we'll need to make more space on the right of the plot.
+
+### Try yourself
+
+1. Remove the guide which is no longer required.
+
+2. Use the `hjust` field to push the text to the right so it doesn't overlap the lines.
+
+3. The text will now be cut-off as it goes outside the panel. There are two ways to fix this. The easiest is to just increase the `limits` of the x-axis via `scale_x_date()`. Try that first.
+
+4. An alternate and neater solution is to turn off the 'clipping' that happens outside the panel. You can do this via `coord_cartesian(clip='off')`
+
+5. You will likely still need to add a bit more space on the outside of the plot on the right for the labels to take up. You can do this via `plot.margin` in `theme()`.
+
+## Fancier annotations with `marquee`
+
+We've seen how to add different fonts and alter styling. What if we want to alter the styling *inside* an annotation? e.g. perhaps on the mean birth age plot we might want the words 'birth age' to be bold, while the rest of the label is plain.
+
+The `marquee` package allows for the use of markdown formatted text using `geom_marquee()` for text elements on the chart and `element_marquee()` for theming:
+
+```{r}
+ggplot(mean_birth_age) +
+  aes(x = year, y = mean_age) +
+  geom_point() +
+  annotate(geom='marquee', x=1978, y=25, label="Mean **birth age** was lowest in 1972", hjust=0)
+```
+
+### Try yourself
+
+1. Add a title to the above plot that utilises some markdown (e.g. bold, italic) formatting.
+
+2. Add `plot.title=element_marquee()` to `theme()` to get it rendered correctly.
+
+3. Experiment with colour in the title element. e.g. try "My {.red this is a red} title".
+
+4. See if you can figure out how to add custom colours (instead of the built-in markdown/HTML colours) using hex codes.
+
+5. Spend some time tweaking the labels, title, theme, sizing, fonts and colours of this chart to make it your own.
+
+## Finishing up
+
+As this is a Quarto document, we can **Render** it to a nice, self-contained .HTML report.
+
+**Make sure you can Render your document successfully.**
