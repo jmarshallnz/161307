@@ -20,7 +20,7 @@ Make sure you have both R and RStudio installed. In addition, make sure you have
 
 Both of these are detailed here:
 
-[https://r-resources.massey.ac.nz/help/usingrin297.101.html](https://r-resources.massey.ac.nz/help/usingrin297.101.html)
+<https://r-resources.massey.ac.nz/help/usingrin297.101.html>
 
 ## Creating a project for your work
 
@@ -43,7 +43,7 @@ Now download `lab01.qmd` into this folder.
 
 The easiest way to do this is to right click on the URL below and "Save file as..."
 
-[https://www.massey.ac.nz/~jcmarsha/161307/labs/lab01.qmd](https://www.massey.ac.nz/~jcmarsha/161307/labs/lab01.qmd)
+<https://www.massey.ac.nz/~jcmarsha/161307/labs/lab01.qmd>
 
 Save it into the 161307 folder you created above.
 

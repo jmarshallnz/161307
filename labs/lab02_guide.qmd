@@ -10,7 +10,7 @@ In this workshop we're looking at:
 
 Start by downloading lab02.qmd into your 161307 project folder
 
-[https://www.massey.ac.nz/~jcmarsha/161307/labs/lab02.qmd](https://www.massey.ac.nz/~jcmarsha/161307/labs/lab02.qmd)
+<https://www.massey.ac.nz/~jcmarsha/161307/labs/lab02.qmd>
 
 Open your 161307 project in RStudio and then load up `lab02.qmd` and work through the workshop.
 
