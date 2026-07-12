@@ -41,7 +41,7 @@ Download the `portfolio01.qmd` template file below and write code using the `set
  - Show both the data and a trend on each facet.
  - Your chart should have appropriate labels, a title and subtitle.
  - Use the title to help tell the story of the chart.
- - You should submit the `portfolio.qmd` file to the stream dropbox.
+ - You should submit the `portfolio01.qmd` file to the stream dropbox.
  - Make sure that it renders correctly before submission.
  
 ## Grading rubric
@@ -56,4 +56,4 @@ You will be graded out of 10 based on:
 
 Download your template file by right clicking and selecting Save File As...
 
-[https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio01.qmd](https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio01.qmd)
+<https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio01.qmd>

@@ -30,7 +30,7 @@ Download the `portfolio02.qmd` template file below and write code using the `wal
  - Your chart should clearly show the **distribution** of the number of people using the bridge for each of the 7 days separately.
  - Consider carefully what the "story" of your chart is and use the title/subtitle or annotation to help highlight the story.
  - Ensure your chart has clear labels.
- - You should submit the `portfolio.qmd` file to the stream dropbox.
+ - You should submit the `portfolio02.qmd` file to the stream dropbox.
  - Make sure that it renders correctly before submission.
  
 ## Grading rubric
@@ -45,4 +45,4 @@ You will be graded out of 10 based on:
 
 Download your template file by right clicking and selecting Save File As...
 
-[https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio02.qmd](https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio02.qmd)
+<https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio02.qmd>
