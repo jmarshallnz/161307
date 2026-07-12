@@ -1,0 +1,50 @@
+---
+title: "Portfolio 3: Joyous Births"
+format:
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+For this portfolio we'll be recreating one of the classic "ridge-line" plots or "joy plots" that show changes in mothers age of birth through time.
+
+This is usually done with US data to highlight the baby boom, but we'll be using the Aotearoa/NZ data instead, by cohort:
+
+```{r}
+#| message: false
+library(tidyverse)
+
+nz_births <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/nz/births_tidy.csv") |>
+  mutate(cohort = year - age) |> # mothers year of birth
+  filter(cohort >= 1948, cohort <= 1980, age < 46)
+```
+
+
+## Requirements
+
+Download the `portfolio03.qmd` template file below and **modify** the existing figure code to produce a unique, eye-catching chart with the same geometry type.
+
+ - Ensure you fill in your name in the author field.
+ - Keep the same geometry (`geom_slab()`) but instead focus on the presentation.
+ - Your chart must have appropriate labels and a title.
+ - You must use a theme for your chart that is unique: any pre-existing theme used must be modified.
+ - You must utilise a non-standard font which is acquired via `require_font()` from an online source (for reproducibility).
+ - You must utilise a colour in your chart in some way. This needn't be mapped to an aesthetic (though can be if you wish).
+ - You must alter the aspect ratio or dimensions of the figure.
+ - You should submit the `portfolio03.qmd` file to the stream dropbox.
+ - Make sure that it renders correctly before submission.
+ 
+## Grading rubric
+
+You will be graded out of 10 based on:
+
+ - Your submission must be reproducible and render without errors or warnings (2 marks).
+ - Your submission must include your name in the author field and the code for your chart (2 marks).
+ - Your chart should satisfy the requirements given above (6 marks).
+
+## Template file
+
+Download your template file by right clicking and selecting Save File As...
+
+<https://www.massey.ac.nz/~jcmarsha/161307/portfolio/portfolio03.qmd>
