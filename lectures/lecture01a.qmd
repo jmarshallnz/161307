@@ -84,8 +84,8 @@ ag_production |>
 ## The ggplot2 recipe
 
 :::{.incremental}
-1. Create a chart with `ggplot2()`
-2. Assign some data to the chart with `data=foo`, i.e. `ggplot2(data=foo)`
+1. Create a chart with `ggplot()`
+2. Assign some data to the chart with `data=foo`, i.e. `ggplot(data=foo)`
 3. Define the mapping from features of the chart to variables/columns in the data with `aes()`
 4. Choose which type of geometry to use with `geom_*()`.
 :::
