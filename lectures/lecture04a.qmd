@@ -1,0 +1,189 @@
+---
+title: "Space!"
+format:
+  revealjs:
+    theme: [solarized, slides.scss]
+    width: 1280
+    height: 720
+    margin: 0.1
+    echo: false
+    message: false
+    fig-width: 7
+    fig-height: 7
+---
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+theme_set(theme_minimal(base_size=20))
+```
+
+# Spatial data
+
+## Spatial data
+
+Spatial data is anything that has some position or coordinates associated with it.
+
+There are four main types:
+
+- **Points**: x, y coordinates possibly with some other data associated with them.
+
+- **Lines**: A linked set of points that may have data on the links.
+
+- **Polygons**: closed polygons that describe the boundaries of a set of regions which possibly have some other data associated with them.
+
+- **Grids**: A special case where the polygons are uniform rectangles that form a grid.
+
+We'll be looking at points, polygons and grids. Lines will be present through polygon borders though!
+
+## Points
+
+Point data are the locations of observations through some spatial region.
+
+The spatial region might be bounded (e.g. points within a country or city) or unbounded.
+
+Can be more than two dimensional (e.g. points in 3D space) but we'll be focusing on 2D, and will generally assume that this 2D data are **planar**. i.e. lie in a plane.
+
+Many such data that we assume are planar are not! e.g. locations on the planet are better approximated by a sphere but like the term "plane sailing" we'll temporally become flat-earthers!
+
+## Questions about points
+
+The simplest question about points is: "why are they there?"
+
+i.e. what is the **process** that gave rise to this particular pattern of points that we see.
+
+Other questions may be:
+
+- Is something we've measured at these points related to the location? *Spatial correlation*
+
+- Can we take a measure from one set of points and infer what that measure might be somewhere else? *Spatial interpolation*
+
+## Earthquakes around Fiji
+
+```{r}
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.3)
+```
+
+- Have longitude/latitude information
+- Assume the data are 'flat' in these
+- Aspect ratio will matter though!
+
+## Cricket wagon-wheels
+
+```{r}
+
+```
+
+## Point processes
+
+A point process is the statistical model that gives rise to the location of points.
+
+A one-dimensional point process produces event times.
+
+A two-dimensional point process produces event locations.
+
+We usually model these with some sort of *statistical process*.
+
+## Poisson processes
+
+A spatial *Poisson process* generates $N$ points in an area $A$ proportionally according to the area of the region and some underlying "points per unit area" rate, $\lambda$. That is, for any region $A$ and rate $\lambda$ we expect the number of points $N(A)$ to follow a Poisson distribution:
+
+$$
+P(N(A) = n) ~ Poisson(\lambda|A|)
+$$
+
+The rate of points scales with the area: larger area has more points than smaller areas.
+
+The **strong** assumption is that the points don't interact: i.e. their location is not influenced by the location of other points.
+
+## Random?
+
+Picture of homogeneous PPT and a couple of cluster processes.
+
+## Homogeneous and inhomogeneous processes
+
+If the rate $\lambda$ is constant across the region, then the process is **homogeneous**, and the points that result are completely spatially random: The chance of a point being in any location is fully randomised.
+
+In most cases the chance of a point being in a location is not fully randomised as some locations are more likely than others. e.g. people may enjoy living by the sea more than they enjoy living in a desert, so locations closer to the sea will be more likely to have people than locations in deserts.
+
+This is an **inhomogeneous** process where the rate $\lambda = \lambda(x,y)$ depends on the location $(x,y)$. The same basic ideas apply: the number of points in a region A still follow the Poisson but now we have to account for the varying rate or **intensity** $\lambda$:
+
+$$
+P(N(A) = n) ~ Poisson(\Lambda(x))
+\Lambda(x) = \int_A \lambda(x) dx
+$$
+
+## Points are still independent
+
+In an inhomogeneous process the points still don't interact with each other: having more people nearby does not mean that additional people are likely to be there, it's just that there's some external pressure from the intensity $\lambda$ that results in more points in one place than another.
+
+Other fancier processes that allow for **spatial clustering** are also a thing.
+
+See 233.214 GIS and Spatial Statistics for more on this!
+
+## What is important in a point process?
+
+The key thing of importance is the underlying **intensity** function $\lambda(x)$: we want to know where points are more or less likely to be.
+
+We note that the data we have to do this is finite: just a pattern of $n$ points. And the thing we want to know about is an infinite dimensional object: a probably smooth function of x for the infinite possibilities of locations!
+
+So we're not just estimating a mean here! We're gonna need something a bit fancier.
+
+## Estimating point intensity
+
+Typically we use a kernel density estimator to estimate $\lambda$, by noting that we can write $\lambda(x)$ as a constant (the expected number of points) times a probability density (i.e. sums to 1):
+
+$$
+\lambda(x) = \Lambda_0 f(x), \qquad \int_A f(x) dx = 1.
+$$
+
+Estimating $f(x)$ is then just estimating a density, just we're in two dimensions instead of one!
+
+$$
+\hat f(x)= \frac{1}{n} \sum_{i=1}^n K_h(x - x_i)
+$$
+Same idea, just that now $x$ and $x_i$ are 2-d spatial locations, and the kernel $K_h$ is a two dimensional kernel rather than 1d. We usually settle for a bivariate normal distribution and assume that it is rotationally symmetric[^1] so that $h$ has just one dimension.
+
+In `ggplot2` we can use `geom_density_2d()` :)
+
+[^1]: isotropic
+
+## Quakes
+
+EXAMPLE GOES HERE
+
+## KDEs give uniform smoothing
+
+Our kernel density estimator uses a single bandwidth $h$ for the smoothing.
+
+This applies across the entire area.
+
+But, if the intensity is changing across the area, then that implies that the amount of data (information!) we have differs across the region.
+
+If we smooth everything by the same amount, places where we have lots of data/signal will be tend to be smoothed too much, whilst places where data are sparse may be smoothed too little.
+
+Ideally we'd allow our estimator to adapt the amount of smoothing to the situation.
+
+## Adaptive KDE
+
+In adaptive kernel density estimates we allow $h = h(x)$ to vary with $x$.
+
+But this presents a chicken and egg situation: the ideal is for $h(x)$ to be larger (more smoothing) when points are rare (i.e. when $f(x)$ is small) while $h(x)$ should be smaller (less smoothing) when points are dense (i.e. when $f(x)$ is large). But we don't know $f(x)$!!
+
+## Iterating out of the chicken/egg
+
+To figure out the best $h(x)$ we first obtain a pilot estimate $\hat f_p(x)$ with constant smoothing.
+
+We then set $h(x) = \frac{1}{\sqrt{f_p(x)}}$ which turns out to be optimal[^2] and use that in a second round of estimation.
+
+Potentially we could then iterate again, using our new (adaptive) estimate to get a better idea of $h(x)$ to estimate a third time, but it's usually not necessary!
+
+[^2]: See Abramson 1982
+
+## Adaptive quakes
+
+TODO: Constant, then adaptive.
+
