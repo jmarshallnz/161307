@@ -32,14 +32,31 @@ Download the `portfolio02.qmd` template file below and write code using the `wal
  - Ensure your chart has clear labels.
  - You should submit the `portfolio02.qmd` file to the stream dropbox.
  - Make sure that it renders correctly before submission.
- 
-## Grading rubric
+
+**Our expectation is this should take you approximately one hour.** You may spend more or less time than this if you wish, but there is no need to do so if your chart satisfies the criteria above.
+
+::: {.callout-note collapse="true" appearance="simple"}
+
+### Grading rubric
 
 You will be graded out of 10 based on:
 
- - Your submission must be reproducible and render without errors or warnings (2 marks).
- - Your submission must include your name in the author field and the code for your chart (2 marks).
- - Your chart should satisfy the requirements given above (6 marks).
+|  |  |  |
+|---------|---------------------------------------------------------|------|
+| **Reproducibility** | Your .qmd file renders correctly without errors or warnings | 2 |
+|  | Your .qmd file renders but has warnings | 1 |
+|  | Your .qmd file doesn't render without modification | 0 |
+| **Code/Authorship** | Your name is in the author field and all necessary code is visible in the rendered document | 2 |
+|  | Your code is visible in the rendered document but your name is missing | 1 |
+|  | Both code and name are missing | 0 |
+| **Chart** | Your chart satisfies all criteria and is well labelled | 6 |
+|  | Your chart satisfies all criteria but has a minor flaw with labelling or dimensions | 5 |
+|  | Your chart satisfies all criteria but has multiple minor flaws or uses sub-optimal geometry | 4 |
+|  | Your chart has major flaws, is missing criteria or is confusing | 3 |
+|  | Your chart is inappropriate or incomprehensible | 1 |
+|  | Missing or entirely incorrect | 0 |
+
+:::
 
 ## Template file
 
