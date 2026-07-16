@@ -64,7 +64,7 @@ Other questions may be:
 ```{r}
 ggplot(quakes) +
   aes(x=long, y=lat) +
-  geom_point(alpha=0.3)
+  geom_point(alpha=0.2)
 ```
 
 - Have longitude/latitude information
@@ -74,8 +74,36 @@ ggplot(quakes) +
 ## Cricket wagon-wheels
 
 ```{r}
+nz_cric <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/cricket/nz_bat_scores.csv")
 
+bmc <- nz_cric |> filter(p_match == 667653,
+                  score != 0, inns == 3,
+                  wagonX != 0, wagonY != 0,
+                  bat == "Brendon McCullum")
+ggplot(bmc) +
+  aes(x=wagonX, y=wagonY, colour=outcome, linewidth=outcome) +
+  geom_segment(aes(xend=0, yend=0)) +
+  scale_colour_manual(values = c(six = 'red2', four='gold', run='white')) +
+  scale_linewidth_manual(values= c(six = 1.5, four=1, run=0.5)) +
+  theme_void() + 
+  theme(panel.background=element_rect(fill='green4')) +
+  guides(colour='none', linewidth='none') +
+  coord_fixed()
 ```
+
+Brendon McCullum's innings of
+302 vs India in 2014
+
+## Cricket wagon-wheels
+
+```{r}
+ggplot(bmc) +
+  aes(x=wagonX, y=wagonY) +
+  geom_point(alpha=0.3)
+```
+
+Brendon McCullum's innings of
+302 vs India in 2014 as a point pattern.
 
 ## Point processes
 
@@ -128,7 +156,7 @@ See 233.214 GIS and Spatial Statistics for more on this!
 
 The key thing of importance is the underlying **intensity** function $\lambda(x)$: we want to know where points are more or less likely to be.
 
-We note that the data we have to do this is finite: just a pattern of $n$ points. And the thing we want to know about is an infinite dimensional object: a probably smooth function of x for the infinite possibilities of locations!
+We note that the data we have to do this is finite: just a pattern of $n$ points. And the thing we want to know about is an infinite dimensional object: a (probably) smooth function of x for the infinite possibilities of locations.
 
 So we're not just estimating a mean here! We're gonna need something a bit fancier.
 
@@ -140,18 +168,22 @@ $$
 \lambda(x) = \Lambda_0 f(x), \qquad \int_A f(x) dx = 1.
 $$
 
-Estimating $f(x)$ is then just estimating a density, just we're in two dimensions instead of one!
+Estimating $f(x)$ is then just estimating a density, just we're in two dimensions instead of one:
 
 $$
-\hat f(x)= \frac{1}{n} \sum_{i=1}^n K_h(x - x_i)
+\hat f(\mathbf{x})= \frac{1}{n} \sum_{i=1}^n K_h(\mathbf{x} - \mathbf{x}_i)
 $$
-Same idea, just that now $x$ and $x_i$ are 2-d spatial locations, and the kernel $K_h$ is a two dimensional kernel rather than 1d. We usually settle for a bivariate normal distribution and assume that it is rotationally symmetric[^1] so that $h$ has just one dimension.
+Same idea, just that now $\mathbf{x}$ and $\mathbf{x}_i$ are 2-d spatial locations, and the kernel $K_h$ is a two dimensional kernel rather than 1d. We usually settle for a bivariate normal distribution and assume that it is rotationally symmetric[^1] so that $h$ is a scalar.
 
 In `ggplot2` we can use `geom_density_2d()` :)
 
 [^1]: isotropic
 
 ## Quakes
+
+EXAMPLE GOES HERE
+
+## Cricket
 
 EXAMPLE GOES HERE
 
@@ -183,7 +215,32 @@ Potentially we could then iterate again, using our new (adaptive) estimate to ge
 
 [^2]: See Abramson 1982
 
+## Adaptive cricket?
+
+
 ## Adaptive quakes
 
-TODO: Constant, then adaptive.
+TODO: Constant, then show bandwidth (why 1/sqrt? - it's circular, and num points scales with area not radius) then adaptive.
+
+## Adding context to the quakes?
+
+e.g. Where is New Zealand in relation to this map?
+
+A map of NZ is available via map_data('nz')
+
+This just gives a row of x/y coordinates.
+
+Can use geom_path to link them up (difference between path/line/polygon)
+
+Sidequest: geom_line() orders the data in x first (good for time-series as the plot really shouldn't depend on order of x, right?) geom_path() orders by order in the data.
+
+So draw NZ on.
+
+## But is this flat? The sailing isn't plane anymore.
+
+Show distance between lowest and highest latitudes.
+
+We should at least be aware of the distortion that results (next time: CRS!)
+
+## Further reading...
 
