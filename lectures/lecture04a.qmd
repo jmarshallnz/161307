@@ -1,12 +1,12 @@
 ---
-title: "Space!"
+title: "Points in Space!"
 format:
   revealjs:
     theme: [solarized, slides.scss]
     width: 1280
     height: 720
     margin: 0.1
-    echo: false
+    echo: true
     message: false
     fig-width: 7
     fig-height: 7
@@ -25,17 +25,29 @@ theme_set(theme_minimal(base_size=20))
 
 Spatial data is anything that has some position or coordinates associated with it.
 
-There are four main types:
+There are four main types.
 
-- **Points**: x, y coordinates possibly with some other data associated with them.
+::: {.fragment}
+**Points**: x, y coordinates possibly with some other data associated with them.
+:::
 
-- **Lines**: A linked set of points that may have data on the links.
+::: {.fragment}
+**Lines**: A linked set of points that may have data on the links.
+:::
 
-- **Polygons**: closed polygons that describe the boundaries of a set of regions which possibly have some other data associated with them.
+::: {.fragment}
+**Polygons**: closed polygons that describe the boundaries of a set of regions which possibly have some other data associated with them.
+:::
 
-- **Grids**: A special case where the polygons are uniform rectangles that form a grid.
+::: {.fragment}
+**Grids**: A special case where the polygons are uniform rectangles that form a grid.
+:::
 
-We'll be looking at points, polygons and grids. Lines will be present through polygon borders though!
+::: {.fragment}
+::: aside
+We'll be looking at points, polygons and grids. Lines will be present through polygon borders though.
+:::
+:::
 
 ## Points
 
@@ -43,9 +55,11 @@ Point data are the locations of observations through some spatial region.
 
 The spatial region might be bounded (e.g. points within a country or city) or unbounded.
 
-Can be more than two dimensional (e.g. points in 3D space) but we'll be focusing on 2D, and will generally assume that this 2D data are **planar**. i.e. lie in a plane.
+Can be more than two dimensional (e.g. points in 3D space) but we'll be focusing on 2D, and will generally assume that this 2D data are **planar**.
 
-Many such data that we assume are planar are not! e.g. locations on the planet are better approximated by a sphere but like the term "plane sailing" we'll temporally become flat-earthers!
+:::{.fragment}
+Many such data that we assume are planar are not! e.g. locations on the planet are better approximated by a sphere but like the term "plane sailing" we'll temporally become flat-earthers.
+:::
 
 ## Questions about points
 
@@ -53,194 +67,666 @@ The simplest question about points is: "why are they there?"
 
 i.e. what is the **process** that gave rise to this particular pattern of points that we see.
 
+:::{.fragment}
 Other questions may be:
 
 - Is something we've measured at these points related to the location? *Spatial correlation*
 
 - Can we take a measure from one set of points and infer what that measure might be somewhere else? *Spatial interpolation*
+:::
 
 ## Earthquakes around Fiji
 
-```{r}
+:::: {.columns}
+
+::: {.column}
+```{r quakes1}
+#| eval: false
 ggplot(quakes) +
   aes(x=long, y=lat) +
   geom_point(alpha=0.2)
 ```
 
 - Have longitude/latitude information
+
 - Assume the data are 'flat' in these
-- Aspect ratio will matter though!
+
+:::
+
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "quakes1"
+```
+:::
+
+::::
+
+## Earthquakes around Fiji
+
+:::: {.columns}
+
+::: {.column}
+```{r quakes2}
+#| eval: false
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.2) +
+  coord_fixed()
+```
+
+- Have longitude/latitude information
+
+- Assume the data are 'flat' in these
+
+- The aspect ratio is important though!
+
+:::
+
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "quakes2"
+```
+:::
+
+::::
 
 ## Cricket wagon-wheels
 
+::::{.columns}
+
+:::{.column}
+
+Brendon McCullum's innings of
+302 against India in 2014
+
+:::
+
+::: {.column .absolute top=0 right=-5%}
+
 ```{r}
+#| echo: false
 nz_cric <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/cricket/nz_bat_scores.csv")
 
 bmc <- nz_cric |> filter(p_match == 667653,
                   score != 0, inns == 3,
                   wagonX != 0, wagonY != 0,
                   bat == "Brendon McCullum")
+
+oval <- tibble(theta = seq(0, 2*pi, length.out=200)) |>
+  mutate(x = 175*sin(theta), y = 175*cos(theta))
+
 ggplot(bmc) +
-  aes(x=wagonX, y=wagonY, colour=outcome, linewidth=outcome) +
-  geom_segment(aes(xend=0, yend=0)) +
+  geom_polygon(data=oval, aes(x=x, y=y), fill='green4', col=NA) +
+  geom_segment(aes(x=wagonX, y=wagonY, colour=outcome, linewidth=outcome, xend=0, yend=0)) +
   scale_colour_manual(values = c(six = 'red2', four='gold', run='white')) +
   scale_linewidth_manual(values= c(six = 1.5, four=1, run=0.5)) +
   theme_void() + 
-  theme(panel.background=element_rect(fill='green4')) +
+#  theme(panel.background=element_rect(fill='green4')) +
   guides(colour='none', linewidth='none') +
   coord_fixed()
 ```
 
-Brendon McCullum's innings of
-302 vs India in 2014
+:::
+::::
 
 ## Cricket wagon-wheels
 
-```{r}
+::::{.columns}
+
+:::{.column}
+
+```{r wagon1}
+#| eval: false
 ggplot(bmc) +
   aes(x=wagonX, y=wagonY) +
-  geom_point(alpha=0.3)
+  geom_point(alpha=0.3) +
+  coord_fixed()
 ```
 
 Brendon McCullum's innings of
-302 vs India in 2014 as a point pattern.
+302 against India in 2014 as a point pattern.
+
+:::
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "wagon1"
+```
+:::
+
+::::
+
+# Point processes
 
 ## Point processes
 
 A point process is the statistical model that gives rise to the location of points.
 
-A one-dimensional point process produces event times.
+:::{.incremental}
+- A one-dimensional point process produces event times.
 
-A two-dimensional point process produces event locations.
+- A two-dimensional point process produces event locations.
+:::
 
-We usually model these with some sort of *statistical process*.
+:::{.fragment}
+The simplest type of model is a *Poisson process* where we assume events occur independently at a given rate.
+:::
 
 ## Poisson processes
 
-A spatial *Poisson process* generates $N$ points in an area $A$ proportionally according to the area of the region and some underlying "points per unit area" rate, $\lambda$. That is, for any region $A$ and rate $\lambda$ we expect the number of points $N(A)$ to follow a Poisson distribution:
+A spatial *Poisson process* generates $N$ points in an area $A$ according to the area of the region and rate $\lambda$.
+
+:::{.fragment}
+For any region $A$ and rate $\lambda$ we expect the number of points $N(A)$ to follow a Poisson distribution:
 
 $$
-P(N(A) = n) ~ Poisson(\lambda|A|)
+P(N(A) = n) \sim \textsf{Poisson}(\lambda|A|)
 $$
+where $|A|$ is the area of region $A$.
+:::
 
-The rate of points scales with the area: larger area has more points than smaller areas.
-
+:::{.fragment}
 The **strong** assumption is that the points don't interact: i.e. their location is not influenced by the location of other points.
+:::
 
-## Random?
+## What is random?
 
-Picture of homogeneous PPT and a couple of cluster processes.
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+#| fig-align: 'center'
+library(spatstat)
 
-## Homogeneous and inhomogeneous processes
+set.seed(2025)
+csr <- rpoispp(lambda=50, nsim=1) |> as.data.frame()
+tom <- rThomas(8, 0.08, 7) |> as.data.frame()
+mat <- rMaternII(100, r=0.07) |> as.data.frame()
+sims <- bind_rows(csr, tom, mat, .id='model')
+ggplot(sims) +
+  aes(x=x, y=y) +
+  geom_point() +
+  theme_void() +
+  theme(panel.border = element_rect(colour='black', linewidth=0.5),
+        strip.text = element_blank()) +
+  facet_wrap(vars(model))
+```
 
-If the rate $\lambda$ is constant across the region, then the process is **homogeneous**, and the points that result are completely spatially random: The chance of a point being in any location is fully randomised.
+## Homogeneous processes
 
-In most cases the chance of a point being in a location is not fully randomised as some locations are more likely than others. e.g. people may enjoy living by the sea more than they enjoy living in a desert, so locations closer to the sea will be more likely to have people than locations in deserts.
+- If the **intensity** $\lambda$ is constant across the region, then the process is **homogeneous**.
 
-This is an **inhomogeneous** process where the rate $\lambda = \lambda(x,y)$ depends on the location $(x,y)$. The same basic ideas apply: the number of points in a region A still follow the Poisson but now we have to account for the varying rate or **intensity** $\lambda$:
+- The chance of a point being in any location is fully randomised.
+
+- The point patterns that result exhibit **complete spatial randomness** or CSR.
+
+:::{.fragment}
+This results in a simple statistical model, and works well-enough in a surprising number of examples.
+:::
+
+:::{.fragment}
+As a result there are various tests to check whether a point pattern is CSR.
+:::
+## Inhomogeneous processes
+
+A more realistic process is the **inhomogeneous** Poisson process where the rate $\lambda = \lambda(\mathbf{x})$ depends on the location $\mathbf{x}$.
+
+The number of points $N(A)$ in region $A$ still follows a Poisson distribution, but the intensity $\Lambda$ now depends on $\mathbf{x}$.
 
 $$
-P(N(A) = n) ~ Poisson(\Lambda(x))
-\Lambda(x) = \int_A \lambda(x) dx
+P(N(A) = n) \sim \textsf{Poisson}(\Lambda(A)), \qquad \Lambda(A) = \int_A \lambda(x) dx
 $$
 
 ## Points are still independent
 
-In an inhomogeneous process the points still don't interact with each other: having more people nearby does not mean that additional people are likely to be there, it's just that there's some external pressure from the intensity $\lambda$ that results in more points in one place than another.
+:::{.incremental}
+- In an inhomogeneous Poisson process the points still don't interact with each other.
 
-Other fancier processes that allow for **spatial clustering** are also a thing.
+- Having more people nearby does not mean that additional people are likely to be there.
 
-See 233.214 GIS and Spatial Statistics for more on this!
+- It's just that there's some external pressure (e.g. "the sea") from the intensity $\lambda$ that results in more points in one place than another.
+
+- Other fancier processes that allow for **spatial clustering** or **inhibition** are available.
+
+- Often the inhomogeneous Poisson process does pretty well though!
+:::
 
 ## What is important in a point process?
 
-The key thing of importance is the underlying **intensity** function $\lambda(x)$: we want to know where points are more or less likely to be.
+- The key thing of importance is the underlying **intensity** function $\lambda(\mathbf{x})$.
 
-We note that the data we have to do this is finite: just a pattern of $n$ points. And the thing we want to know about is an infinite dimensional object: a (probably) smooth function of x for the infinite possibilities of locations.
+- $\lambda(\mathbf{x})$ contains two separate ideas: How many points are generated (magnitude) plus where they are (density).
 
-So we're not just estimating a mean here! We're gonna need something a bit fancier.
+- It is the **density** that is of interest: where are points more or less likely to be?
+
+- To estimate the density we use a kernel density estimator.
+
+- Same idea as `geom_density()` extended to two dimensions.
 
 ## Estimating point intensity
 
-Typically we use a kernel density estimator to estimate $\lambda$, by noting that we can write $\lambda(x)$ as a constant (the expected number of points) times a probability density (i.e. sums to 1):
+We let $\lambda(\mathbf{x}) = \lambda_0 f(\mathbf{x})$ where $\lambda_0$ represents magnitude (number of points to be generated), and $f(\mathbf{x})$ is a probability density function (where they go).
 
-$$
-\lambda(x) = \Lambda_0 f(x), \qquad \int_A f(x) dx = 1.
-$$
-
-Estimating $f(x)$ is then just estimating a density, just we're in two dimensions instead of one:
+:::{.fragment}
+We estimate $f(\mathbf{x})$ using a KDE in two dimensions:
 
 $$
 \hat f(\mathbf{x})= \frac{1}{n} \sum_{i=1}^n K_h(\mathbf{x} - \mathbf{x}_i)
 $$
-Same idea, just that now $\mathbf{x}$ and $\mathbf{x}_i$ are 2-d spatial locations, and the kernel $K_h$ is a two dimensional kernel rather than 1d. We usually settle for a bivariate normal distribution and assume that it is rotationally symmetric[^1] so that $h$ is a scalar.
 
-In `ggplot2` we can use `geom_density_2d()` :)
+where $\mathbf{x}$ and $\mathbf{x}_i$ are 2-d spatial locations, and the kernel $K_h$ is a two dimensional kernel.
+:::
 
-[^1]: isotropic
+:::{.fragment}
+We usually set $K_h$ to be a bivariate normal distribution and assume that it is rotationally symmetric (isotropic) so that $h$ is a scalar.
+:::
 
-## Quakes
+:::{.fragment}
+In `ggplot2` we can use `geom_density_2d().`
+:::
 
-EXAMPLE GOES HERE
+
+## Earthquakes around Fiji
+
+:::: {.columns}
+
+::: {.column}
+```{r quakes3}
+#| eval: false
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.2) +
+  coord_fixed()
+```
+
+:::
+
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "quakes3"
+```
+:::
+
+::::
+
+## Earthquakes around Fiji
+
+:::: {.columns}
+
+::: {.column}
+```{r quakes4}
+#| eval: false
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.2) +
+  geom_density_2d() +
+  coord_fixed()
+```
+
+Use `geom_density_2d()` for a
+density estimator
+:::
+
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "quakes4"
+```
+:::
+
+::::
+
+
+## Earthquakes around Fiji
+
+:::: {.columns}
+
+::: {.column}
+```{r quakes5}
+#| eval: false
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.2) +
+  geom_density_2d(adjust=0.5) +
+  coord_fixed()
+```
+
+Use `geom_density_2d()` for a
+density estimator.
+
+Can tune the bandwidth with `adjust`
+:::
+
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "quakes5"
+```
+:::
+
+::::
+
+
+## Earthquakes around Fiji
+
+:::: {.columns}
+
+::: {.column}
+```{r quakes6}
+#| eval: false
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_density_2d_filled(adjust=0.5) +
+  geom_point(alpha=0.2, size=0.2) +
+  scale_fill_viridis_d() +
+  guides(fill='none') +
+  coord_fixed()
+```
+
+Use `geom_density_2d_filled()` to
+fill the contours.
+:::
+
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "quakes6"
+```
+:::
+
+::::
 
 ## Cricket
 
-EXAMPLE GOES HERE
+::::{.columns}
+
+:::{.column}
+
+```{r wagon2}
+#| eval: false
+ggplot(bmc) +
+  aes(x=wagonX, y=wagonY) +
+  geom_point(alpha=0.3) +
+  coord_fixed()
+```
+
+Brendon McCullum's innings of
+302 against India in 2014 as a point pattern.
+
+:::
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "wagon2"
+```
+:::
+
+::::
+
+## Cricket
+
+::::{.columns}
+
+:::{.column}
+
+```{r wagon3}
+#| eval: false
+ggplot(bmc) +
+  aes(x=wagonX, y=wagonY) +
+  geom_point(alpha=0.3) +
+  geom_density_2d() +
+  coord_fixed()
+```
+
+Brendon McCullum's innings of
+302 against India in 2014.
+
+:::
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "wagon3"
+```
+:::
+
+::::
+
+## Cricket
+
+```{r}
+#| echo: false
+sangakkara <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/cricket/sangakkara.csv")
+```
+::::{.columns}
+
+:::{.column}
+
+```{r wagon5}
+#| eval: false
+ggplot(sangakkara) +
+  aes(x=wagonX, y=wagonY) +
+  geom_point(alpha=0.3) +
+  geom_density_2d() +
+  coord_fixed()
+```
+
+Kumar Sangakkara's 319 against
+Bangladesh in 2014.
+
+:::
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "wagon5"
+```
+:::
+
+::::
 
 ## KDEs give uniform smoothing
 
-Our kernel density estimator uses a single bandwidth $h$ for the smoothing.
+:::{.incremental}
+- Our kernel density estimator uses a single bandwidth $h$ for the smoothing.
 
-This applies across the entire area.
+- This applies across the entire region.
 
-But, if the intensity is changing across the area, then that implies that the amount of data (information!) we have differs across the region.
+- But, if the intensity is changing across the area, then that implies that the amount of data (information!) we have differs across the region.
 
-If we smooth everything by the same amount, places where we have lots of data/signal will be tend to be smoothed too much, whilst places where data are sparse may be smoothed too little.
+- If we smooth everything by the same amount, places where data are dense will be tend to be *over-smoothed*, whilst places where data are sparse may be *under-smoothed*.
 
-Ideally we'd allow our estimator to adapt the amount of smoothing to the situation.
+- Ideally we'd allow our estimator to adapt the amount of smoothing to the situation.
+:::
 
 ## Adaptive KDE
 
-In adaptive kernel density estimates we allow $h = h(x)$ to vary with $x$.
+- In adaptive kernel density estimates we allow $h = h(\mathbf{x})$ to vary with $\mathbf{x}$.
 
-But this presents a chicken and egg situation: the ideal is for $h(x)$ to be larger (more smoothing) when points are rare (i.e. when $f(x)$ is small) while $h(x)$ should be smaller (less smoothing) when points are dense (i.e. when $f(x)$ is large). But we don't know $f(x)$!!
+- Where data are sparse ($f(\mathbf{x})$ is small) we want more smoothing.
+
+- Where data are dense ($f(\mathbf{x})$ is large) we want less smoothing.
+
+- Makes sense to smooth in proportion to $\frac{1}{\sqrt{f(\mathbf{x})}}$. **Why this form?**
+
+:::{.fragment}
+Chicken and egg problem: We need $h$ to estimate $f$ and $f$ to estimate $h$.
+:::
 
 ## Iterating out of the chicken/egg
 
-To figure out the best $h(x)$ we first obtain a pilot estimate $\hat f_p(x)$ with constant smoothing.
+:::{.incremental}
+- First get a **pilot estimate** $\hat f_p(x)$ with using constant smoothing with a fixed $h$.
 
-We then set $h(x) = \frac{1}{\sqrt{f_p(x)}}$ which turns out to be optimal[^2] and use that in a second round of estimation.
+- Set $h(x) = \frac{1}{\sqrt{f_p(x)}}$ and use that in a second round of estimation[^2].
 
-Potentially we could then iterate again, using our new (adaptive) estimate to get a better idea of $h(x)$ to estimate a third time, but it's usually not necessary!
+- We could iterate again, using our adaptive estimate to recompute $h(x)$ and estimate a third time, but it's usually not necessary.
+:::
 
-[^2]: See Abramson 1982
+[^2]: See [Abramson 1982](https://projecteuclid.org/journals/annals-of-statistics/volume-10/issue-4/On-Bandwidth-Variation-in-Kernel-Estimates-A-Square-Root-Law/10.1214/aos/1176345986.full) if you're especially keen on the maths!
 
-## Adaptive cricket?
+## Kumar Sangakkara
 
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+#| fig-align: 'center'
+sangakkara.ppp <- as.ppp(sangakkara |> select(wagonX, wagonY),
+                         W = owin(c(-200,200), c(-200,200)))
+h0=bw.ppl(sangakkara.ppp)
+
+fixed <-density(sangakkara.ppp, sigma=h0) |> as.data.frame()
+adaptive <- densityAdaptiveKernel(sangakkara.ppp, h0=h0) |> as.data.frame()
+
+bind_rows(lst(fixed, adaptive), .id="model") |>
+  mutate(model = fct_relevel(model, 'fixed')) |>
+  ggplot() +
+  geom_point(data=sangakkara, mapping=aes(x=wagonX, y=wagonY), alpha=0.3) +
+  geom_contour(mapping=aes(x=x, y=y, z=value)) +
+  coord_fixed() +
+  facet_wrap(vars(model)) +
+  theme(panel.spacing.x = unit(20, units='mm'))
+```
+
+## Brendon McCullum
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+#| fig-align: 'center'
+bmc.ppp <- as.ppp(bmc |> select(wagonX, wagonY),
+                         W = owin(c(-200,200), c(-200,200)))
+h0=bw.ppl(bmc.ppp)
+
+fixed <-density(bmc.ppp, sigma=h0) |> as.data.frame()
+adaptive <- densityAdaptiveKernel(bmc.ppp, h0=h0) |> as.data.frame()
+
+bind_rows(lst(fixed, adaptive), .id="model") |>
+  mutate(model = fct_relevel(model, 'fixed')) |>
+  ggplot() +
+  geom_point(data=bmc, mapping=aes(x=wagonX, y=wagonY), alpha=0.3) +
+  geom_contour(mapping=aes(x=x, y=y, z=value)) +
+  coord_fixed() +
+  facet_wrap(vars(model)) +
+  theme(panel.spacing.x = unit(20, units='mm'))
+```
 
 ## Adaptive quakes
 
-TODO: Constant, then show bandwidth (why 1/sqrt? - it's circular, and num points scales with area not radius) then adaptive.
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 6
+#| fig-align: 'center'
+quakes.ppp <- as.ppp(quakes |> select(long, lat),
+                         W = owin(range(quakes$long), range(quakes$lat)))
+h0=bw.ppl(quakes.ppp)
 
-## Adding context to the quakes?
+fixed <-density(quakes.ppp, sigma=h0) |> as.data.frame()
+adaptive <- densityAdaptiveKernel(quakes.ppp, h0=h0) |> as.data.frame()
 
-e.g. Where is New Zealand in relation to this map?
+bind_rows(lst(fixed, adaptive), .id="model") |>
+  mutate(model = fct_relevel(model, 'fixed')) |>
+  mutate(value = if_else(value < 1e-10, 0, value)) |>
+  ggplot() +
+  geom_point(data=quakes, mapping=aes(x=long, y=lat), alpha=0.1) +
+  geom_contour(mapping=aes(x=x, y=y, z=value)) +
+  coord_fixed() +
+  facet_wrap(vars(model)) +
+  theme(panel.spacing.x = unit(20, units='mm'))
+```
+::: aside
+More of this in 233.214 GIS and Spatial Statistics
+:::
 
-A map of NZ is available via map_data('nz')
+## Adding context to quakes
 
-This just gives a row of x/y coordinates.
+::::{.columns}
 
-Can use geom_path to link them up (difference between path/line/polygon)
+:::{.column}
 
-Sidequest: geom_line() orders the data in x first (good for time-series as the plot really shouldn't depend on order of x, right?) geom_path() orders by order in the data.
+```{r nzquake}
+#| eval: false
+nz <- map_data('nz')
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.3) +
+  geom_path(data=nz,
+            aes(group=group)) +
+  coord_fixed()
+```
 
-So draw NZ on.
+Can plot NZ on the same map
 
-## But is this flat? The sailing isn't plane anymore.
+:::
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+#| ref.label: "nzquake"
+```
+:::
 
-Show distance between lowest and highest latitudes.
+::::
 
-We should at least be aware of the distortion that results (next time: CRS!)
+## Adding context to quakes
 
-## Further reading...
+::::{.columns}
+
+:::{.column}
+
+```{r nzquake2}
+#| eval: false
+nz <- map_data('nz')
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.3) +
+  geom_path(data=nz,
+            aes(group=group)) +
+  coord_fixed()
+```
+
+But it's not plane sailing anymore!
+
+:::
+::: {.column .absolute top=0 right=-5%}
+```{r}
+#| echo: false
+library(sf)
+dists <- quakes |>
+  reframe(long=range(long), lat=range(lat, nz$lat)) |>
+  complete(long, lat) |>
+  st_as_sf(coords = c('long', 'lat'), remove=FALSE) |>
+  st_set_crs(4326)
+
+d <- st_distance(dists)
+
+# hacky hacky
+geodist <- tribble(~line, ~x1, ~x2, ~y1, ~d,
+        1, 166, 188, -47.4, d[1,3],
+        2, 166, 188, -10.7, d[4,2])
+
+ggplot(quakes) +
+  aes(x=long, y=lat) +
+  geom_point(alpha=0.3) +
+  geom_path(data=nz, aes(group=group), col='grey40') +
+  geom_segment(data=geodist, aes(x=x1, xend=x2, y=y1), col='darkred',
+               arrow = arrow(angle=10, type='closed', ends='both')) +
+  geom_text(data=geodist, aes(x=(x1+x2)/2, y=y1, label=paste(round(d/1000), 'km')),
+            col='darkred', vjust=-.2) +
+  coord_fixed()
+```
+:::
+
+::::
+
+## Further reading
+
+- [Maps](https://ggplot2-book.org/maps.html) from ggplot2: Elegant Graphics for Data Analysis
+
+- [Types of spatial data](https://www.paulamoraga.com/book-spatial/types-of-spatial-data.html) in Spatial Statistics for Data Science: Theory and Practice with R
+
+- Take 233.214 GIS and Spatial Statistics!
 
