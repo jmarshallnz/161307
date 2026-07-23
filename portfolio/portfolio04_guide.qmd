@@ -11,13 +11,14 @@ For this portfolio you'll be revisiting the chart you submitted for portfolio 1,
 
 ## Requirements
 
-Download the `portfolio04.qmd` template file below and copy/paste your original code from your `portfolio01.qmd` into the first code block.
+1. Download the `portfolio04.qmd` template file below.
+2. Copy/paste your original code from your `portfolio01.qmd` submission into the first code block.
+3. Use the space provided to write a short plan of what you wish to improve on the chart and why you think those changes are important. You are welcome to utilise (or ignore!) the feedback you received for portfolio 1. Two to three sentences will suffice and you are welcome to incorporate bullet points or a list if that helps keep your writing concise.
+4. Utilise the second code block to produce a new, revised chart based on your plan.
 
-Use the space provided to write a short plan of what you wish to improve on the chart and why you think those changes are important. You are welcome to utilise (or ignore!) the feedback you received for portfolio 1. Two to three sentences will suffice and you are welcome to incorporate bullet points or a list if that helps keep your writing concise.
+Expectations:
 
-Then utilise the second code block to produce a new, revised chart based on your plan.
-
- - Your original chart should be left unchanged. Same code, same output dimensions etc.
+ - Your original chart is left unchanged. Same code, same output dimensions etc.
  - There are no restrictions on what you can change in your revised version. You could produce a completely different chart (different geometry etc) if you feel that is better and have explained why in your plan.
  - As always, your chart must have appropriate labels.
  - Your chart should have a useful title or subtitle that directs the reader at the key 'story'.
@@ -34,19 +35,18 @@ You will be graded out of 10 based on:
 
 |  |  |  |
 |---------|---------------------------------------------------------|------|
-| **Plan** | Your .qmd file renders correctly without errors or warnings | 3 |
-|  | Your .qmd file renders but has warnings | 2 |
-|  | Your .qmd file renders but has warnings | 1 |
-|  | Your .qmd file doesn't render without modification | 0 |
-| **Code** | Your name is in the author field and all necessary code is visible in the rendered document | 3 |
-|  | Your code is visible in the rendered document but your name is missing | 2 |
-|  | Your code is visible in the rendered document but your name is missing | 1 |
-|  | Both code and name are missing | 0 |
-| **Chart** | Your chart satisfies all criteria and is well labelled | 4 |
-|  | Your chart satisfies all criteria but has a minor flaw with labelling or dimensions | 5 |
-|  | Your chart satisfies all criteria but has multiple minor flaws or uses sub-optimal geometry | 4 |
-|  | Your chart has major flaws, is missing criteria or is confusing | 3 |
-|  | Your chart is inappropriate or incomprehensible | 1 |
+| **Plan** | The plan is clear and coherent | 3 |
+|  | The plan is clear with minor flaws (overly long/short) | 2 |
+|  | The plan is unclear or incoherent | 1 |
+|  | Entirely missing | 0 |
+| **Code** | The code is correct and well structured | 3 |
+|  | The code is largely correct but there is a minor issue | 2 |
+|  | The code has multiple minor flaws or a major flaw | 1 |
+|  | Code is missing | 0 |
+| **Chart** | Your chart follows your planned changes and clearly improves on the first version | 4 |
+|  | Your chart follows the plan and is an improvement but has minor flaws such as labelling or dimensions | 3 |
+|  | Your chart has major flaws or does not substantively improve over the first version | 2 |
+|  | Your chart is present but is inappropriate | 1 |
 |  | Missing or entirely incorrect | 0 |
 
 :::
