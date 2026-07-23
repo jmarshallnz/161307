@@ -1,0 +1,40 @@
+---
+title: "Portfolio 4: Plastic, plastic, redux"
+author: "YOUR NAME HERE"
+format:
+  html:
+    embed-resources: true
+---
+
+```{r dont touch this code chunk}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+
+lego_sets <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+lego_parts <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_parts.csv.gz")
+
+set_weights <- lego_parts |>
+  group_by(set) |>
+  summarise(weight = sum(weight*quantity, na.rm=TRUE))
+
+sets_with_weight <- lego_sets |>
+  left_join(set_weights, by=join_by(set))
+```
+
+## Your Original Figure
+
+```{r original}
+# copy and paste your original figure code here, then leaving it unchanged from portfolio 1 submission.
+```
+
+## Your plan
+
+WRITE 2-3 SENTENCES HERE ON WHAT YOU PLAN TO DO AND WHY
+
+## Your revised figure
+
+```{r revised}
+# replace this comment with your revised figure. You needn't repeat any data wrangling code if it's already been done above.
+```
