@@ -1,0 +1,525 @@
+---
+title: "Maps"
+format:
+  revealjs:
+    theme: [solarized, slides.scss]
+    width: 1280
+    height: 720
+    margin: 0.1
+    echo: true
+    message: false
+    fig-width: 7
+    fig-height: 7
+---
+
+```{r}
+#| echo: false
+
+library(tidyverse)
+theme_set(theme_minimal(base_size=20))
+```
+
+# Polygons
+
+## Polygon maps
+
+The simplest form of map data are polygons on lat/longitude or similar:
+
+```{r}
+nz <- map_data('nz')
+nz
+```
+
+## Polygon maps
+
+::::: columns
+::: column
+```{r nz1}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat) +
+  geom_point()
+```
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz1
+```
+:::
+:::::
+
+## Polygon maps
+
+::::: columns
+::: column
+```{r nz2}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat) +
+  geom_line()
+```
+
+Lines can link up points?
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz2
+```
+:::
+:::::
+
+## Polygon maps
+
+:::::: columns
+:::: column
+```{r nz3}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat, group=group) +
+  geom_line()
+```
+
+`group` separates islands.
+
+::: fragment
+`geom_line()` arranges the data by `x`.
+:::
+::::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz3
+```
+:::
+::::::
+
+## Polygon maps
+
+::::: columns
+::: column
+```{r nz4}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat, group=group) +
+  geom_path()
+```
+
+`group` separates islands.
+
+`geom_path()` directly links points.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz4
+```
+:::
+:::::
+
+## Polygon maps
+
+::::: columns
+::: column
+```{r nz5}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat, group=group) +
+  geom_polygon(fill='tan')
+```
+
+`geom_polygon()` for a filled polygon.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz5
+```
+:::
+:::::
+
+## Polygon maps
+
+::::: columns
+::: column
+```{r nz6}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat, group=group) +
+  geom_polygon(fill='tan') +
+  coord_sf()
+```
+
+Aspect ratio matters.
+
+`coord_sf()` can help.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz6
+```
+:::
+:::::
+
+## Polygon maps
+
+```{r}
+#| echo: false
+petrels <- read_csv("https://www.massey.ac.nz/~jcmarsha/227212/data/petrels.csv") |>
+  rename(long = Longitude, lat = Latitude, group=Area)
+```
+
+::::: columns
+::: column
+```{r nz7}
+#| eval: false
+ggplot(nz) +
+  aes(x=long, y=lat, group=group) +
+  geom_polygon(fill='tan') +
+  geom_point(data=petrels,
+             alpha=0.3) +
+  coord_sf()
+```
+
+Additional data added via `data=`.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz7
+```
+:::
+:::::
+
+## Polygon maps
+
+```{r}
+#| echo: false
+petrels <- read_csv("https://www.massey.ac.nz/~jcmarsha/227212/data/petrels.csv")
+```
+
+::::: columns
+::: column
+```{r nz8}
+#| eval: false
+ggplot(nz) +
+  geom_polygon(
+    mapping = aes(x=long,
+                  y=lat,
+                  group=group),
+    fill='tan') +
+  geom_point(
+    data=petrels,
+    mapping=aes(x=Longitude,
+                y=Latitude),
+    alpha=0.3) +
+  coord_sf()
+```
+
+In practice need to utilise separate `aes()` lines for separate `data`.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: nz8
+```
+:::
+:::::
+
+# Simple features
+
+## Simple features
+
+Simple features is a standard produced by the Open Geospatial Consortium.
+
+It defines a common storage and access model of geographic features made using two-dimensional geometries.
+
+Codifies things like database access, geometry types, coordinate reference systems etc.
+
+::: fragment
+The `sf` package provides most of the tools needed to work with these data.
+
+`geom_sf()` and `coord_sf()` are then the `ggplot2` functions that work with `sf`.
+:::
+
+## Simple features data
+
+```{r}
+#| echo: false
+library(sf)
+nz_sf <- nz |> st_as_sf(coords = c('long', 'lat')) |>
+  group_by(region) |>
+  summarize(do_union = FALSE, .groups='drop') |>
+  st_cast("LINESTRING") |>
+  st_cast("POLYGON") |>
+  mutate(region = str_replace_all(region, '\\.', ' ') |> str_trim()) |>
+  tibble::remove_rownames() |>
+  st_set_crs(4326)
+```
+
+```{r}
+nz_sf
+```
+
+::: fragment
+Each row represents a single region (island) with spatial information in a `geometry` column.
+:::
+
+## Simple features
+
+::::: columns
+::: column
+```{r sf1}
+#| eval: false
+ggplot(data=nz_sf) +
+  geom_sf()
+```
+
+Can use `geom_sf()` to draw directly.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf1
+```
+:::
+:::::
+
+## Simple features
+
+::::: columns
+::: column
+```{r sf2}
+#| eval: false
+ggplot(data=nz_sf) +
+  aes(geometry=geometry) +
+  geom_sf()
+```
+
+Can use `geom_sf()` to draw directly.
+
+The `geometry` aesthetic is specific to `sf` data.
+
+Automatically detected if there is only one `geometry` column.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf2
+```
+:::
+:::::
+
+## Simple features
+
+::::: columns
+::: column
+```{r sf3}
+#| eval: false
+ggplot(data=nz_sf) +
+  aes(fill=region) +
+  geom_sf() +
+  guides(fill = 'none')
+```
+
+Other aesthetics work as expected.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf3
+```
+:::
+:::::
+
+## Simple features
+
+The metadata block tells us a bit about the simple features data we're working with:
+
+```{r}
+#| echo: false
+print(nz_sf, n=0)
+```
+
+- The number of features and fields (non-geometry columns)
+
+- The geometry type and dimension
+
+- A rectangular boundary that contains all points
+
+- The coordinate reference system (more later!)
+
+## Layering
+
+::::: columns
+::: column
+```{r sf4}
+#| eval: false
+ggplot(data=nz_sf) +
+  geom_sf() +
+  geom_point(data=petrels,
+             aes(x=Longitude,
+                 y=Latitude,
+                 col=Area)) +
+  guides(fill = 'none')
+```
+
+Can add other datasets and use additional geometries.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf4
+```
+:::
+:::::
+
+# Coordinate reference systems
+
+## Map projections
+
+The planet is not flat! It's not a sphere either. So when we map a coordinate (e.g. longitude/latitude) to a location we need to make lots of assumptions:
+
+::: incremental
+- How much of an ellipsoid is the Earth?
+
+- Where is it's centre?
+
+- Where is sea level?
+
+- Where is the origin for our x/y pairs?
+
+- How do the techtonic plates move?
+:::
+
+::: fragment
+How relevant each is depends on how far apart our data are: if they're all within a few hundred kilometers, 'plane sailing' is probably just fine!
+:::
+
+## Map projections
+
+The set of assumptions about earth shape and it's link to coordinate pairs is known as the **geodetic datum**.
+
+WGS84 (the world geodetic system) is the classic world datum featured on most online mapping things (Open Street Maps etc).
+
+It defines:
+
+- The ellipsoid
+
+- The origin for longitude (Greenwich) and latitude (Equator)
+
+- What a one unit increase in each means (change of angle of one degree).
+
+## WGS84
+
+```{r}
+st_crs(nz_sf)
+```
+
+## NZTM2000
+
+The most common NZ-wide projection is probably NZTM2000, though there are many others that focus on specific areas.
+
+It is a Transverse Mercator (cylindrical north/south) projection which works well as NZ is largely orientated north/south.
+
+It uses the GRS80 oblate ellipisoid (flattened at the poles) and the New Zealand Geodetic Datum 2000 (NZGD2000).
+
+The origin for NZTM is 173°E, 0°S which are represented with easting/northing (x/y) values in metres of 1,600,000m and 100,000,000m.
+
+## NZTM2000
+
+```{r}
+nz_sf |> st_transform(crs=2193) # NZTM2000 has ESPG code 2193
+```
+
+Now our polygon coordinates are expressed in metres rather than degrees.
+
+## NZTM 2000
+
+::::: columns
+::: column
+```{r sf5}
+#| eval: false
+nz_sf |>
+  st_transform(crs=2193) |>
+  ggplot() +
+  geom_sf()
+```
+
+This reflects the cylindrical projection.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf5
+```
+:::
+:::::
+
+## NZTM 2000
+
+::::: columns
+::: column
+```{r sf6}
+#| eval: false
+ggplot(nz_sf) +
+  geom_sf() +
+  coord_sf(crs=2193)
+```
+
+Can also do it at chart time with `coord_sf()`.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf6
+```
+:::
+:::::
+
+## Another projection
+
+::::: columns
+::: column
+```{r sf7}
+#| eval: false
+ggplot(nz_sf) +
+  geom_sf() +
+  coord_sf(crs=9191) # Niwa Albers
+```
+
+Lots of other projections are available.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf7
+```
+:::
+::::
+
+
+## Further reading
+
+- [Maps](https://ggplot2-book.org/maps.html) from ggplot2: Elegant Graphics for Data Analysis
+
+- [Types of spatial data](https://www.paulamoraga.com/book-spatial/types-of-spatial-data.html) in Spatial Statistics for Data Science: Theory and Practice with R
+
+- Take 233.214 GIS and Spatial Statistics!
