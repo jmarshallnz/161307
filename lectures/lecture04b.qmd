@@ -9,7 +9,7 @@ format:
     echo: true
     message: false
     fig-width: 7
-    fig-height: 7
+    fig-height: 8
 ---
 
 ```{r}
@@ -32,7 +32,7 @@ nz
 
 ## Polygon maps
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz1}
 #| eval: false
@@ -48,11 +48,11 @@ ggplot(nz) +
 #| ref.label: nz1
 ```
 :::
-:::::
+::::
 
 ## Polygon maps
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz2}
 #| eval: false
@@ -70,11 +70,11 @@ Lines can link up points?
 #| ref.label: nz2
 ```
 :::
-:::::
+::::
 
 ## Polygon maps
 
-:::::: columns
+:::: columns
 :::: column
 ```{r nz3}
 #| eval: false
@@ -96,11 +96,11 @@ ggplot(nz) +
 #| ref.label: nz3
 ```
 :::
-::::::
+::::
 
 ## Polygon maps
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz4}
 #| eval: false
@@ -120,11 +120,11 @@ ggplot(nz) +
 #| ref.label: nz4
 ```
 :::
-:::::
+::::
 
 ## Polygon maps
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz5}
 #| eval: false
@@ -146,7 +146,7 @@ ggplot(nz) +
 
 ## Polygon maps
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz6}
 #| eval: false
@@ -177,7 +177,7 @@ petrels <- read_csv("https://www.massey.ac.nz/~jcmarsha/227212/data/petrels.csv"
   rename(long = Longitude, lat = Latitude, group=Area)
 ```
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz7}
 #| eval: false
@@ -207,7 +207,7 @@ Additional data added via `data=`.
 petrels <- read_csv("https://www.massey.ac.nz/~jcmarsha/227212/data/petrels.csv")
 ```
 
-::::: columns
+:::: columns
 ::: column
 ```{r nz8}
 #| eval: false
@@ -277,7 +277,7 @@ Each row represents a single region (island) with spatial information in a `geom
 
 ## Simple features
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf1}
 #| eval: false
@@ -298,7 +298,7 @@ Can use `geom_sf()` to draw directly.
 
 ## Simple features
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf2}
 #| eval: false
@@ -324,7 +324,7 @@ Automatically detected if there is only one `geometry` column.
 
 ## Simple features
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf3}
 #| eval: false
@@ -364,7 +364,7 @@ print(nz_sf, n=0)
 
 ## Layering
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf4}
 #| eval: false
@@ -374,7 +374,7 @@ ggplot(data=nz_sf) +
              aes(x=Longitude,
                  y=Latitude,
                  col=Area)) +
-  guides(fill = 'none')
+  guides(col='none')
 ```
 
 Can add other datasets and use additional geometries.
@@ -397,7 +397,7 @@ The planet is not flat! It's not a sphere either. So when we map a coordinate (e
 ::: incremental
 - How much of an ellipsoid is the Earth?
 
-- Where is it's centre?
+- Where is its centre?
 
 - Where is sea level?
 
@@ -450,7 +450,7 @@ Now our polygon coordinates are expressed in metres rather than degrees.
 
 ## NZTM 2000
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf5}
 #| eval: false
@@ -473,7 +473,7 @@ This reflects the cylindrical projection.
 
 ## NZTM 2000
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf6}
 #| eval: false
@@ -495,7 +495,7 @@ Can also do it at chart time with `coord_sf()`.
 
 ## Another projection
 
-::::: columns
+:::: columns
 ::: column
 ```{r sf7}
 #| eval: false
@@ -515,11 +515,278 @@ Lots of other projections are available.
 :::
 ::::
 
+## Census 2023 data
+
+```{r}
+library(sf)
+nz2023 <- read_sf("https://www.massey.ac.nz/~jcmarsha/data/nz_map/sa3_data.sqlite")
+nz2023
+```
+
+## Census 2023
+
+:::: columns
+::: column
+```{r census1}
+#| eval: false
+ggplot(nz2023) +
+  aes(fill=moved_in_last_year) +
+  geom_sf(linewidth=0.1) +
+  scale_fill_viridis_c() +
+  labs(fill=NULL,
+       title="Moved recently")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: census1
+```
+:::
+::::
+
+## Census 2023
+
+:::: columns
+::: column
+```{r census2}
+#| eval: false
+nz2023 |>
+  filter(territorial_authority == "Auckland") |>
+  ggplot() +
+  aes(fill=moved_in_last_year) +
+  geom_sf(linewidth=0.1) +
+  scale_fill_viridis_c() +
+  labs(fill=NULL,
+       title="Moved recently")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: census2
+```
+:::
+::::
+
+
+## Census 2023
+
+:::: columns
+::: column
+```{r census3}
+#| eval: false
+nz2023 |>
+  filter(territorial_authority == "Auckland") |>
+  ggplot() +
+  aes(fill=median_income) +
+  geom_sf(linewidth=0.1) +
+  scale_fill_viridis_c() +
+  labs(fill=NULL,
+       title="Median income")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: census3
+```
+:::
+::::
+
+## Census 2023
+
+:::: columns
+::: column
+```{r census4}
+#| eval: false
+nz2023 |>
+  filter(territorial_authority == "Auckland") |>
+  ggplot() +
+  aes(fill=home_for_last) +
+  geom_sf(linewidth=0.1) +
+  scale_fill_viridis_c() +
+  labs(fill=NULL,
+       title="Years in same home")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: census4
+```
+:::
+::::
+
+## Rasters
+
+While simple features data are polygon, many datasets work better on a grid.
+
+Such grids are represented as pixel images or **rasters**.
+
+They needn't be strict grids: they might be non-equispaced, skewed or curvi-linear.
+
+Most are grids though!
+
+## Rasters
+
+The `stars` and `terra` packages are for working with rasters. `stars` provides `geom_stars()` for
+adding rasters to charts.
+
+Forest coverage data for NZ from Manaaki Whenua Landcare Research at 2km resolution:
+
+```{r}
+library(stars)
+forest <- read_stars("https://www.massey.ac.nz/~jcmarsha/data/nz_map/forest.tif")
+forest
+```
+
+## Forest cover
+
+:::: columns
+::: column
+```{r forest1}
+#| eval: false
+ggplot(nz2023) +
+  geom_sf(linewidth=0.1) +
+  geom_stars(data=forest) +
+  scale_fill_viridis_c(
+    na.value='transparent'
+    ) +
+  labs(fill=NULL,
+       title='Forest cover')
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: forest1
+```
+:::
+::::
+
+
+## Forest cover
+
+:::: columns
+::: column
+```{r forest2}
+#| eval: false
+lims <- nz2023 |>
+  filter(sa3_name == "Stewart Island") |>
+  st_bbox()
+
+ggplot(nz2023) +
+  geom_sf(linewidth=0.1) +
+  geom_stars(data=forest) +
+  scale_fill_viridis_c(
+    na.value='transparent'
+    ) +
+  coord_sf(xlim=lims[c('xmin', 'xmax')],
+           ylim=lims[c('ymin', 'ymax')]) +
+  labs(fill=NULL,
+       title="Forest cover")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: forest2
+```
+:::
+::::
+
+## Spatial joins
+
+We can join datasets together with a spatial join:
+
+```{r}
+forest_sf <- forest |> st_as_sf() |> st_transform(2193)
+sa3_forest <- nz2023 |> st_join(forest_sf)
+sa3_forest |> select(sa3, sa3_name, forest.tif)
+```
+
+## Spatial join
+
+We can then aggregate across the rows of the same geometry with the usual `group_by`/`summarise`:
+
+```{r}
+sa3_cover <- sa3_forest |>
+  group_by(sa3, sa3_name, territorial_authority) |>
+  summarise(forest = mean(forest.tif, na.rm=TRUE))
+sa3_cover
+```
+
+## Forest cover
+
+:::: columns
+::: column
+```{r forest3}
+#| eval: false
+sa3_cover |>
+  ggplot() +
+  aes(fill=forest) +
+  geom_sf(linewidth=0.1) +
+  scale_fill_viridis_c() +
+  labs(fill=NULL,
+       title="Forest cover")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: forest3
+```
+:::
+::::
+
+
+## Forest cover
+
+:::: columns
+::: column
+```{r forest4}
+#| eval: false
+sa3_cover |>
+  filter(territorial_authority == "Auckland") |>
+  ggplot() +
+  aes(fill=forest) +
+  geom_sf(linewidth=0.1) +
+  scale_fill_viridis_c() +
+  labs(fill=NULL,
+       title="Forest cover")
+```
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: forest4
+```
+:::
+::::
 
 ## Further reading
 
 - [Maps](https://ggplot2-book.org/maps.html) from ggplot2: Elegant Graphics for Data Analysis
 
-- [Types of spatial data](https://www.paulamoraga.com/book-spatial/types-of-spatial-data.html) in Spatial Statistics for Data Science: Theory and Practice with R
+- [Draw maps](http://vissoc.co/07-maps.html) from Data Visualisation A Practical Introduction
+
+- [Introduction to sf and stars](https://r-spatial.org/book/07-Introsf.html) from Spatial Data Science With Applications in R
 
 - Take 233.214 GIS and Spatial Statistics!
