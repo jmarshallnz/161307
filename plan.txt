@@ -10,7 +10,7 @@ Lab 3: Themes, fonts, colours, patchwork etc.
 Portfolio 3: Set of 3 charts combined with patchwork all with a custom theme/ink/highlight
 
 Lab 4: Space!
-Portfolio 4: Hmmm...
+Portfolio 4: Portfolio 1 redux
 
 1-2 lectures and a 2 hour computing workshop a week.
 
@@ -46,11 +46,11 @@ Figure design DONE
 
 Week 4a
 
-Maps
+Points in Space DONE
 
 Week 4b
 
-More maps?!?
+Maps DONE
 
 
 
