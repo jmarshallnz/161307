@@ -515,6 +515,150 @@ Lots of other projections are available.
 :::
 ::::
 
+
+## Projected coordinates
+
+:::: columns
+::: column
+```{r sf11}
+#| eval: false
+nz_sf |>
+  st_transform(2193) |>
+  ggplot() +
+  geom_sf() +
+  coord_sf(xlim=c(1720000, 1800000),
+           ylim=c(5860000, 5960000))
+```
+
+If the data are projected (i.e. not long/lat)
+then `xlim` and `ylim` are in projected
+coordinates.
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf11
+```
+:::
+::::
+
+## Projected coordinates
+
+:::: columns
+::: column
+```{r sf8}
+#| eval: false
+nz_sf |>
+  st_transform(2193) |>
+  ggplot() +
+  geom_sf() +
+  coord_sf(datum=NULL)
+```
+
+If the data are projected then the underlying
+coordinates are `x`, `y`.
+
+Set `datum=NULL` to chart in those units.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf8
+```
+:::
+::::
+
+## Projected coordinates
+
+:::: columns
+::: column
+```{r sf9}
+#| eval: false
+nz_sf |>
+  st_transform(2193) |>
+  ggplot() +
+  geom_sf() +
+  annotate(geom='rect',
+         xmin=1720000, xmax=1800000,
+         ymin=5860000, ymax=5960000,
+         fill='transparent',
+         col='darkred') +
+  coord_sf(datum=NULL)
+```
+
+Setting `datum=NULL` is useful for figuring
+out `xlim`, `ylim`.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf9
+```
+:::
+::::
+
+## Projected coordinates
+
+:::: columns
+::: column
+```{r sf10}
+#| eval: false
+nz_sf |>
+  st_transform(2193) |>
+  ggplot() +
+  geom_sf() +
+  coord_sf(xlim=c(1720000, 1800000),
+           ylim=c(5860000, 5960000),
+           datum=NULL)
+```
+
+Setting `datum=NULL` is useful for figuring
+out `xlim`, `ylim`.
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf10
+```
+:::
+::::
+
+## Projected coordinates
+
+:::: columns
+::: column
+```{r sf12}
+#| eval: false
+nz_sf |>
+  st_transform(2193) |>
+  ggplot() +
+  geom_sf() +
+  coord_sf(xlim=c(1720000, 1800000),
+           ylim=c(5860000, 5960000))
+```
+
+Then we can switch off `datum=NULL` to get more
+widely readable axes.
+
+:::{.fragment}
+Note resolution isn't great from `map_data()`!
+:::
+
+:::
+
+::: {.column .absolute top="0" right="-5%"}
+```{r}
+#| echo: false
+#| ref.label: sf12
+```
+:::
+::::
+
 ## Census 2023 data
 
 ```{r}
@@ -560,7 +704,9 @@ nz2023 |>
   geom_sf(linewidth=0.1) +
   scale_fill_viridis_c() +
   labs(fill=NULL,
-       title="Moved recently")
+       title="Moved recently") +
+  coord_sf(xlim=c(1740000, 1780000),
+           ylim=c(5890000, 5950000))
 ```
 
 :::
@@ -585,9 +731,13 @@ nz2023 |>
   ggplot() +
   aes(fill=median_income) +
   geom_sf(linewidth=0.1) +
-  scale_fill_viridis_c() +
+  scale_fill_viridis_c(
+    labels=scales::label_dollar()
+    ) +
   labs(fill=NULL,
-       title="Median income")
+       title="Median income") +
+  coord_sf(xlim=c(1740000, 1780000),
+           ylim=c(5890000, 5950000))
 ```
 
 :::
@@ -613,7 +763,9 @@ nz2023 |>
   geom_sf(linewidth=0.1) +
   scale_fill_viridis_c() +
   labs(fill=NULL,
-       title="Years in same home")
+       title="Years in same home") +
+  coord_sf(xlim=c(1740000, 1780000),
+           ylim=c(5890000, 5950000))
 ```
 
 :::
@@ -682,18 +834,14 @@ ggplot(nz2023) +
 ::: column
 ```{r forest2}
 #| eval: false
-lims <- nz2023 |>
-  filter(sa3_name == "Stewart Island") |>
-  st_bbox()
-
 ggplot(nz2023) +
   geom_sf(linewidth=0.1) +
   geom_stars(data=forest) +
   scale_fill_viridis_c(
     na.value='transparent'
     ) +
-  coord_sf(xlim=lims[c('xmin', 'xmax')],
-           ylim=lims[c('ymin', 'ymax')]) +
+  coord_sf(xlim=c(1160000, 1270000),
+           ylim=c(4740000, 4900000)) +
   labs(fill=NULL,
        title="Forest cover")
 ```
@@ -768,7 +916,9 @@ sa3_cover |>
   geom_sf(linewidth=0.1) +
   scale_fill_viridis_c() +
   labs(fill=NULL,
-       title="Forest cover")
+       title="Forest cover") +
+  coord_sf(xlim=c(1740000, 1780000),
+           ylim=c(5890000, 5950000))
 ```
 
 :::
