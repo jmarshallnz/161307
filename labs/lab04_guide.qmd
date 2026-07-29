@@ -1,0 +1,20 @@
+---
+title: "Workshop 4: Space!"
+format: html
+---
+
+This week we're looking at spatial data with emphasis on mapping. We'll be looking at:
+
+ - Polygon maps
+ - Simple features
+ - Adding points to a map
+ - Cooordinate reference systems
+ - Raster data
+
+Start by downloading lab04.qmd into your 161307 project folder
+
+<https://www.massey.ac.nz/~jcmarsha/161307/labs/lab04.qmd>
+
+Open your 161307 project in RStudio and then load up `lab04.qmd` and work through the workshop.
+
+**Remember to take lots of notes and to ask questions of the teaching staff if there's anything you find unclear.**
