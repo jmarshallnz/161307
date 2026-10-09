@@ -1,0 +1,707 @@
+---
+title: "Workshop 11: All the variables"
+format:
+  html:
+    embed-resources: true
+    self-contained: true
+---
+
+Download the link to the quarto template here
+
+```{r, echo=FALSE}
+xfun::embed_file("lab11_soln.qmd")
+```
+
+and the data file here
+
+```{r}
+xfun::embed_file("../data/func_fish_wide_wrack.csv")
+```
+
+```{r, message=FALSE, warning=FALSE}
+# to wrangle/tidy data
+library(tidyverse)
+library(janitor)
+# plotting extras
+library(GGally)
+library(patchwork)
+library(ggrepel)
+library(factoextra)
+# main multivariate analysis package
+library(vegan)
+```
+
+## Introduction
+
+The goal of today's workshop is to explore data related to time.
+
+Specifically we will:
+
+- Explore multivariate techniques for dimension reduction
+- Plot multivariate data
+
+## Scenario
+
+Characterized by low in situ primary production, sandy beaches are a classic example of subsidized ecosystems, maintaining food webs that rely fundamentally on inputs from adjacent habitats such as rocky reefs, kelp forests, and seagrass meadows. These marine subsidies in the form of detached macrophytes, support a high diversity and abundance of intertidal invertebrate consumers which in turn provide a critical energy source for higher-trophic level predators including surf zone fish. While several studies examine the effects of detached macrophytes in coastal environments only a few studies have attempted to investigate the influence of wrack inputs on sandy beach surf zone fish communities, particularly across large spatial scales, hindering our ability to develop more general inferences about the role of floating macrophytes in dynamic nearshore habitats. 
+
+Here we investigate the relationship between floating macrophyte communities (wrack) and surf zone fish communities.
+
+
+## Data citation
+
+Jenifer Dugan, & Michelle Marraffini. (2026). California coast, ecosystem surveys of sandy beaches and surf zones (Long-term monitoring). California Ocean Protection Council Data Repository. urn:uuid:9ea66d7e-ddbe-4acc-a78e-902d6d19fd4b.
+
+## Load data
+
+Adjust paths to files as necessary on your machine
+
+```{r}
+fish_wrack <- read.csv("../data/func_fish_wide_wrack.csv")
+glimpse(fish_wrack)
+```
+Columns:
+
+- region: North, Central and South bioregions of California. Central:South boundary is Pt Conception a break in many many marine species ranges. Only two sites in the North were sampled
+
+- site_name: Beach site name
+
+- site_pair: pair is one MPA and one reference site with similar biophysical characteristics
+
+- mpa_status: MPA or reference site 
+
+- num_sites: count of site (internal data qa/qc) ignore
+
+- brown - animal indicate wrack groupings
+
+- Agonidae - Squatinidae indicate fish family or functional groups
+
+
+### Check data
+
+Multivariate techniques can struggle when columns and/or rows of the matrix have know observations
+
+```{r}
+# Surveys were no fish/algae were observed
+rownames(fish_wrack[, 5:25])[rowSums(fish_wrack[, 5:25]) == 0]
+
+# Species that were never observed, this should equal 0 since we filtered the data before pivoting 
+colnames(fish_wrack[, 5:25])[colSums(fish_wrack[, 5:25]) == 0]
+```
+
+in this data these have already been filtered but it is usually a good idea to double check. 
+
+Some analyses can also struggle with rare species/groups so the code above can be adjusted to some other threshold.
+
+## PCA for dimension reduction
+
+Let's look only at the fish for a minute
+
+```{r}
+# we use 'scale. = TRUE' in prcomp to ensures variables with 
+# different units or scales are comparable. but ours are all species counts
+fish_pca <- prcomp(fish_wrack[, 13:25])
+
+# View the summary to see how much variance is explained by each component.
+# This helps identify the "meaningful components".
+summary(fish_pca)
+```
+
+### Let's look at the PCs
+
+```{r}
+# How much proportion of the variance is explained by each PC. The importance
+pc_var <- round(summary(fish_pca)$importance[2, 1:2] * 100, 1)
+
+# Add categorical variables
+pca_data <- data.frame(fish_pca$x, Site = fish_wrack$site_name, mpa_status = fish_wrack$mpa_status,
+                       Region = fish_wrack$region, Pair = fish_wrack$site_pair)
+
+# Each original variable has an specific contribution to each PC, this are called loadings
+pca_loadings <- as.data.frame(fish_pca$rotation)
+
+pca_loadings
+```
+
+
+### PCA plot
+
+```{r, echo=TRUE, warning=FALSE}
+# Create a biplot to represent both the observations (points)
+pca_data |> 
+ggplot() +
+  aes(x = PC1, y = PC2) +
+  geom_point(aes(color = Site), size = 3, alpha = 0.8) +
+  labs(
+    title = "PCA Ordination: ",
+    subtitle = "Projecting 374 variables into 2 dimensions",
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  # How does each variable relate to the ordination of the points?
+  geom_segment(data = pca_loadings, 
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+               arrow = arrow(length = unit(0.3, "cm")), 
+               color = "black", 
+               linewidth = 1) +
+  geom_text(data = pca_loadings,
+            aes(x = PC1*2.1, y = PC2*2.1, label = row.names(pca_loadings)))
+
+
+```
+Well that's not helpful
+
+### Try yourself
+
+Make a biplot with MPA status as a categorical variable
+
+```{r, echo=TRUE, warning=FALSE}
+# Create a biplot to represent both the observations (points)
+pca_data |> 
+ggplot() +
+  aes(x = PC1, y = PC2) +
+  geom_point(aes(color = mpa_status), size = 3, alpha = 0.8) +
+  labs(
+    title = "PCA Ordination: ",
+    subtitle = "Projecting 374 variables into 2 dimensions",
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  # How does each variable relate to the ordination of the points?
+  geom_segment(data = pca_loadings, 
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+               arrow = arrow(length = unit(0.3, "cm")), 
+               color = "black", 
+               linewidth = 1) +
+  geom_text(data = pca_loadings,
+            aes(x = PC1*2.1, y = PC2*2.1, label = row.names(pca_loadings)))
+
+```
+
+Which sites are my outliers messing with this plot?
+
+One way to see this is to add an identifier as text, do not recommend as a published visualization but useful for EDA.
+
+```{r, echo=TRUE, warning=FALSE}
+pca_data |> 
+ggplot() +
+  aes(x = PC1, y = PC2) +
+  geom_point(aes(color = Site), size = 3, alpha = 0.8) +
+  labs(
+    title = "PCA Ordination: ",
+    subtitle = "Projecting 374 variables into 2 dimensions",
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  ) +
+  # scale_color_brewer(palette = "Set1") +
+  # # How does each variable relate to the ordination of the points?
+  # geom_segment(data = pca_loadings, 
+  #              aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+  #              arrow = arrow(length = unit(0.3, "cm")), 
+  #              color = "black", 
+  #              linewidth = 1) +
+  geom_text(  aes(x = PC1+2.1, y = PC2+2.1, label = Site))
+
+```
+
+
+### Try yourself
+
+How would you fix the site plot? what do we need to change?
+
+```{r}
+pca_data |> 
+ggplot() +
+  aes(x = PC1, y = PC2) +
+  geom_point(aes(shape = mpa_status, colour = Pair), size = 3, alpha = 0.8) +
+  labs(
+    title = "PCA Ordination: ",
+    subtitle = "Projecting 374 variables into 2 dimensions",
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  )
+```
+
+### Try yourself
+
+Combine your two plots above, make a biplot with two categorical variables.
+
+```{r}
+# See above plot code
+```
+
+
+Is this a useful plot? why or why not? What is happening with this data?
+
+By using site pair and MPA status we have essentially recreated site name. Every site pair has an MPA and a reference site. Another option is to use numbers and create a legend (see RDA plot at the end for an example). 
+
+We still have the issue of outliers. These are outliers because they are, it is not an error so removing them is not really advisable. You could remove them from the plot but not the analysis but that doesn't usually help as they are so different the model thinks all the other sites are alike in comparison.
+
+## Hellinger transformation
+
+Hellinger transformation is used in many un-even community datasets, to better linearize the distances among sites (and reduce the effect of dominant species in the site dissimilarity) (Legendre and Legendre, 2012)
+
+
+```{r, echo=TRUE, warning=FALSE}
+func_Fish_sp_hel <- decostand(fish_wrack[, c(13:25)], method = "hellinger", na.rm = T)
+func_Fish_sp_log <- decostand(fish_wrack[, c(13:25)], method = "log", na.rm = T)
+
+```
+
+
+## PCA plot with transformation
+
+```{r}
+fish_pca2 <- prcomp(func_Fish_sp_hel)
+
+pc_var <- round(summary(fish_pca2)$importance[2, 1:4] * 100, 1)
+
+fish_pca_loadings <- as.data.frame(fish_pca2$rotation)
+
+pca_data2 <- data.frame(fish_pca2$x, regions = fish_wrack$region, 
+                        Pair = fish_wrack$site_pair, 
+                        Site = fish_wrack$site_name, 
+                        mpa_status = fish_wrack$mpa_status)
+
+
+ggplot(pca_data2, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = regions, shape = mpa_status), size = 3, alpha = 0.8) +
+  labs(
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  geom_segment(data = fish_pca_loadings, 
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+               arrow = arrow(length = unit(0.3, "cm")), 
+               color = "black", 
+               linewidth = 1) +
+  geom_text(data = fish_pca_loadings,
+            aes(x = PC1*2.1, y = PC2*2.1, label = row.names(fish_pca_loadings)))+
+  geom_text_repel(aes(label = Pair), size = 3)
+
+
+
+```
+Big improvement
+
+
+### Try yourself
+
+What changes would improve this plot visually? Think of at least two.
+
+We made the arrows slightly transparent and added `coord_cartesian(clip="off")` so the names did not get cut off.
+
+You could probably remove `region` to simplify the plot as region isn't actually useful in this data (North only has 2 observations) or combine North and Central to make fewer levels. 
+
+```{r}
+ggplot(pca_data2, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = regions, shape = mpa_status), size = 3, alpha = 0.8) +
+  labs(
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  geom_segment(data = fish_pca_loadings, 
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2) , 
+               arrow = arrow(length = unit(0.3, "cm")), 
+               alpha = 0.5,
+               color = "black", 
+               linewidth = 1) +
+  geom_text_repel(data = fish_pca_loadings,
+            aes(x = PC1*2.1, y = PC2*2.1, label = row.names(fish_pca_loadings)))+
+  coord_cartesian(clip="off") +
+  geom_text_repel(aes(label = Pair), size = 3) + 
+  theme_minimal()
+
+```
+
+```{r}
+# PC2 vs 3
+ggplot(pca_data2, aes(x = PC2, y = PC3)) +
+  geom_point(aes(color = regions, shape = mpa_status), size = 3, alpha = 0.8) +
+  labs(
+    x = paste0("PC2 (", pc_var[2], "% variance)"),
+    y = paste0("PC3 (", pc_var[3], "% variance)")
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  geom_segment(data = fish_pca_loadings, 
+               aes(x = 0, y = 0, xend = PC2*2, yend = PC3*2),
+               arrow = arrow(length = unit(0.3, "cm")), 
+               color = "black", 
+               linewidth = 1) +
+  geom_text(data = fish_pca_loadings,
+            aes(x = PC2*2.1, y = PC3*2.1, label = row.names(fish_pca_loadings)))+
+  geom_text_repel(aes(label = Pair), size = 3, show.legend = FALSE)
+
+```
+
+
+
+Alternative transformation option: log
+
+```{r}
+fish_pca3 <- prcomp(func_Fish_sp_log)
+
+pc_var <- round(summary(fish_pca3)$importance[2, 1:4] * 100, 1)
+
+fish_pca_loadings <- as.data.frame(fish_pca3$rotation)
+
+pca_data3 <- data.frame(fish_pca3$x, regions = fish_wrack$region, 
+                        Pair = fish_wrack$site_pair, 
+                        Site = fish_wrack$site_name, 
+                        mpa_status = fish_wrack$mpa_status)
+
+
+
+ggplot(pca_data3, aes(x = PC1, y = PC2)) +
+  geom_point(aes(color = regions, shape = mpa_status), size = 3, alpha = 0.8, show.legend = FALSE) +
+  labs(
+    x = paste0("PC1 (", pc_var[1], "% variance)"),
+    y = paste0("PC2 (", pc_var[2], "% variance)")
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  geom_segment(data = fish_pca_loadings, 
+               aes(x = 0, y = 0, xend = PC1*2, yend = PC2*2),
+               arrow = arrow(length = unit(0.3, "cm")), 
+               color = "black", 
+               linewidth = 1) +
+  geom_text(data = fish_pca_loadings,
+            aes(x = PC1*2.1, y = PC2*2.1, label = row.names(fish_pca_loadings)))+
+  geom_text_repel(aes(label = Pair), size = 3, show.legend = FALSE)
+
+```
+
+
+Sites are much more spread.
+
+Different transformations make sense for different datasets. In general transformations reduce the huge variation while allowing for more seperation of closely related sites.
+
+## Two multivariate datasets
+
+Now let's explore more of the data. We have data on wrack and fish.
+
+## Cluster analysis
+
+```{r}
+# stick with hellinger transformation for both matrices
+# since they are separate data, transform them separately
+# func_Fish_sp_hel
+wrack_hel <- as.data.frame(decostand(fish_wrack[,6:10], method = "hellinger", na.rm = T))
+
+Fish_wrack_hel <- cbind(wrack_hel, func_Fish_sp_hel)
+
+row.names(Fish_wrack_hel) <- fish_wrack$site_name
+```
+
+
+## K means
+
+How many clusters?
+
+`cascadeKM()` function in `vegan` package has two options for methods of assessing number of clusters.
+
+
+```{r}
+# cascadeKM() inside vegan
+KM <- cascadeKM(Fish_wrack_hel, 2, 6, iter = 25, criterion = "ssi")
+  
+plot(KM, , sortg = T)
+```
+**ssi**:
+
+the “Simple Structure Index” multiplicatively combines several elements which influence the interpretability of a partitioning solution. The best partition is indicated by the highest SSI value.
+
+```{r}
+# cascadeKM() inside vegan
+KM <- cascadeKM(Fish_wrack_hel, 2, 6, iter = 25, criterion = "calinski")
+  
+plot(KM, , sortg = T)
+```
+**calinski**:
+
+(SSB/(K-1)) / (SSW/(n-k))
+
+where n is the number of data points and k is the number of clusters. SSW is the sum of squares within the clusters while SSB is the sum of squares among the clusters. This index is simply an F (ANOVA) statistic.
+
+SSI suggest 4 clusters and calinski suggests 3 clusters.
+
+
+## K = 4
+
+Let's start with 4 clusters and see what that looks like.
+
+```{r}
+set.seed(123)
+
+Fish_wrack_KM_4 <- kmeans(Fish_wrack_hel, centers = 4)
+
+table(row.names(Fish_wrack_hel), Fish_wrack_KM_4$cluster)
+```
+Table illustrates which sites are in which cluster.
+
+```{r}
+Clusters_biplot <- fviz_cluster(Fish_wrack_KM_4,
+                   data = Fish_wrack_hel,
+                   repel = T)
+
+
+Clusters_biplot
+```
+Cluster 3 seems odd. It is made up of 3 sites Percos, Whalers Cove, and Stillwater Cove. But is seems to touch cluster 4 at Greyhound Rock.
+
+
+```{r}
+HeatMap <- heatmap(Fish_wrack_KM_4$centers, 
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+The heat map allows us to explore which fish and algae make up each cluster. 
+
+How to read it: each column is a variable. Each observation is a row. Each square is a value. High values are drawn in red and low values in yellow, by default. 
+
+This default map is a little busy, let's remove the dendrograms
+
+```{r}
+heatmap(Fish_wrack_KM_4$centers, Colv = NA, Rowv = NA,
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+That is simpler. 
+
+### Colors
+
+Base R has some native color palettes: terrain.color(), rainbow(), heat.colors(), topo.colors() or cm.colors()
+
+```{r}
+heatmap(Fish_wrack_KM_4$centers, Colv = NA, Rowv = NA, col = terrain.colors(128),
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+
+
+Alternatively you can use color palettes from other libraries
+```{r}
+library(RColorBrewer)
+coul <- colorRampPalette(brewer.pal(8, "PiYG"))(25)
+heatmap(Fish_wrack_KM_4$centers, Colv = NA, Rowv = NA, col = coul,
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+
+
+
+```{r}
+# Use 'scale' to normalize
+# our data was already scaled/clustered so this is not appropriate for our data
+heatmap(Fish_wrack_KM_4$centers, Colv = NA, Rowv = NA, 
+        col = terrain.colors(128), scale="column",  
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+
+By default (scale = "row") the rows are scaled to have mean zero and standard deviation one.
+
+### Interpretation
+Here I am using the original colors, but have flipped the chart so we can read the fish labels easier.
+
+To do this I had to flip the matrix and flip the `scale` argument.
+
+```{r}
+heatmap(t(Fish_wrack_KM_4$centers),  Rowv = NA, scale = "column",
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+```{r}
+Clusters_biplot
+```
+
+
+
+For wrack groups, brown is pretty high in all clusters. Seagrass appears highest in cluster 1 and lowest in cluster 4. 
+
+For fish: some fish are equally rare in all clusters. Surf specialists are higher in clusters 1, 2, & 4. Sciaenidae is only high in cluster 1. Reef associated is high in cluster 3.
+
+
+
+### Try yourself
+
+Repeat the cluster analysis with k = 3 means.
+
+```{r}
+Fish_wrack_KM_3 <- kmeans(Fish_wrack_hel, centers = 3)
+
+```
+
+### Try yourself
+
+Repeat the biplot and the heatmap for 3 clusters.
+
+```{r}
+
+b <- fviz_cluster(Fish_wrack_KM_3,
+                   data = Fish_wrack_hel,
+                   repel = T,
+             ggtheme = theme_classic(),
+             main = " ")
+
+b 
+  
+```
+
+```{r}
+heatmap(t(Fish_wrack_KM_3$centers),  Rowv = NA, scale = "column",
+           main = "Cluster profiles (Hellinger-transformed)")
+```
+
+
+### Try yourself
+
+What differences or similarities do you notice?
+
+We discussed how the biplot allows us to highlight geography while the heatmap explains 'why' clusters differ. 
+
+
+
+### Try yourself
+
+How would you explain theses results to a general audience. Which figure(s) would you use to present your findings?
+
+This answers really depends on what you are trying to communicate.
+
+The biplot is useful if you are communicating to people who know these places, you can then verbally highlight what species vary in the different clusters and discuss how sites that are close together geographically do or do not cluster.
+
+The heatmap will require less narrative around species as people can view those relationships but it does not show which sites form which clusters.
+
+Both have their place. *Personally* in a presentation I would probably show both. I might add a map to the side of the biplot and highlight how some sites are similar but do not cluster together or vice versa. Then show the heatmap and highlight some specific differences among clusters and include images of the species/groups.
+
+
+
+## RDA
+Research question: "Here we investigate the relationship between floating macrophyte communities (wrack) and surf zone fish communities."
+
+```{r}
+# made fish transformed data earlier
+scale_wrack <- scale(fish_wrack[,6:10])
+
+func_fish_wrack_RDA_2 <- rda(func_Fish_sp_hel ~ . , data = as.data.frame(scale_wrack))
+anova(func_fish_wrack_RDA_2, permutations = 999)
+
+```
+
+```{r}
+# look at algae groups
+anova.cca(func_fish_wrack_RDA_2, by = "margin", permutations = 999)
+```
+
+```{r}
+# consider site pairs as blocks
+h <- how(blocks = fish_wrack$site_pair)
+
+anova.cca(func_fish_wrack_RDA_2, by = "margin", permutations = h) # none signification
+
+vif.cca(func_fish_wrack_RDA_2)
+
+adj_r2_2 <- RsquareAdj(func_fish_wrack_RDA_2)$adj.r.squared
+adj_r2_2
+```
+
+
+No algae significant for explaining fish composition by functional groups with very little variance explained (`r round(adj_r2_2, digits = 2)`).
+
+
+```{r}
+#get data
+site_data_RDA <- as.data.frame(scores(func_fish_wrack_RDA_2, display = "sites"))
+
+fish_data_RDA <- as.data.frame(scores(func_fish_wrack_RDA_2, display = "species"))
+
+algae_data_RDA <- as.data.frame(scores(func_fish_wrack_RDA_2, display = "bp"))
+
+# organise to plot
+RDA_plot_df <- data.frame(site_data_RDA,
+                          site = as.factor(fish_wrack$site_name), 
+                          region = as.factor(fish_wrack$region))
+
+# Projection
+legend_text <- paste0(row.names(RDA_plot_df), ". ", RDA_plot_df$site, collapse = "\n")
+```
+
+
+```{r}
+
+RDA_plot <- RDA_plot_df |>  ggplot() +
+  # sites as points
+  geom_point(aes(x = RDA1, y = RDA2),size = 5) +
+  annotate("label", x = Inf, y = Inf, label = legend_text,
+    hjust = 1, vjust = 1, size = 3) +
+  scale_x_continuous(expand = expansion(mult = c(0.05, 0.25))) +
+  geom_text(aes(x = RDA1, y = RDA2,label = row.names(RDA_plot_df)), size = 3, color= "white" )+ #, nudge_x = 0.05
+
+  # fish families/funct groups as blue arrows
+  geom_segment(data = fish_data_RDA, aes(x = 0, y = 0, xend = RDA1, yend = RDA2), 
+               arrow = arrow(length = unit(0.2, "cm")), color = "blue") +
+  geom_text(data = fish_data_RDA, aes(x = RDA1, y = RDA2, label = rownames(fish_data_RDA)), 
+            color = "darkblue", size = 4, check_overlap = TRUE, position = position_jitter()) +
+  # wrack as green arrows
+  geom_segment(data = algae_data_RDA, aes(x = 0, y = 0, xend = RDA1, yend = RDA2), 
+               arrow = arrow(length = unit(0.3, "cm")), color = "darkgreen", linewidth = 1) +
+  geom_text(data = algae_data_RDA, aes(x = RDA1, y = RDA2, label = rownames(algae_data_RDA)), #orchid4
+            color = "darkgreen", fontface = "bold", check_overlap = TRUE, position = position_jitter()) +
+  theme_bw() +
+  labs(title = "RDA: Fish functional group Predicted by Algae type",
+       subtitle = paste("Proportion Inertia Constrained =", round(adj_r2_2, 3))) #, round(adj_r2, 3))
+
+RDA_plot
+```
+
+Seagrass seems to be associated with Scianidae on the South, considering the marginal significance. Is interesting how the surf specialist "goes away" from all the wrack types, specially Green.
+
+We adjusted the above plot to remove regions, have the numbers inside the circles, increased font sizes, and jitter around words to slightly improve the figure. 
+
+### Try yourself
+
+Consider the research question. 
+
+"We investigate the relationship between floating macrophyte communities (wrack) and surf zone fish communities. We hypothesize that floating macrophyte communities influence the composition of surf zone fish communities. Since some fish will be attracted to wrack (for shelter, food, habitat) while others will avoid wrack (similar reasons)."
+
+Which plot(s) and analyses would you suggest reporting as part of a 10min presentation to a scientific audience?
+
+Assume your audience contains marine ecologists who may have heard of these multivariate techniques but not preformed them. 
+
+Call plots 
+```{r}
+RDA_plot
+```
+
+Summaries results 
+```{r}
+
+```
+
+
+3-5 sentence description of what you conclude.
+
+Discussed how this varies depending on the audience, but that the RDA biplot is a very data rich figure that could lead to a number of conclusions.
+
+## Additional examples
+Vegan (note these include analyses not covered in this course)
+- https://peat-clark.github.io/BIO381/veganTutorial.html
+- https://malldred.github.io/rworkshops/A13MultivariateAnalysis
+
+Clusters: https://gavinsimpson.github.io/physalia-multivariate/01-monday/cluster-analysis.html
+
+PCA: https://gavinsimpson.github.io/physalia-multivariate/02-tuesday/ponds.html
+
+Heatmaps:
+
+- https://www.datanovia.com/learn/machine-learning/clustering/heatmap
+- https://r-graph-gallery.com/heatmap
+
+PERMANOVA:
+https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/permanova.html
+
+## References
+
+Marraffini, M.L., Hamilton, S.L., Marin Jarrin, J., Ladd, M., Koval, G., Madden, J.R., Mangino, I., Parker, L.M., Emery, K.A., Terhaar, K. and Hubbard, D.M., 2024. Evaluating the influence of marine protected areas on surf zone fish. Conservation Biology, 38(6), p.e14296.
+
+## Finishing up
+
+As this is a Quarto document, we can **Render** it to a nice, self-contained .HTML report.
+
+**Make sure you can Render your full document successfully.**
