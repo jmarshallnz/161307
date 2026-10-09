@@ -1,0 +1,46 @@
+---
+title: "Portfolio 8: Make a flyer"
+author: "YOUR NAME HERE"
+format: docx
+---
+
+```{r load data}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+
+# load in lego from a previous portfolio
+
+lego_sets <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_sets.csv")
+lego_parts <- read_csv("https://www.massey.ac.nz/~jcmarsha/data/lego/lego_parts.csv.gz")
+
+set_weights <- lego_parts |>
+  group_by(set) |>
+  summarise(weight = sum(weight*quantity, na.rm=TRUE))
+
+sets_with_weight <- lego_sets |>
+  left_join(set_weights, by=join_by(set))
+```
+
+## Your Figure
+
+```{r figure}
+# make an appropriate figure
+```
+
+## Your Second Figure
+
+```{r figure 2}
+# make an appropriate figure
+```
+
+## Explanation
+
+Provide a short explanation of your charts.
+
+## Your image
+
+Insert an image from pixbay. Ensure appropriate credit.
+
+** you should rearrange subtitles, make different subtitles, and adjust any other formatting as you see fit.

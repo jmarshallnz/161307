@@ -1,0 +1,45 @@
+---
+title: "Portfolio 9: Where does the time go?"
+author: "YOUR NAME HERE"
+format: html
+---
+
+Use the `economics` dataset from `ggplot2` package (we also explored this in the lab) produced from US economic time series data available from https://fred.stlouisfed.org/. 
+
+
+```{r load data}
+#| message: false
+#| echo: false
+
+library(tidyverse)
+
+data(economics, package = 'ggplot2')
+
+ggplot(economics) +
+  aes(x = date, y = psavert) +
+  geom_line() +
+  labs(title = "Personal Savings Rate",
+       x = "Date",
+       y = "Personal Savings Rate")
+```
+
+
+## Make variables
+
+```{r variables}
+# make an appropriate figure
+```
+
+## Your Figure
+
+```{r figure}
+# make an appropriate figure
+```
+
+Add additional code chucks as required
+
+## Explanation
+
+Provide a short explanation of your chart(s).
+
+
