@@ -1,0 +1,224 @@
+---
+title: "Workshop 12: Git"
+format:
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+The goal of today's workshop is to understand basic bash and git commands. Practice making a git directory. 
+
+## Basics
+
+- Change some files
+- See what you changed  
+  -- `git status`  
+  -- `git diff`  
+  -- `git log`  
+- Decide what changes you want to save  
+  -- `git add`  
+- Commit those changes  
+  -- `git commit`  
+- Push changes to GitHub    
+  -- `git push`  
+
+## Basics
+
+- Pull changes from collaborators  
+  -- `git pull`  
+  -- `git fetch`  
+  -- `git merge`  
+
+
+## Command line refresh
+
+- Directory structure   
+   -- Absolute    
+    ~/Documents/Data422/Project/Rawdata/  
+   -- Relative paths  
+   ../Rawdata/  
+- Creating, removing, changing directories  
+  -- `mkdir`  
+  -- `rmdir`  
+  -- `cd`  
+  -- `cd -`  
+- Moving, copying, removing files  
+  -- `mv`  
+  -- `cp`  
+  -- `rm -i`  
+    
+## Make a directory
+
+```{bash, eval = FALSE, echo =TRUE}
+cd Documents/classes/reproducible_viz
+
+mkdir workshop
+
+cd workshop
+
+cd ~
+
+```
+
+## Starting a new project
+Create a local repository  
+
+```{bash, eval = FALSE, echo =TRUE}
+pwd 
+cd Documents/classes/reproducible_viz/workshop
+
+touch workshopnotes.txt
+
+git init
+
+```
+
+
+## What's inside?
+
+Where does Git store information?
+```{bash, eval = FALSE, echo =TRUE}
+ls
+ls -a
+```
+
+`.git` extension:  
+Git uses this special sub-directory to store all the information about the project, including all files and sub-directories located within the project’s directory.  
+
+If we ever delete the `.git` sub-directory, we will lose the project’s history.
+
+## Did it work?
+
+```{bash, eval = FALSE, echo =TRUE}
+git status
+
+```
+
+
+### Try yourself   
+
+1. Make a new directory
+2. Navigate to that directory
+3. make a new text file 
+4. initiate the repository
+5. check if git notices we made a new file  
+
+
+
+
+## What's first?
+
+```{bash, eval = FALSE, echo =TRUE}
+pwd 
+
+cd ../Lecture
+
+nano README.txt
+
+touch dataprocessing.R 
+```
+
+A README file should describe the project and contents of the repository.  
+
+`dataprocessing.R` will be an empty file but is an example of a code file.
+
+## Stage Changes
+```{bash, eval = FALSE, echo =TRUE}
+
+git add README.txt
+
+git add .
+```
+Tells git to start keeping track of this file  
+
+Can add one file at a time or multiple
+
+## Stage Changes
+```{bash, eval = FALSE, echo =TRUE}
+git status
+
+git add .
+
+```
+
+Can add one file at a time or multiple
+
+## Incorporate changes into repository
+```{bash, eval = FALSE, echo =TRUE}
+git commit
+
+```
+
+- Add file to the repository  
+- The `-m` arguments allows you to add a message  
+- Without the argument will open a text editor   
+- Message can be multiple lines but first should be an overview  
+
+## Checks
+```{bash, eval = FALSE, echo =TRUE}
+git status
+
+git log
+
+```
+
+## When to commit?
+- Use frequent small commits  
+- Commit sources not derived files  
+- Use a `.gitignore` to indicate which files not to commit  
+
+
+## What makes a good commit?
+Why do you want to make small commits?
+
+What makes a good commit message?
+
+
+### Try yourself
+
+1. Make a readme file
+2. Put a descriptor in that file
+3. Stage the file
+4. Commit the file
+5. Write a commit message
+
+## Removing and moving files tracked by git
+Use with caution!
+
+```{bash, eval = FALSE, echo =TRUE}
+git rm myfile
+
+git mv myfile directory/newname
+
+git commit
+
+```
+
+
+## Making changes
+Altering existing files and how git tracks changes
+```{bash, eval = FALSE, echo =TRUE}
+nano README.txt
+
+cat README.txt
+```
+
+## Next step
+```{bash, eval = FALSE, echo =TRUE}
+git status
+```
+
+Git knows the file has been modified but says “no changes added to commit”.  Why?  
+
+
+## 
+## Additional information
+
+https://quarto.org/docs/presentations/revealjs/
+
+## Finishing up
+
+As this is a Quarto document, we can **Render** it to a nice, self-contained .HTML report.
+
+**Make sure you can Render your full document successfully.**

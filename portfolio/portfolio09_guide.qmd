@@ -1,0 +1,50 @@
+---
+title: "Portfolio 9: Where does the time go?"
+format:
+  html:
+    embed-resources: true
+    self-contained: true
+---
+
+## Introduction
+
+For this portfolio you'll be using the `economics` dataset to explore changes in variables across a time series.
+
+## Requirements
+
+Download the `portfolio09.qmd` template file.
+
+1. Ensure you fill in your name in the author field.
+2. Generate a variable for the change in annual median personal savings rate and another variable for change in annual median unemployment rate.
+3. Create an appropriate chart(s) to illustrate these two new variables over time.
+4. Consider carefully what the "story" of your chart is and use the title/subtitle or annotation to help highlight the story.
+5. Provide a **brief** interpretation of your chart for a general audience. Expect 3-4 sentences (~100-150 words).
+6. Ensure your chart has clear labels and all parts are legible. 
+7. You should submit the `portfolio09.qmd` file to the stream dropbox.
+8. Make sure that it renders correctly before submission.
+
+ 
+**Our expectation is this should take you approximately one hour.** You may spend more or less time than this if you wish, but there is no need to do so if your portfolio satisfies the criteria above.
+
+::: {.callout-note collapse="true" appearance="simple"}
+
+### Grading rubric
+
+You will be graded out of 10 based on:
+
+|  |  |  |
+|---------|---------------------------------------------------------|------|
+| **Reproducibility** | Your .qmd file renders correctly without errors or warnings | 2 |
+|  | Your .qmd file renders but has warnings | 1 |
+|  | Your .qmd file doesn't render without modification | 0 |
+| **Explanation** | Your explanation is appropriate and well written | 2 |
+|  | Minor errors in grammar or spelling which do not distract from the meaning | 1 |
+|  | Your .qmd file doesn't render without modification | 0 |
+| **Chart** | Your chart satisfies all criteria and is well labelled | 2 |
+|  | Your chart has major flaws, is missing criteria or is confusing  | 1 |
+|  | Missing or entirely incorrect | 0 |
+| **Formatting** | Your document renders to the correct format and chart(s) are clearly visible. | 2 |
+|  | Your document does not render correctly, and/or parts are cut off | 1 |
+|  | Your document does not render at all due to code errors, major parts of your figures or text are cut off | 0 |
+:::
+

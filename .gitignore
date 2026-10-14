@@ -6,3 +6,10 @@
 *.html
 *_files/
 /.quarto/
+*.docx
+*.pdf
+
+.DS_Store
+data/.DS_Store
+data_sources/.DS_Store
+*/.DS_Store

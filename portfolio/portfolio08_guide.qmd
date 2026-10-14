@@ -1,0 +1,52 @@
+---
+title: "Portfolio 8: Communication"
+format:
+  html:
+    embed-resources: true
+    self-contained: true
+---
+
+## Introduction
+
+For this portfolio you'll be generating a single page flyer from the lego dataset. The goal is for it to fit on a single A4 printer sheet of paper. You will need to render your file and observe its size. 
+
+## Requirements
+
+Download the `portfolio08.qmd` template file from stream.
+
+ - Ensure you fill in your name in the author field.
+ - Make two appropriate charts for the dataset.
+ - Consider carefully what the "story" of your charts are and use the title/subtitle or annotation to help highlight the story and ensure your charts have clear labels.
+ - Write a short explanation of your charts be sure to specify key points. This should be written for a general audience **no jargon**.
+ - Insert an image that relates to your interpretation of the scenario. You can explore royalty-free images on websites like [pixabay]{https://pixabay.com/}
+ - You should render the file and submit the `portfolio08.docx` file to the stream dropbox.
+
+ 
+**Our expectation is this should take you approximately one hour.** You may spend more or less time than this if you wish, but there is no need to do so if your portfolio satisfies the criteria above.
+
+::: {.callout-note collapse="true" appearance="simple"}
+
+### Grading rubric
+
+You will be graded out of 10 based on:
+
+|  |  |  |
+|---------|---------------------------------------------------------|------|
+| **Reproducibility** | Your .qmd file renders correctly without errors or warnings | 2 |
+|  | Your .qmd file renders but has warnings | 1 |
+|  | Your .qmd file doesn't render without modification | 0 |
+| **Explanation** | Your explanation is appropriate and well written | 2 |
+|  | Minor errors in grammar or spelling which do not distract from the meaning | 1 |
+|  | Your explanation is inappropriate or unclear | 0 |
+| **Chart** | Your chart satisfies all criteria and is well labelled | 2 |
+|  | Your chart has major flaws, is missing criteria or is confusing  | 1 |
+|  | Missing or entirely incorrect | 0 |
+| **Image** | Your image appears when rendered, is appropriate for the scenario, and includes caption/alt text.| 2 |
+|  | Your image appears but is squished or difficult to see and/or no caption provided | 1 |
+|  | Image does not appear, error is generated | 0 |
+| **Formatting** | Your document renders to the correct length and figures/images are clearly visible | 2 |
+|  | Your document is too long or two short, and/or parts are cut off | 1 |
+|  | Your document does not render to the pdf or word format, major parts of your figures or text are cutoff by margins | 0 |
+:::
+
+
